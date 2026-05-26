@@ -57,7 +57,21 @@ import {
   Edit3
 } from 'lucide-react';
 import russiaHero from './assets/russia_hero.png';
+import { supabase } from './supabaseClient';
 import './App.css';
+
+// ─── Supabase ⇄ JS data mappers (snake_case ↔ camelCase) ───
+const mapTaskFromDb = (r) => ({ id: r.id, title: r.title, assignee: r.assignee, category: r.category, completed: r.completed, isCritical: r.is_critical });
+const mapTaskToDb = (t) => ({ title: t.title, assignee: t.assignee, category: t.category, completed: !!t.completed, is_critical: !!t.isCritical });
+
+const mapBookingFromDb = (r) => ({ id: r.id, type: r.type, title: r.title, status: r.status, details: r.details });
+const mapBookingToDb = (b) => ({ type: b.type, title: b.title, status: b.status, details: b.details });
+
+const mapExpenseFromDb = (r) => ({ id: r.id, description: r.description, amountSar: Number(r.amount_sar), paidBy: r.paid_by, date: r.date });
+const mapExpenseToDb = (e) => ({ description: e.description, amount_sar: Number(e.amountSar), paid_by: e.paidBy, date: e.date });
+
+const mapItineraryFromDb = (r) => ({ id: r.id, day: r.day, date: r.date, city: r.city, title: r.title, activities: r.activities, leader: r.leader, notes: r.notes || '' });
+const mapItineraryToDb = (i) => ({ day: i.day, date: i.date, city: i.city, title: i.title, activities: i.activities, leader: i.leader, notes: i.notes || '' });
 
 // Premium Custom SVG Logo for Summer Trip (Russian Onion Domes + Travel Compass detailing)
 function ShaddadLogo({ className = "w-full h-full" }) {
@@ -150,10 +164,6 @@ const INITIAL_ITINERARY = [
   { id: 'd11', day: 11, date: '2026-07-04', city: 'موسكو', title: 'العودة بقطار سابسان وجولة في شوارع المقاهي المزدحمة', activities: 'ركوب قطار سابسان للعودة إلى موسكو والاستقرار. قضاء العصر في التمشي الطويل بشارعي مياسنيتسكايا (Myasnitskaya Street) وبيايتنيتسكايا (Pyatnitskaya Street) المليئين بالمقاهي المتنوعة والأجواء الحيوية الشبابية.', notes: 'تعد الشوارع أقل سياحية ولكنها من الأكثر متعة للمشي الطويل والمطاعم.', leader: 'فهد بن جديد' },
   { id: 'd12', day: 12, date: '2026-07-05', city: 'موسكو', title: 'شراء الهدايا التذكارية والمغادرة للوطن', activities: 'شراء الهدايا التذكارية وأحذية الفرو والجلود بأسعار معقولة من السوق تحت الأرضي بجوار الساحة الحمراء، ثم تسجيل الخروج والتوجه لمطار شيريميتيفو للعودة بسلامة الله إلى أرض الوطن.', notes: 'نهاية الرحلة والعودة إلى الرياض.', leader: 'فهد بن جديد' }
 ];
-
-const INITIAL_BOOKINGS = [];
-const INITIAL_TASKS = [];
-const INITIAL_EXPENSES = [];
 
 // Packing checklist defaults per traveler
 const DEFAULT_PACKING_ITEMS = [
@@ -279,10 +289,80 @@ function App() {
     return docs;
   });
 
-  const [itinerary, setItinerary] = useState(INITIAL_ITINERARY);
-  const [bookings, setBookings] = useState(INITIAL_BOOKINGS);
-  const [tasks, setTasks] = useState(INITIAL_TASKS);
-  const [expenses, setExpenses] = useState(INITIAL_EXPENSES);
+  const [itinerary, setItinerary] = useState([]);
+  const [bookings, setBookings] = useState([]);
+  const [tasks, setTasks] = useState([]);
+  const [expenses, setExpenses] = useState([]);
+  const [dataLoadError, setDataLoadError] = useState(null);
+
+  // ─── Fetch all shared trip data from Supabase on mount ───
+  useEffect(() => {
+    let cancelled = false;
+    async function fetchAll() {
+      try {
+        const [itineraryRes, bookingsRes, tasksRes, expensesRes] = await Promise.all([
+          supabase.from('itinerary').select('*').order('day', { ascending: true }),
+          supabase.from('bookings').select('*').order('created_at', { ascending: true }),
+          supabase.from('tasks').select('*').order('created_at', { ascending: true }),
+          supabase.from('expenses').select('*').order('created_at', { ascending: true }),
+        ]);
+        if (cancelled) return;
+
+        const firstErr = [itineraryRes, bookingsRes, tasksRes, expensesRes].find(r => r.error);
+        if (firstErr) {
+          console.error('[Supabase Error]', firstErr.error.message);
+          setDataLoadError('قاعدة البيانات غير مهيأة بعد. الرجاء تنفيذ ملف SUPABASE_GUIDE.md في Supabase SQL Editor.');
+        }
+
+        // Fallback to local seed data if itinerary table is empty (first run before SQL was executed)
+        const itineraryData = (itineraryRes.data && itineraryRes.data.length > 0)
+          ? itineraryRes.data.map(mapItineraryFromDb)
+          : INITIAL_ITINERARY;
+
+        setItinerary(itineraryData);
+        setBookings((bookingsRes.data || []).map(mapBookingFromDb));
+        setTasks((tasksRes.data || []).map(mapTaskFromDb));
+        setExpenses((expensesRes.data || []).map(mapExpenseFromDb));
+      } catch (err) {
+        console.error('[Supabase Fatal] failed to load trip data:', err);
+        if (!cancelled) {
+          setItinerary(INITIAL_ITINERARY);
+          setDataLoadError('تعذّر الاتصال بقاعدة البيانات. تحقق من الإنترنت أو إعدادات Supabase.');
+        }
+      }
+    }
+    fetchAll();
+
+    // ─── Realtime sync: live updates between devices ───
+    const channel = supabase
+      .channel('trip-sync')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, (payload) => {
+        if (payload.eventType === 'INSERT')  setTasks(p => p.some(x => x.id === payload.new.id) ? p : [...p, mapTaskFromDb(payload.new)]);
+        if (payload.eventType === 'UPDATE')  setTasks(p => p.map(x => x.id === payload.new.id ? mapTaskFromDb(payload.new) : x));
+        if (payload.eventType === 'DELETE')  setTasks(p => p.filter(x => x.id !== payload.old.id));
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, (payload) => {
+        if (payload.eventType === 'INSERT')  setBookings(p => p.some(x => x.id === payload.new.id) ? p : [...p, mapBookingFromDb(payload.new)]);
+        if (payload.eventType === 'UPDATE')  setBookings(p => p.map(x => x.id === payload.new.id ? mapBookingFromDb(payload.new) : x));
+        if (payload.eventType === 'DELETE')  setBookings(p => p.filter(x => x.id !== payload.old.id));
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'expenses' }, (payload) => {
+        if (payload.eventType === 'INSERT')  setExpenses(p => p.some(x => x.id === payload.new.id) ? p : [...p, mapExpenseFromDb(payload.new)]);
+        if (payload.eventType === 'UPDATE')  setExpenses(p => p.map(x => x.id === payload.new.id ? mapExpenseFromDb(payload.new) : x));
+        if (payload.eventType === 'DELETE')  setExpenses(p => p.filter(x => x.id !== payload.old.id));
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'itinerary' }, (payload) => {
+        if (payload.eventType === 'INSERT')  setItinerary(p => (p.some(x => x.id === payload.new.id) ? p : [...p, mapItineraryFromDb(payload.new)]).sort((a, b) => a.day - b.day));
+        if (payload.eventType === 'UPDATE')  setItinerary(p => p.map(x => x.id === payload.new.id ? mapItineraryFromDb(payload.new) : x).sort((a, b) => a.day - b.day));
+        if (payload.eventType === 'DELETE')  setItinerary(p => p.filter(x => x.id !== payload.old.id));
+      })
+      .subscribe();
+
+    return () => {
+      cancelled = true;
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   // Form States
   const [newActivity, setNewActivity] = useState({ day: 1, city: 'موسكو', title: '', activities: '', leader: 'عبدالله الزهراني' });
@@ -815,30 +895,40 @@ function App() {
     setNewProposal({ title: '', description: '', sendAlert: false });
   };
 
-  // Actions for tasks
-  const toggleTask = (id) => {
-    setTasks(prev => prev.map(t => t.id === id ? { ...t, completed: !t.completed } : t));
+  // Actions for tasks (Supabase-backed)
+  const toggleTask = async (id) => {
+    const current = tasks.find(t => t.id === id);
+    if (!current) return;
+    const next = !current.completed;
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, completed: next } : t));
+    const { error } = await supabase.from('tasks').update({ completed: next }).eq('id', id);
+    if (error) {
+      console.error('[Supabase Error] toggleTask:', error.message);
+      setTasks(prev => prev.map(t => t.id === id ? { ...t, completed: !next } : t));
+    }
   };
 
-  const deleteTask = (id) => {
+  const deleteTask = async (id) => {
     if (!canEdit) return;
+    const snapshot = tasks;
     setTasks(prev => prev.filter(t => t.id !== id));
+    const { error } = await supabase.from('tasks').delete().eq('id', id);
+    if (error) {
+      console.error('[Supabase Error] deleteTask:', error.message);
+      setTasks(snapshot);
+    }
   };
 
-  const handleAddTask = (e) => {
+  const handleAddTask = async (e) => {
     e.preventDefault();
     if (!newTask.title.trim() || !canEdit) return;
-    setTasks(prev => [
-      ...prev,
-      {
-        id: `t_${Date.now()}`,
-        title: newTask.title,
-        assignee: newTask.assignee,
-        category: newTask.category,
-        completed: false,
-        isCritical: newTask.isCritical
-      }
-    ]);
+    const payload = mapTaskToDb({ ...newTask, completed: false });
+    const { data, error } = await supabase.from('tasks').insert([payload]).select().single();
+    if (error) {
+      console.error('[Supabase Error] handleAddTask:', error.message);
+      return;
+    }
+    setTasks(prev => prev.some(t => t.id === data.id) ? prev : [...prev, mapTaskFromDb(data)]);
     setNewTask({ title: '', assignee: 'الجميع', category: 'تجهيزات', isCritical: false });
   };
 
@@ -852,35 +942,44 @@ function App() {
     });
   };
 
-  const handleSaveTaskEdit = (id) => {
-    setTasks(prev => prev.map(t => {
-      if (t.id === id) {
-        return { ...t, ...editTaskData };
-      }
-      return t;
-    }));
+  const handleSaveTaskEdit = async (id) => {
+    const payload = mapTaskToDb({ ...editTaskData, completed: tasks.find(t => t.id === id)?.completed });
+    const { data, error } = await supabase.from('tasks').update(payload).eq('id', id).select().single();
+    if (error) {
+      console.error('[Supabase Error] handleSaveTaskEdit:', error.message);
+      return;
+    }
+    setTasks(prev => prev.map(t => t.id === id ? mapTaskFromDb(data) : t));
     setEditingTaskId(null);
   };
 
-  const handleAddExpense = (e) => {
+  const handleAddExpense = async (e) => {
     e.preventDefault();
     if (!newExpense.description.trim() || !newExpense.amountSar || !newExpense.paidBy || !canEdit) return;
-    setExpenses(prev => [
-      ...prev,
-      {
-        id: `e_${Date.now()}`,
-        description: newExpense.description,
-        amountSar: parseFloat(newExpense.amountSar),
-        paidBy: newExpense.paidBy,
-        date: new Date().toISOString().split('T')[0]
-      }
-    ]);
+    const payload = mapExpenseToDb({
+      description: newExpense.description,
+      amountSar: parseFloat(newExpense.amountSar),
+      paidBy: newExpense.paidBy,
+      date: new Date().toISOString().split('T')[0]
+    });
+    const { data, error } = await supabase.from('expenses').insert([payload]).select().single();
+    if (error) {
+      console.error('[Supabase Error] handleAddExpense:', error.message);
+      return;
+    }
+    setExpenses(prev => prev.some(x => x.id === data.id) ? prev : [...prev, mapExpenseFromDb(data)]);
     setNewExpense({ description: '', amountSar: '', paidBy: 'الصندوق' });
   };
 
-  const handleDeleteExpense = (id) => {
+  const handleDeleteExpense = async (id) => {
     if (!canEdit) return;
+    const snapshot = expenses;
     setExpenses(prev => prev.filter(e => e.id !== id));
+    const { error } = await supabase.from('expenses').delete().eq('id', id);
+    if (error) {
+      console.error('[Supabase Error] handleDeleteExpense:', error.message);
+      setExpenses(snapshot);
+    }
   };
 
   const handleUpdateContribution = (travelerId, paidVal) => {
@@ -895,22 +994,28 @@ function App() {
     ));
   };
 
-  const handleAddBooking = (e) => {
+  const handleAddBooking = async (e) => {
     e.preventDefault();
     if (!newBooking.title.trim() || !canEdit) return;
-    setBookings(prev => [
-      ...prev,
-      {
-        id: `b_${Date.now()}`,
-        ...newBooking
-      }
-    ]);
+    const payload = mapBookingToDb(newBooking);
+    const { data, error } = await supabase.from('bookings').insert([payload]).select().single();
+    if (error) {
+      console.error('[Supabase Error] handleAddBooking:', error.message);
+      return;
+    }
+    setBookings(prev => prev.some(x => x.id === data.id) ? prev : [...prev, mapBookingFromDb(data)]);
     setNewBooking({ type: 'طيران', title: '', status: 'مستهدف', details: '' });
   };
 
-  const handleDeleteBooking = (id) => {
+  const handleDeleteBooking = async (id) => {
     if (!canEdit) return;
+    const snapshot = bookings;
     setBookings(prev => prev.filter(b => b.id !== id));
+    const { error } = await supabase.from('bookings').delete().eq('id', id);
+    if (error) {
+      console.error('[Supabase Error] handleDeleteBooking:', error.message);
+      setBookings(snapshot);
+    }
   };
 
   const startEditingBooking = (booking) => {
@@ -923,71 +1028,80 @@ function App() {
     });
   };
 
-  const handleSaveBookingEdit = (id) => {
-    setBookings(prev => prev.map(b => {
-      if (b.id === id) {
-        return { ...b, ...editBookingData };
-      }
-      return b;
-    }));
+  const handleSaveBookingEdit = async (id) => {
+    const payload = mapBookingToDb(editBookingData);
+    const { data, error } = await supabase.from('bookings').update(payload).eq('id', id).select().single();
+    if (error) {
+      console.error('[Supabase Error] handleSaveBookingEdit:', error.message);
+      return;
+    }
+    setBookings(prev => prev.map(b => b.id === id ? mapBookingFromDb(data) : b));
     setEditingBookingId(null);
   };
 
-  const handleAddActivity = (e) => {
+  const handleAddActivity = async (e) => {
     e.preventDefault();
     if (!newActivity.title.trim() || !canEdit) return;
+    const payload = mapItineraryToDb({
+      day: parseInt(newActivity.day),
+      date: getDateForDay(tripStartDate, parseInt(newActivity.day)),
+      city: newActivity.city,
+      title: newActivity.title,
+      activities: newActivity.activities,
+      leader: newActivity.leader,
+      notes: newActivity.notes || ''
+    });
+    const { data, error } = await supabase.from('itinerary').insert([payload]).select().single();
+    if (error) {
+      console.error('[Supabase Error] handleAddActivity:', error.message);
+      return;
+    }
     setItinerary(prev => {
-      const updated = [
-        ...prev,
-        {
-          id: `d_${Date.now()}`,
-          day: parseInt(newActivity.day),
-          date: getDateForDay(tripStartDate, parseInt(newActivity.day)), 
-          city: newActivity.city,
-          title: newActivity.title,
-          activities: newActivity.activities,
-          leader: newActivity.leader,
-          notes: newActivity.notes || ''
-        }
-      ];
-      return updated.sort((a, b) => a.day - b.day);
+      if (prev.some(x => x.id === data.id)) return prev;
+      return [...prev, mapItineraryFromDb(data)].sort((a, b) => a.day - b.day);
     });
     setNewActivity({ day: 1, city: 'موسكو', title: '', activities: '', leader: 'عبدالله الزهراني', notes: '' });
   };
 
-  const handleDeleteActivity = (id) => {
+  const handleDeleteActivity = async (id) => {
     if (!canEdit) return;
+    const snapshot = itinerary;
     setItinerary(prev => prev.filter(i => i.id !== id));
+    const { error } = await supabase.from('itinerary').delete().eq('id', id);
+    if (error) {
+      console.error('[Supabase Error] handleDeleteActivity:', error.message);
+      setItinerary(snapshot);
+    }
   };
 
   const startEditingActivity = (activity) => {
     setEditingActivityId(activity.id);
-    setEditActivityData({ 
-      day: activity.day, 
-      city: activity.city, 
-      title: activity.title, 
-      activities: activity.activities, 
+    setEditActivityData({
+      day: activity.day,
+      city: activity.city,
+      title: activity.title,
+      activities: activity.activities,
       leader: activity.leader,
-      notes: activity.notes || '' 
+      notes: activity.notes || ''
     });
   };
 
-  const handleSaveActivityEdit = (id) => {
-    setItinerary(prev => prev.map(item => {
-      if (item.id === id) {
-        return {
-          ...item,
-          day: parseInt(editActivityData.day),
-          date: getDateForDay(tripStartDate, parseInt(editActivityData.day)),
-          city: editActivityData.city,
-          title: editActivityData.title,
-          activities: editActivityData.activities,
-          leader: editActivityData.leader,
-          notes: editActivityData.notes
-        };
-      }
-      return item;
-    }).sort((a, b) => a.day - b.day));
+  const handleSaveActivityEdit = async (id) => {
+    const payload = mapItineraryToDb({
+      day: parseInt(editActivityData.day),
+      date: getDateForDay(tripStartDate, parseInt(editActivityData.day)),
+      city: editActivityData.city,
+      title: editActivityData.title,
+      activities: editActivityData.activities,
+      leader: editActivityData.leader,
+      notes: editActivityData.notes
+    });
+    const { data, error } = await supabase.from('itinerary').update(payload).eq('id', id).select().single();
+    if (error) {
+      console.error('[Supabase Error] handleSaveActivityEdit:', error.message);
+      return;
+    }
+    setItinerary(prev => prev.map(item => item.id === id ? mapItineraryFromDb(data) : item).sort((a, b) => a.day - b.day));
     setEditingActivityId(null);
   };
 
@@ -1080,34 +1194,35 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
     ]);
   };
 
-  const closeMultiOptionPoll = (pollId, winnerOptId) => {
-    setMultiOptionPolls(prev => prev.map(poll => {
-      if (poll.id !== pollId) return poll;
-      
-      const winningOption = poll.options.find(o => o.id === winnerOptId);
-      if (winningOption && canEdit) {
-        setItinerary(oldItinerary => {
-          const exists = oldItinerary.some(item => item.title === `نشاط مُعتمد بالتصويت: ${winningOption.text}` && item.day === poll.targetDay);
-          if (exists) return oldItinerary;
-          
-          const updated = [
-            ...oldItinerary,
-            {
-              id: `d_poll_${Date.now()}`,
-              day: poll.targetDay,
-              date: getDateForDay(tripStartDate, poll.targetDay),
-              city: poll.targetCity,
-              title: `نشاط مُعتمد بالتصويت: ${winningOption.text}`,
-              activities: `تم حسم هذا النشاط جماعياً بالتصويت. مقترح بواسطة: ${poll.creator}`,
-              leader: 'المنظم'
-            }
-          ];
-          return updated.sort((a, b) => a.day - b.day);
+  const closeMultiOptionPoll = async (pollId, winnerOptId) => {
+    const poll = multiOptionPolls.find(p => p.id === pollId);
+    if (!poll) return;
+    const winningOption = poll.options.find(o => o.id === winnerOptId);
+    const winningTitle = winningOption ? `نشاط مُعتمد بالتصويت: ${winningOption.text}` : null;
+    const alreadyExists = winningTitle && itinerary.some(item => item.title === winningTitle && item.day === poll.targetDay);
+
+    if (winningOption && canEdit && !alreadyExists) {
+      const payload = mapItineraryToDb({
+        day: poll.targetDay,
+        date: getDateForDay(tripStartDate, poll.targetDay),
+        city: poll.targetCity,
+        title: winningTitle,
+        activities: `تم حسم هذا النشاط جماعياً بالتصويت. مقترح بواسطة: ${poll.creator}`,
+        leader: 'المنظم',
+        notes: ''
+      });
+      const { data, error } = await supabase.from('itinerary').insert([payload]).select().single();
+      if (error) {
+        console.error('[Supabase Error] closeMultiOptionPoll insert:', error.message);
+      } else if (data) {
+        setItinerary(prev => {
+          if (prev.some(x => x.id === data.id)) return prev;
+          return [...prev, mapItineraryFromDb(data)].sort((a, b) => a.day - b.day);
         });
       }
-      
-      return { ...poll, isActive: false, winnerOptionId: winnerOptId };
-    }));
+    }
+
+    setMultiOptionPolls(prev => prev.map(p => p.id === pollId ? { ...p, isActive: false, winnerOptionId: winnerOptId } : p));
   };
 
   const trackBannerClick = (id) => {
@@ -1434,6 +1549,18 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
       <main className="flex-1 p-6 md:p-10 overflow-y-auto">
 
 
+
+        {/* SUPABASE CONNECTION/SETUP WARNING */}
+        {dataLoadError && (
+          <div className="bg-amber-50 border border-amber-200 text-amber-950 p-4 rounded-2xl mb-6 flex items-start gap-3 text-right shadow-xs">
+            <AlertTriangle className="text-amber-700 shrink-0 mt-0.5" size={18} />
+            <div className="flex-1">
+              <h4 className="font-bold text-xs text-amber-900">قاعدة البيانات بحاجة إلى تهيئة</h4>
+              <p className="text-[11px] text-amber-800 mt-1 leading-relaxed">{dataLoadError}</p>
+              <p className="text-[10px] text-amber-700 mt-1 font-mono">سيستمر التطبيق بالعمل محلياً لكن التغييرات لن تُحفظ.</p>
+            </div>
+          </div>
+        )}
 
         {/* BROADCAST ALERT FROM ADMIN */}
         {broadcastAlert && (
