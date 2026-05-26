@@ -1377,16 +1377,19 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
         <div className="w-full max-w-5xl bg-white border border-[#ECE6DC] rounded-none md:rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-screen md:min-h-[640px] relative z-10">
           
           {/* Right Side: Login Form */}
-          <div className="w-full md:w-1/2 p-8 md:p-12 lg:p-16 flex flex-col justify-between space-y-8 bg-white">
-            {/* Top header/logo + minimal tagline */}
-            <div className="space-y-4">
+          <div className="w-full md:w-1/2 p-8 md:p-12 lg:p-16 flex flex-col justify-between space-y-7 bg-white">
+            {/* ─── TOP: Russian flag stripe + brand block ─── */}
+            <div className="space-y-5">
+              {/* Authentic Russian flag — official colors */}
+              <div className="russian-flag-stripe h-2.5 w-20 rounded-full mx-auto md:mx-0 shadow-sm"></div>
+
               <div className="flex items-center gap-4 justify-start">
-                <div className="w-14 h-14 md:w-12 md:h-12">
+                <div className="w-14 h-14 md:w-16 md:h-16 shrink-0">
                   <ShaddadLogo />
                 </div>
                 <div className="text-right">
-                  <h2 className="text-xl md:text-2xl font-black text-[#14172A] m-0">رحلة صيف ٢٠٢٦</h2>
-                  <p className="text-sm md:text-base text-[#2A3F7E] font-bold m-0">صُنع بحب للأصحاب</p>
+                  <h2 className="text-2xl md:text-3xl font-black text-[#14172A] m-0 leading-tight">رحلة روسيا 2026</h2>
+                  <p className="text-sm md:text-base text-[#2A3F7E] font-bold m-0 mt-1">المخطط الجماعي للأصحاب</p>
                 </div>
               </div>
             </div>
@@ -1488,11 +1491,42 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
               )}
             </div>
 
-            {/* Minimal footer — full credit appears inside the app */}
-            <div className="text-center pt-2">
-              <p className="text-[10px] text-gray-400 font-mono m-0">
-                Summer Trip Planner © 2026
-              </p>
+            {/* ─── PROFESSIONAL SIGNATURE CARD ─── */}
+            <div className="relative bg-gradient-to-br from-white to-[#FAF7F2] border border-[#ECE6DC] rounded-2xl p-5 md:p-6 shadow-[0_10px_30px_-10px_rgba(42,63,126,0.15)] overflow-hidden">
+              {/* Subtle flag-color accent at top of card */}
+              <div className="absolute top-0 left-0 right-0 h-1 flex">
+                <div className="flex-1 bg-white"></div>
+                <div className="flex-1 bg-[#0036A7]"></div>
+                <div className="flex-1 bg-[#D62718]"></div>
+              </div>
+
+              <div className="space-y-3 text-center">
+                <p className="text-sm md:text-base text-[#2A3F7E] font-bold leading-relaxed m-0">
+                  صُنع بحب للأصحاب
+                </p>
+                <p className="text-xs md:text-sm text-gray-600 font-medium leading-relaxed m-0">
+                  نظام تفاعلي لتنسيق رحلتنا إلى روسيا 2026
+                </p>
+
+                {/* Divider with diamond accent */}
+                <div className="flex items-center gap-3 my-1">
+                  <div className="flex-1 h-px bg-gradient-to-l from-transparent via-[#ECE6DC] to-transparent"></div>
+                  <div className="w-1.5 h-1.5 rotate-45 bg-[#D62718]"></div>
+                  <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[#ECE6DC] to-transparent"></div>
+                </div>
+
+                {/* Signature */}
+                <div className="space-y-0.5">
+                  <p className="text-[10px] text-gray-400 font-medium m-0 tracking-wide">بإشراف وتنظيم</p>
+                  <p className="text-base md:text-lg text-[#14172A] font-black m-0" style={{ fontFamily: '"Tajawal", serif', letterSpacing: '0.02em' }}>
+                    عبدالله الزهراني
+                  </p>
+                </div>
+
+                <p className="text-[9px] text-gray-400 font-mono m-0 pt-1">
+                  Summer Trip Planner © 2026
+                </p>
+              </div>
             </div>
           </div>
 
@@ -1535,24 +1569,18 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
   return (
     <div className="min-h-screen bg-[#FAF7F2] text-[#14172A] flex flex-col md:flex-row font-sans relative pb-20 md:pb-0" dir="rtl">
       
-      {/* Mobile Top Header */}
-      <header className="md:hidden bg-white border-b border-[#ECE6DC] px-5 py-4 flex items-center justify-between sticky top-0 z-30 w-full shrink-0">
-        <div className="flex items-center gap-3">
-          <button 
-            onClick={() => setIsMobileMenuOpen(true)}
-            className="p-1.5 hover:bg-[#ECE6DC]/40 rounded-lg text-[#14172A] cursor-pointer"
-            aria-label="القائمة"
-          >
-            <Menu size={20} />
-          </button>
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 shrink-0">
-              <ShaddadLogo />
-            </div>
-            <span className="font-extrabold text-sm text-[#14172A] font-sans">رحلة صيف ٢٠٢٦</span>
+      {/* Mobile Top Header — branding only, no burger (bottom nav handles navigation) */}
+      <header className="md:hidden bg-white border-b border-[#ECE6DC] px-5 py-3.5 flex items-center justify-between sticky top-0 z-30 w-full shrink-0">
+        <div className="flex items-center gap-2.5">
+          <div className="w-9 h-9 shrink-0">
+            <ShaddadLogo />
+          </div>
+          <div className="flex flex-col items-start">
+            <span className="font-extrabold text-sm text-[#14172A] leading-none">رحلة روسيا 2026</span>
+            <span className="font-medium text-[10px] text-[#2A3F7E] leading-none mt-0.5">المخطط الجماعي</span>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-2 bg-[#FAF7F2] border border-[#ECE6DC] px-2.5 py-1 rounded-lg">
           <div className={`w-5 h-5 rounded-md bg-gradient-to-br ${currentUser.avatarColor} flex items-center justify-center font-bold text-white text-[9px]`}>
             {currentUser.name[0]}
@@ -1748,11 +1776,11 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
 
             {/* ─── 1. HERO: greeting + compact countdown ─── */}
             <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#2A3F7E] via-[#243A7A] to-[#1B2D64] text-white p-6 md:p-8 shadow-lg">
-              {/* Russian flag accent stripe — subtle, top edge */}
+              {/* Russian flag accent stripe — OFFICIAL flag colors */}
               <div className="absolute top-0 left-0 right-0 h-1.5 flex">
                 <div className="flex-1 bg-white"></div>
-                <div className="flex-1 bg-[#2A3F7E] opacity-80"></div>
-                <div className="flex-1 bg-[#D52B1E]"></div>
+                <div className="flex-1 bg-[#0036A7]"></div>
+                <div className="flex-1 bg-[#D62718]"></div>
               </div>
               {/* Soft decorative dome silhouette */}
               <div className="absolute -bottom-6 -left-6 w-40 h-40 opacity-10 pointer-events-none">
