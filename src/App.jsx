@@ -67,8 +67,22 @@ const mapTaskToDb = (t) => ({ title: t.title, assignee: t.assignee, category: t.
 const mapBookingFromDb = (r) => ({ id: r.id, type: r.type, title: r.title, status: r.status, details: r.details });
 const mapBookingToDb = (b) => ({ type: b.type, title: b.title, status: b.status, details: b.details });
 
-const mapExpenseFromDb = (r) => ({ id: r.id, description: r.description, amountSar: Number(r.amount_sar), paidBy: r.paid_by, date: r.date });
-const mapExpenseToDb = (e) => ({ description: e.description, amount_sar: Number(e.amountSar), paid_by: e.paidBy, date: e.date });
+const mapExpenseFromDb = (r) => ({ id: r.id, description: r.description, amountSar: Number(r.amount_sar), paidBy: r.paid_by, date: r.date, category: r.category || 'أخرى' });
+const mapExpenseToDb = (e) => ({ description: e.description, amount_sar: Number(e.amountSar), paid_by: e.paidBy, date: e.date, category: e.category || 'أخرى' });
+
+// ─── Expense category catalog (icon + color theme + Arabic label) ───
+const EXPENSE_CATEGORIES = [
+  { id: 'طيران',     label: 'طيران',           color: 'sky',     theme: 'bg-sky-50 text-sky-700 border-sky-200',           solid: 'bg-sky-600' },
+  { id: 'فنادق',     label: 'فنادق وسكن',      color: 'indigo',  theme: 'bg-indigo-50 text-indigo-700 border-indigo-200',   solid: 'bg-indigo-600' },
+  { id: 'قطار',      label: 'قطار ومواصلات',   color: 'emerald', theme: 'bg-emerald-50 text-emerald-700 border-emerald-200', solid: 'bg-emerald-600' },
+  { id: 'تكسي',      label: 'تكسي',            color: 'amber',   theme: 'bg-amber-50 text-amber-700 border-amber-200',     solid: 'bg-amber-600' },
+  { id: 'مطاعم',     label: 'مطاعم ومقاهي',    color: 'rose',    theme: 'bg-rose-50 text-rose-700 border-rose-200',         solid: 'bg-rose-600' },
+  { id: 'فعاليات',   label: 'فعاليات وتذاكر',  color: 'purple',  theme: 'bg-purple-50 text-purple-700 border-purple-200',   solid: 'bg-purple-600' },
+  { id: 'خدمات',     label: 'خدمات عامة',      color: 'slate',   theme: 'bg-slate-50 text-slate-700 border-slate-200',     solid: 'bg-slate-600' },
+  { id: 'تسوق',      label: 'تسوق وهدايا',     color: 'pink',    theme: 'bg-pink-50 text-pink-700 border-pink-200',         solid: 'bg-pink-600' },
+  { id: 'أخرى',      label: 'أخرى',            color: 'gray',    theme: 'bg-gray-100 text-gray-700 border-gray-200',       solid: 'bg-gray-600' },
+];
+const getCategoryMeta = (cat) => EXPENSE_CATEGORIES.find(c => c.id === cat) || EXPENSE_CATEGORIES[EXPENSE_CATEGORIES.length - 1];
 
 const mapItineraryFromDb = (r) => ({ id: r.id, day: r.day, date: r.date, city: r.city, title: r.title, activities: r.activities, leader: r.leader, notes: r.notes || '', places: Array.isArray(r.places) ? r.places : [] });
 const mapItineraryToDb = (i) => ({ day: i.day, date: i.date, city: i.city, title: i.title, activities: i.activities, leader: i.leader, notes: i.notes || '', places: Array.isArray(i.places) ? i.places : [] });
@@ -425,7 +439,7 @@ function App() {
   const [newActivity, setNewActivity] = useState({ day: 1, city: 'موسكو', title: '', activities: '', leader: 'عبدالله الزهراني' });
   const [newBooking, setNewBooking] = useState({ type: 'طيران', title: '', status: 'مستهدف', details: '' });
   const [newTask, setNewTask] = useState({ title: '', assignee: 'الجميع', category: 'تجهيزات', isCritical: false });
-  const [newExpense, setNewExpense] = useState({ description: '', amountSar: '', paidBy: 'الصندوق' });
+  const [newExpense, setNewExpense] = useState({ description: '', amountSar: '', paidBy: 'الصندوق', category: 'مطاعم' });
   const [newPersonalItem, setNewPersonalItem] = useState({ title: '', category: 'إلكترونيات' });
   const [calcAmountSar, setCalcAmountSar] = useState('100');
   const [calcAmountRub, setCalcAmountRub] = useState('1000');
@@ -1086,7 +1100,8 @@ function App() {
       description: newExpense.description,
       amountSar: parseFloat(newExpense.amountSar),
       paidBy: newExpense.paidBy,
-      date: new Date().toISOString().split('T')[0]
+      date: new Date().toISOString().split('T')[0],
+      category: newExpense.category || 'مطاعم'
     });
     const { data, error } = await supabase.from('expenses').insert([payload]).select().single();
     if (error) {
@@ -1095,7 +1110,7 @@ function App() {
       return;
     }
     setExpenses(prev => prev.some(x => x.id === data.id) ? prev : [...prev, mapExpenseFromDb(data)]);
-    setNewExpense({ description: '', amountSar: '', paidBy: 'الصندوق' });
+    setNewExpense({ description: '', amountSar: '', paidBy: 'الصندوق', category: 'مطاعم' });
     showToast('تمت إضافة المصروف بنجاح');
   };
 
@@ -3153,512 +3168,295 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
           </div>
         )}
 
-        {/* TAB 6: FINANCIALS & FUND ("المالية والقطة" - Unified expenses, reserve and members Qatta) */}
+        {/* TAB 6: FINANCIALS & FUND — Redesigned with 3-card layout + categorized expenses */}
         {activeTab === 'expenses' && (
-          <div className="space-y-8 animate-fadeIn text-right">
-            <div className="border-b border-[#ECE6DC] pb-6 flex items-center justify-between flex-wrap gap-4">
-              <div>
-                <h2 className="text-xl md:text-2xl font-black text-[#D52B1E]">صندوق الرحلة والميزانية العامة (المالية والقطة)</h2>
-                <p className="text-xs text-gray-500 mt-1">تتبع الصندوق والقطة المشتركة، مبالغ الاحتياطي، وتسجيل نفقات الصندوق أو المشتريات الشخصية بالتفصيل</p>
-              </div>
-              {pricingPlan === 'free' && (
-                <button
-                  onClick={() => setShowUpgradeModal(true)}
-                  className="bg-amber-100 border border-amber-300 text-amber-800 font-bold px-3 py-1.5 rounded-xl text-xs flex items-center gap-1 cursor-pointer animate-pulse"
-                >
-                  <Crown size={12} className="text-amber-700" />
-                  <span>تنشيط الميزات المالية الفائقة للرحلة</span>
-                </button>
-              )}
+          <div className="space-y-6 animate-fadeIn text-right">
+
+            {/* Page Header */}
+            <div className="border-b border-[#ECE6DC] pb-5">
+              <h2 className="text-xl md:text-2xl font-black text-[#D52B1E]">صندوق الرحلة والميزانية</h2>
+              <p className="text-xs md:text-sm text-gray-500 mt-1 leading-relaxed">قطة الأعضاء، الصندوق المشترك، والمصروفات المصنّفة - كل شي في صفحة واحدة منظمة</p>
             </div>
 
-            {/* ─── BUDGET BANNER: single prominent hero card with smart color states ─── */}
-            {(() => {
-              const isDeficit = financeStats.remainingFund < 0;
-              const isLow = !isDeficit && financeStats.totalFundCollected > 0 && financeStats.remainingFund / financeStats.totalFundCollected < 0.2;
-              const pctSpent = financeStats.totalFundCollected > 0
-                ? Math.min(100, Math.round((financeStats.spentFromFund / financeStats.totalFundCollected) * 100))
-                : 0;
-              const bannerBg = isDeficit
-                ? 'bg-gradient-to-br from-[#D52B1E] via-[#B92214] to-[#8C1810]'
-                : 'bg-gradient-to-br from-[#2A3F7E] via-[#1B2D64] to-[#0F1E48]';
-              return (
-                <div className={`relative overflow-hidden rounded-3xl ${bannerBg} text-white p-5 md:p-7 shadow-lg`}>
-                  {/* Russian flag stripe */}
-                  <div className="absolute top-0 left-0 right-0 h-1 flex">
-                    <div className="flex-1 bg-white"></div>
-                    <div className="flex-1 bg-[#0036A7]"></div>
-                    <div className="flex-1 bg-[#D62718]"></div>
-                  </div>
-                  <div className="absolute -bottom-8 -left-8 opacity-10 pointer-events-none">
-                    <Coins size={140} />
-                  </div>
-
-                  <div className="relative z-10 space-y-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="text-xs md:text-sm text-white/75 font-medium">
-                          {isDeficit ? 'الصندوق في عجز - يحتاج تغذية' : 'الرصيد المتبقي في الصندوق المشترك'}
-                        </p>
-                        <p className="text-3xl md:text-4xl font-black tabular-nums leading-tight mt-1.5" dir="ltr" style={{ textAlign: 'right' }}>
-                          {isDeficit && '−'}{Math.abs(financeStats.remainingFund).toLocaleString()} <span className="text-lg md:text-xl font-bold opacity-90">ر.س</span>
-                        </p>
-                      </div>
-                      {isDeficit && (
-                        <span className="bg-white/15 border border-white/30 backdrop-blur-sm rounded-full px-3 py-1 text-[10px] md:text-xs font-black whitespace-nowrap">
-                          عجز
-                        </span>
-                      )}
-                      {isLow && (
-                        <span className="bg-amber-400/20 border border-amber-300/40 text-amber-100 rounded-full px-3 py-1 text-[10px] md:text-xs font-black whitespace-nowrap">
-                          منخفض
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Progress bar — only meaningful when there's fund collected */}
-                    {financeStats.totalFundCollected > 0 && !isDeficit && (
-                      <div>
-                        <div className="flex justify-between text-[10px] md:text-xs text-white/70 mb-1.5 font-bold">
-                          <span>صُرف {financeStats.spentFromFund.toLocaleString()} ر.س</span>
-                          <span>من {financeStats.totalFundCollected.toLocaleString()} ر.س</span>
-                        </div>
-                        <div className="w-full bg-white/10 h-2 rounded-full overflow-hidden">
-                          <div className="bg-white h-full rounded-full transition-all duration-500" style={{ width: `${pctSpent}%` }}></div>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Quick stats row */}
-                    <div className="grid grid-cols-3 gap-2 pt-2">
-                      <div className="bg-white/10 backdrop-blur-sm border border-white/15 rounded-xl p-2.5 text-center">
-                        <p className="text-[9px] md:text-[10px] text-white/70 font-bold">المُحصّل</p>
-                        <p className="text-sm md:text-base font-black tabular-nums mt-0.5">{financeStats.totalFundCollected.toLocaleString()}</p>
-                      </div>
-                      <div className="bg-white/10 backdrop-blur-sm border border-white/15 rounded-xl p-2.5 text-center">
-                        <p className="text-[9px] md:text-[10px] text-white/70 font-bold">المصروف</p>
-                        <p className="text-sm md:text-base font-black tabular-nums mt-0.5">{financeStats.spentFromFund.toLocaleString()}</p>
-                      </div>
-                      <div className="bg-white/10 backdrop-blur-sm border border-white/15 rounded-xl p-2.5 text-center">
-                        <p className="text-[9px] md:text-[10px] text-white/70 font-bold">شخصي مستحق</p>
-                        <p className="text-sm md:text-base font-black tabular-nums mt-0.5">{financeStats.totalPersonalSpent.toLocaleString()}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })()}
-
-            {/* Contribution and Reserve Cash Dashboard */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Contributions & Reserve editing */}
-              <div className="lg:col-span-2 space-y-6">
-                
-                {/* 1. Member Contributions */}
-                <div className="white-card p-6 rounded-2xl space-y-4">
-                  <div className="flex items-center justify-between border-b border-[#ECE6DC] pb-3">
-                    <h3 className="text-xs font-black text-gray-800">حالة دفع قطة السفر المشتركة (المستهدف: 5,000 ر.س لكل شخص)</h3>
-                    {isFinanceSupervisor && (
-                      <span className="text-[8px] bg-[#2A3F7E]/10 border border-[#2A3F7E]/30 text-[#2A3F7E] px-2 py-0.5 rounded font-black">
-                        أنت مخول بالتعديل
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-xs text-right divide-y divide-[#ECE6DC]">
-                      <thead>
-                        <tr className="text-gray-500 font-bold">
-                          <th className="pb-2">اسم العضو</th>
-                          <th className="pb-2 text-center">المستهدف (ر.س)</th>
-                          <th className="pb-2 text-center">المدفوع الفعلي (ر.س)</th>
-                          <th className="pb-2 text-center">المتبقي (ر.س)</th>
-                          <th className="pb-2 text-left">الحالة</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-[#ECE6DC]/50 text-gray-700 font-medium">
-                        {fundContributions.map(contrib => {
-                          const isFullyPaid = contrib.paid >= contrib.target;
-                          const isPartial = contrib.paid > 0 && contrib.paid < contrib.target;
-                          return (
-                            <tr key={contrib.id} className="py-2.5">
-                              <td className="py-3 font-extrabold">{contrib.name}</td>
-                              <td className="py-3 text-center">
-                                {isFinanceSupervisor ? (
-                                  <input 
-                                    type="number"
-                                    value={contrib.target}
-                                    onChange={(e) => handleUpdateContTarget(contrib.id, e.target.value)}
-                                    className="bg-[#FAF7F2] border border-[#ECE6DC] rounded px-1.5 py-1 text-[10px] text-center w-20 font-mono"
-                                  />
-                                ) : (
-                                  contrib.target.toLocaleString()
-                                )}
-                              </td>
-                              <td className="py-3 text-center">
-                                {isFinanceSupervisor ? (
-                                  <input 
-                                    type="number"
-                                    value={contrib.paid}
-                                    onChange={(e) => handleUpdateContribution(contrib.id, e.target.value)}
-                                    className="bg-[#FAF7F2] border border-[#ECE6DC] rounded px-1.5 py-1 text-[10px] text-center w-20 font-mono"
-                                  />
-                                ) : (
-                                  contrib.paid.toLocaleString()
-                                )}
-                              </td>
-                              <td className="py-3 text-center font-mono font-bold">
-                                {Math.max(0, contrib.target - contrib.paid).toLocaleString()}
-                              </td>
-                              <td className="py-3 text-left">
-                                <span className={`px-2 py-0.5 rounded-full text-[9px] font-black ${
-                                  isFullyPaid 
-                                    ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                                    : isPartial
-                                      ? 'bg-amber-50 text-amber-800 border border-amber-200'
-                                      : 'bg-rose-50 text-rose-800 border border-rose-200'
-                                }`}>
-                                  {isFullyPaid ? 'دفع بالكامل' : isPartial ? 'دفع جزئي' : 'لم يدفع بعد'}
-                                </span>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-
-                  {/* Reserve Fund Editing Box */}
-                  <div className="pt-4 border-t border-[#ECE6DC] flex items-center justify-between flex-wrap gap-4 bg-[#FAF7F2] p-3 rounded-xl">
-                    <div className="text-right">
-                      <h4 className="text-xs font-bold text-gray-700">مبالغ الصندوق الاحتياطية والطوارئ</h4>
-                      <p className="text-[9px] text-gray-400">مبلغ إضافي كاش في الصندوق لحالات الطوارئ المباغتة</p>
-                    </div>
-                    <div>
-                      {isFinanceSupervisor ? (
-                        <div className="flex items-center gap-1.5">
-                          <input 
-                            type="number"
-                            value={reserveFund}
-                            onChange={(e) => setReserveFund(parseFloat(e.target.value) || 0)}
-                            className="bg-white border border-[#ECE6DC] rounded-lg px-2 py-1 text-xs text-center w-24 font-mono font-bold focus:outline-none focus:border-[#2A3F7E]"
-                          />
-                          <span className="text-xs text-gray-500 font-bold">ر.س</span>
-                        </div>
-                      ) : (
-                        <span className="font-mono font-black text-gray-800">{reserveFund.toLocaleString()} ر.س</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* 2. Budget distribution categories */}
-                <div className="white-card p-6 rounded-2xl space-y-4">
-                  <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-                    <h3 className="text-xs font-black text-gray-800">تحليلات وتوزيع ميزانية الرحلة (حسب البنود)</h3>
-                    <span className="text-[9px] text-gray-400 font-bold">إجمالي النفقات المسجلة: {financeStats.totalSpentAll.toLocaleString()} ر.س</span>
-                  </div>
-                  <div className="space-y-4">
-                    {financeStats.categoryBreakdown.map((cat, idx) => (
-                      <div key={idx} className="space-y-1">
-                        <div className="flex justify-between items-center text-xs font-bold text-gray-600">
-                          <span>{cat.name}</span>
-                          <span className="font-mono text-gray-800">{cat.amount.toLocaleString()} ر.س ({cat.percent}%)</span>
-                        </div>
-                        <div className="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden">
-                          <div 
-                            className={`${cat.color} h-full transition-all duration-500`} 
-                            style={{ width: `${cat.percent}%` }}
-                          ></div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* 3. Advanced Currency Converter */}
-                <div className="white-card p-6 rounded-2xl space-y-4 relative overflow-hidden">
-                  <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-                    <h3 className="text-xs font-black text-gray-800">حاسبة محول العملات الذكي للرحلة (SAR - RUB - USD)</h3>
-                    <span className="text-[9px] text-[#2A3F7E] font-bold">معدل الصرف: 1 ر.س = {currencyRates.rub} روبل</span>
-                  </div>
-
-                  {pricingPlan === 'free' ? (
-                    <div className="py-6 flex flex-col items-center justify-center text-center space-y-3 bg-[#FAF7F2]/80 rounded-2xl border border-dashed border-[#ECE6DC] p-6">
-                      <Lock className="text-amber-600 animate-pulse" size={24} />
-                      <div>
-                        <h4 className="text-xs font-extrabold text-gray-800">ميزة محول العملات المتكامل مغلقة</h4>
-                        <p className="text-[10px] text-gray-500 max-w-xs leading-relaxed mt-1">
-                          قم بترقية خطة الرحلة إلى باقة **شدّاد برو** لفتح حاسبة الصرف وتحويل العملات الفوري للروبل والعملات الأخرى للتسوق بالخارج بسهولة.
-                        </p>
-                      </div>
-                      <button
-                        onClick={() => setShowUpgradeModal(true)}
-                        className="bg-amber-600 hover:bg-amber-700 text-white font-bold py-1.5 px-4 rounded-xl text-[10px] transition cursor-pointer"
-                      >
-                        ترقية الرحلة لفتح الحاسبة
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {/* Convert SAR to RUB / USD */}
-                      <div className="bg-[#FAF7F2] border border-[#ECE6DC] p-4 rounded-xl space-y-3">
-                        <h4 className="text-xs font-bold text-gray-700">تحويل من ريال سعودي (SAR)</h4>
-                        <div className="space-y-2">
-                          <div>
-                            <input 
-                              type="number"
-                              value={calcAmountSar}
-                              onChange={(e) => setCalcAmountSar(e.target.value)}
-                              className="w-full bg-white border border-[#ECE6DC] rounded-lg p-2 text-xs font-mono text-left focus:outline-none focus:border-[#2A3F7E]"
-                              placeholder="أدخل المبلغ بالريال..."
-                            />
-                          </div>
-                          <div className="grid grid-cols-2 gap-2 text-xs pt-1 border-t border-gray-200/50">
-                            <div>
-                              <span className="text-[9px] text-gray-400 block">الروبل الروسي:</span>
-                              <span className="font-mono font-bold text-[#2A3F7E]">{((parseFloat(calcAmountSar) || 0) * currencyRates.rub).toLocaleString(undefined, { maximumFractionDigits: 2 })} RUB</span>
-                            </div>
-                            <div>
-                              <span className="text-[9px] text-gray-400 block">الدولار الأمريكي:</span>
-                              <span className="font-mono font-bold text-gray-700">{((parseFloat(calcAmountSar) || 0) * currencyRates.usd).toLocaleString(undefined, { maximumFractionDigits: 2 })} USD</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Convert RUB to SAR */}
-                      <div className="bg-[#FAF7F2] border border-[#ECE6DC] p-4 rounded-xl space-y-3">
-                        <h4 className="text-xs font-bold text-gray-700">تحويل من روبل روسي (RUB)</h4>
-                        <div className="space-y-2">
-                          <div>
-                            <input 
-                              type="number"
-                              value={calcAmountRub}
-                              onChange={(e) => setCalcAmountRub(e.target.value)}
-                              className="w-full bg-white border border-[#ECE6DC] rounded-lg p-2 text-xs font-mono text-left focus:outline-none focus:border-[#2A3F7E]"
-                              placeholder="أدخل المبلغ بالروبل..."
-                            />
-                          </div>
-                          <div className="text-xs pt-1 border-t border-gray-200/50">
-                            <span className="text-[9px] text-gray-400 block">الريال السعودي الموازي:</span>
-                            <span className="font-mono font-bold text-[#2A3F7E]">{((parseFloat(calcAmountRub) || 0) / currencyRates.rub).toLocaleString(undefined, { maximumFractionDigits: 2 })} SAR</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* 4. Advanced Settlement ledger */}
-                <div className="white-card p-6 rounded-2xl space-y-4">
-                  <div className="flex items-start gap-2.5 justify-start">
-                    <Info className="text-[#2A3F7E] shrink-0 mt-0.5" size={16} />
-                    <div className="text-right">
-                      <h4 className="font-black text-xs text-gray-800">مخلص التسوية المالية الخاصة (للشباب)</h4>
-                      <p className="text-[10px] text-gray-500 leading-relaxed mt-0.5">
-                        هذا التقرير يستعرض تسوية المبالغ المدفوعة من الجيوب الخاصة (المصروفات غير المدفوعة من الصندوق المشترك). يتم احتساب حصة الفرد العادلة لتحديد من يجب عليه التحويل ومقدار التحويل للآخرين.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="bg-[#FAF7F2] border border-[#ECE6DC] p-4 rounded-xl space-y-3">
-                    <div className="flex justify-between items-center text-xs font-bold text-gray-600">
-                      <span>إجمالي المدفوع شخصياً:</span>
-                      <span className="font-mono text-[#14172A]">{financeStats.totalPersonalSpent.toLocaleString()} ر.س</span>
-                    </div>
-                    <div className="flex justify-between items-center text-xs font-bold text-[#2A3F7E] border-b border-[#ECE6DC] pb-2">
-                      <span>نصيب الشخص الواحد للرحلة:</span>
-                      <span className="font-mono">{financeStats.splitSharePerPerson.toLocaleString()} ر.س</span>
-                    </div>
-
-                    <div className="space-y-2 pt-1">
-                      {financeStats.travelerBalances.map((item, idx) => {
-                        const mustPay = item.balance < 0;
-                        return (
-                          <div key={idx} className="flex justify-between items-center text-xs">
-                            <span className="font-extrabold text-gray-700">{item.name}</span>
-                            <div className="flex items-center gap-2">
-                              <span className="text-[10px] text-gray-400">دفع: {item.paid.toLocaleString()} ر.س</span>
-                              <span className={`px-2 py-0.5 rounded text-[9px] font-black ${
-                                mustPay 
-                                  ? 'bg-rose-50 text-rose-800 border border-rose-100'
-                                  : 'bg-emerald-50 text-emerald-800 border border-emerald-100'
-                              }`}>
-                                {mustPay 
-                                  ? `يجب عليه دفع ${Math.abs(Math.round(item.balance)).toLocaleString()} ر.س`
-                                  : `يستحق استلام ${Math.round(item.balance).toLocaleString()} ر.س`}
-                              </span>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Greedy matching ledger (SaaS premium lock) */}
-                  <div className="pt-2 border-t border-gray-100 space-y-3">
-                    <h4 className="text-xs font-black text-gray-800">خارطة التحويلات والتسويات المباشرة لإنهاء العوالق</h4>
-                    
-                    {pricingPlan === 'free' ? (
-                      <div className="py-6 flex flex-col items-center justify-center text-center space-y-2 bg-[#FAF7F2]/60 rounded-xl border border-dashed border-[#ECE6DC] p-4">
-                        <Lock className="text-amber-600" size={18} />
-                        <div>
-                          <h5 className="text-[11px] font-bold text-gray-800">ميزة خارطة التحويلات التلقائية مغلقة</h5>
-                          <p className="text-[9px] text-gray-400 leading-normal max-w-xs mt-0.5">
-                            باقة برو تمنحك تعليمات تسوية ثنائية دقيقة تحدد من يدفع لمن ومقدار الدفعة لتجنب اللخبطة.
-                          </p>
-                        </div>
-                        <button
-                          onClick={() => setShowUpgradeModal(true)}
-                          className="bg-amber-600 hover:bg-amber-700 text-white font-bold py-1 px-3 rounded-lg text-[9px] transition cursor-pointer"
-                        >
-                          تفعيل برو
-                        </button>
-                      </div>
-                    ) : (
-                      <div>
-                        {financeStats.settlementInstructions.length === 0 ? (
-                          <div className="p-4 bg-emerald-50 border border-emerald-100 text-emerald-800 text-center rounded-xl text-xs font-bold">
-                            جميع المديونيات تمت تسويتها بالكامل. الحساب صافي بين الشباب.
-                          </div>
-                        ) : (
-                          <div className="space-y-2">
-                            {financeStats.settlementInstructions.map((inst, idx) => (
-                              <div key={idx} className="p-3 bg-emerald-50/20 border border-emerald-100 rounded-xl flex items-center justify-between text-xs gap-3">
-                                <div className="flex items-center gap-1.5 flex-wrap">
-                                  <strong className="text-gray-900 font-extrabold">{inst.from}</strong>
-                                  <span className="text-gray-500 text-[10px]">يقوم بتحويل</span>
-                                  <strong className="text-emerald-700 font-black font-mono">{inst.amount.toLocaleString()} ر.س</strong>
-                                  <span className="text-gray-500 text-[10px]">إلى</span>
-                                  <strong className="text-gray-900 font-extrabold">{inst.to}</strong>
-                                </div>
-                                <div className="text-[10px] bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded font-black border border-emerald-100 flex items-center gap-0.5">
-                                  <Check size={10} />
-                                  <span>بانتظار التحويل</span>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* 5. Expenses Log & Registry */}
-                <div className="white-card p-6 rounded-2xl space-y-4 order-2 lg:order-1">
-                  <h3 className="text-sm md:text-base font-black text-[#D52B1E] border-b border-[#ECE6DC] pb-3">سجل المصروفات ومشتريات الصندوق</h3>
-                  
-                  <div className="divide-y divide-[#ECE6DC]/50">
-                    {expenses.map((expense) => {
-                      const isFund = expense.paidBy === 'الصندوق';
-                      return (
-                        <div key={expense.id} className="py-3 flex items-center justify-between text-xs gap-3">
-                          <div className="text-right space-y-0.5">
-                            <div className="flex items-center gap-2">
-                              <span className={`text-[8px] font-black px-2 py-0.5 rounded-full ${
-                                isFund 
-                                  ? 'bg-[#2A3F7E]/10 text-[#2A3F7E] border border-[#2A3F7E]/20'
-                                  : 'bg-blue-50 text-blue-800 border border-blue-200'
-                              }`}>
-                                {isFund ? 'خصم من الصندوق' : 'مدفوع شخصي'}
-                              </span>
-                              <h4 className="font-extrabold text-gray-800">{expense.description}</h4>
-                            </div>
-                            <span className="text-[9px] text-gray-400 font-mono">{expense.date}</span>
-                          </div>
-
-                          <div className="flex items-center gap-4 text-left">
-                            <div>
-                              <span className="text-[9px] text-gray-400 block">دفع بواسطة:</span>
-                              <span className="font-bold text-gray-700 block text-left">{expense.paidBy}</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <span className="font-extrabold text-[#2A3F7E] font-mono">{expense.amountSar.toLocaleString()} ر.س</span>
-                              {canEdit && (
-                                <button
-                                  onClick={() => handleDeleteExpense(expense.id)}
-                                  className="text-gray-400 hover:text-red-700 p-1 hover:bg-gray-100 rounded transition cursor-pointer"
-                                  title="حذف"
-                                >
-                                  <Trash2 size={13} />
-                                </button>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
+            {/* ═════ SECTION 1: Members contributions (compact horizontal) ═════ */}
+            <section className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm md:text-base font-black text-[#D52B1E]">قطة الأعضاء</h3>
+                {isFinanceSupervisor ? (
+                  <span className="text-[10px] bg-[#2A3F7E]/10 text-[#2A3F7E] border border-[#2A3F7E]/20 px-2 py-0.5 rounded font-black">أنت مخول بالتعديل</span>
+                ) : (
+                  <span className="text-[10px] text-gray-400 font-bold">عرض فقط</span>
+                )}
               </div>
 
-              {/* Add Expense Sidebar Form — placed first on mobile so it's easy to find */}
-              <div className="white-card p-6 rounded-2xl h-fit space-y-4 order-1 lg:order-2 border-2 border-[#2A3F7E]/20">
-                <div className="flex items-center gap-2 border-b border-[#ECE6DC] pb-3 justify-start">
-                  <Plus className="text-[#D52B1E]" size={20} />
-                  <h3 className="text-base md:text-lg font-black text-[#D52B1E]">تسجيل مصروف جديد</h3>
-                </div>
-
-                {canEdit ? (
-                  <form onSubmit={handleAddExpense} className="space-y-4">
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-gray-500">التفاصيل أو البند</label>
-                      <input 
-                        type="text" 
-                        placeholder="مثال: قطار سابسان السريع"
-                        value={newExpense.description}
-                        onChange={(e) => setNewExpense(prev => ({ ...prev, description: e.target.value }))}
-                        className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-3 py-2 text-xs text-[#14172A] focus:outline-none focus:border-[#2A3F7E]"
-                        required
-                      />
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
+                {fundContributions.map((c) => {
+                  const target = Number(c.target) || 5000;
+                  const paid = Number(c.paid) || 0;
+                  const pct = target > 0 ? Math.min(100, Math.round((paid / target) * 100)) : 0;
+                  const isPaid = paid >= target && target > 0;
+                  return (
+                    <div key={c.id} className="bg-white border border-[#ECE6DC] rounded-2xl p-3 space-y-2 hover:border-[#2A3F7E]/40 transition">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-black text-[#14172A]">{c.name.split(' ')[0]}</span>
+                        {isPaid && <span className="text-[9px] bg-emerald-100 text-emerald-700 border border-emerald-200 px-1.5 py-0.5 rounded-full font-black">مكتمل</span>}
+                      </div>
+                      {isFinanceSupervisor ? (
+                        <input
+                          type="number"
+                          inputMode="numeric"
+                          value={paid}
+                          onChange={(e) => handleUpdateContribution(c.id, e.target.value)}
+                          className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-lg px-2 py-1.5 text-sm font-black text-[#2A3F7E] text-center focus:outline-none focus:border-[#2A3F7E]"
+                        />
+                      ) : (
+                        <div className="text-sm font-black text-[#2A3F7E] text-center bg-[#FAF7F2] rounded-lg py-1.5">{paid.toLocaleString()}</div>
+                      )}
+                      <div className="w-full bg-[#F2EEE7] h-1.5 rounded-full overflow-hidden">
+                        <div
+                          className="h-full rounded-full transition-all duration-500"
+                          style={{ width: `${pct}%`, background: isPaid ? '#10B981' : '#2A3F7E' }}
+                        ></div>
+                      </div>
+                      <p className="text-[10px] text-gray-500 text-center">من {target.toLocaleString()} ر.س</p>
                     </div>
+                  );
+                })}
+              </div>
 
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-gray-500">المبلغ الإجمالي (بالريال السعودي)</label>
-                      <input 
-                        type="number" 
+              {/* Reserve cash editor (admin only) */}
+              {isFinanceSupervisor && (
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-center justify-between gap-3">
+                  <div className="flex-1">
+                    <p className="text-xs font-black text-amber-900">مبلغ احتياطي كاش في الصندوق</p>
+                    <p className="text-[10px] text-amber-700 mt-0.5">لحالات الطوارئ المباغتة</p>
+                  </div>
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    value={reserveFund}
+                    onChange={(e) => setReserveFund(parseFloat(e.target.value) || 0)}
+                    className="w-24 bg-white border border-amber-300 rounded-lg px-2 py-1.5 text-sm font-black text-amber-900 text-center focus:outline-none focus:border-amber-500"
+                  />
+                </div>
+              )}
+            </section>
+
+            {/* ═════ SECTION 2: Three fund cards (Total | Spent | Remaining) ═════ */}
+            <section className="grid grid-cols-3 gap-2.5 md:gap-4">
+              {/* Total Fund */}
+              <div className="bg-gradient-to-br from-[#2A3F7E] to-[#1B2D64] text-white rounded-2xl p-3 md:p-5 shadow-md relative overflow-hidden">
+                <div className="absolute top-0 left-0 right-0 h-0.5 bg-white/30"></div>
+                <p className="text-[10px] md:text-xs text-white/75 font-bold">إجمالي القطة</p>
+                <p className="text-xl md:text-3xl font-black mt-1.5 tabular-nums leading-none">
+                  {financeStats.totalFundCollected.toLocaleString()}
+                </p>
+                <p className="text-[9px] md:text-[10px] text-white/60 mt-1 font-bold">ر.س</p>
+              </div>
+
+              {/* Spent */}
+              <div className="bg-gradient-to-br from-[#D52B1E] to-[#A41F14] text-white rounded-2xl p-3 md:p-5 shadow-md relative overflow-hidden">
+                <div className="absolute top-0 left-0 right-0 h-0.5 bg-white/30"></div>
+                <p className="text-[10px] md:text-xs text-white/75 font-bold">المصروف</p>
+                <p className="text-xl md:text-3xl font-black mt-1.5 tabular-nums leading-none">
+                  −{financeStats.spentFromFund.toLocaleString()}
+                </p>
+                <p className="text-[9px] md:text-[10px] text-white/60 mt-1 font-bold">ر.س</p>
+              </div>
+
+              {/* Remaining */}
+              {(() => {
+                const isDeficit = financeStats.remainingFund < 0;
+                const cardBg = isDeficit
+                  ? 'bg-gradient-to-br from-[#D52B1E] to-[#8C1810] text-white'
+                  : 'bg-gradient-to-br from-emerald-500 to-emerald-700 text-white';
+                return (
+                  <div className={`${cardBg} rounded-2xl p-3 md:p-5 shadow-md relative overflow-hidden`}>
+                    <div className="absolute top-0 left-0 right-0 h-0.5 bg-white/30"></div>
+                    <p className="text-[10px] md:text-xs text-white/80 font-bold">{isDeficit ? 'العجز' : 'المتبقي'}</p>
+                    <p className="text-xl md:text-3xl font-black mt-1.5 tabular-nums leading-none">
+                      {isDeficit && '−'}{Math.abs(financeStats.remainingFund).toLocaleString()}
+                    </p>
+                    <p className="text-[9px] md:text-[10px] text-white/70 mt-1 font-bold">ر.س</p>
+                  </div>
+                );
+              })()}
+            </section>
+
+            {/* ═════ SECTION 3: Add expense form (categorized) ═════ */}
+            <section className="bg-white border-2 border-[#2A3F7E]/20 rounded-2xl p-5 space-y-4">
+              <div className="flex items-center gap-2 border-b border-[#ECE6DC] pb-3">
+                <Plus className="text-[#D52B1E]" size={20} />
+                <h3 className="text-base md:text-lg font-black text-[#D52B1E]">تسجيل مصروف جديد</h3>
+              </div>
+
+              {canEdit ? (
+                <form onSubmit={handleAddExpense} className="space-y-4">
+                  {/* Category chips */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-gray-600">التصنيف</label>
+                    <div className="grid grid-cols-3 md:grid-cols-5 gap-2">
+                      {EXPENSE_CATEGORIES.filter(c => c.id !== 'أخرى').map((cat) => {
+                        const isSelected = newExpense.category === cat.id;
+                        return (
+                          <button
+                            key={cat.id}
+                            type="button"
+                            onClick={() => setNewExpense(prev => ({ ...prev, category: cat.id }))}
+                            className={`text-[11px] md:text-xs font-bold py-2 px-2 rounded-xl border transition cursor-pointer ${
+                              isSelected
+                                ? `${cat.solid} text-white border-transparent shadow-sm`
+                                : `${cat.theme} hover:border-[#2A3F7E]`
+                            }`}
+                          >
+                            {cat.label}
+                          </button>
+                        );
+                      })}
+                      <button
+                        type="button"
+                        onClick={() => setNewExpense(prev => ({ ...prev, category: 'أخرى' }))}
+                        className={`text-[11px] md:text-xs font-bold py-2 px-2 rounded-xl border transition cursor-pointer ${
+                          newExpense.category === 'أخرى'
+                            ? 'bg-gray-700 text-white border-transparent shadow-sm'
+                            : 'bg-gray-100 text-gray-700 border-gray-200 hover:border-[#2A3F7E]'
+                        }`}
+                      >
+                        أخرى
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Amount + Description */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-gray-600">المبلغ (ر.س)</label>
+                      <input
+                        type="number"
+                        inputMode="decimal"
                         placeholder="0"
                         value={newExpense.amountSar}
                         onChange={(e) => setNewExpense(prev => ({ ...prev, amountSar: e.target.value }))}
-                        className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-3 py-2 text-xs text-[#14172A] focus:outline-none focus:border-[#2A3F7E] font-mono text-left"
-                        required
+                        className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-3 py-2.5 text-base font-black text-[#14172A] text-center focus:outline-none focus:border-[#2A3F7E]"
                       />
                     </div>
-
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-gray-500">طريقة الدفع (خصم من)</label>
-                      <select
-                        value={newExpense.paidBy}
-                        onChange={(e) => setNewExpense(prev => ({ ...prev, paidBy: e.target.value }))}
-                        className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-3 py-2 text-xs text-[#14172A] focus:outline-none focus:border-[#2A3F7E] text-right cursor-pointer font-bold"
-                      >
-                        <option value="الصندوق">الصندوق المشترك (خصم من رصيد القطة)</option>
-                        {travelers.map(t => (
-                          <option key={t.id} value={t.name}>{t.name} (دفع من جيبه الخاص)</option>
-                        ))}
-                      </select>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-gray-600">الوصف</label>
+                      <input
+                        type="text"
+                        placeholder="مثال: قطار سابسان"
+                        value={newExpense.description}
+                        onChange={(e) => setNewExpense(prev => ({ ...prev, description: e.target.value }))}
+                        className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-3 py-2.5 text-sm text-[#14172A] focus:outline-none focus:border-[#2A3F7E]"
+                      />
                     </div>
-
-                    <button 
-                      type="submit"
-                      className="w-full bg-[#2A3F7E] hover:bg-[#1b4332] text-white py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
-                    >
-                      <Plus size={14} />
-                      <span>تسجيل المصروف</span>
-                    </button>
-                  </form>
-                ) : (
-                  <div className="text-center py-6 text-gray-400 text-xs font-medium space-y-2">
-                    <Lock size={20} className="mx-auto text-gray-300" />
-                    <p>نموذج الإضافة معطل بسبب قفل التعديل.</p>
                   </div>
-                )}
+
+                  {/* Paid by */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-gray-600">طريقة الدفع</label>
+                    <select
+                      value={newExpense.paidBy}
+                      onChange={(e) => setNewExpense(prev => ({ ...prev, paidBy: e.target.value }))}
+                      className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-3 py-2.5 text-sm font-bold text-[#14172A] focus:outline-none focus:border-[#2A3F7E] cursor-pointer"
+                    >
+                      <option value="الصندوق">الصندوق المشترك (خصم من القطة)</option>
+                      {travelers.map(t => (
+                        <option key={t.id} value={t.name}>{t.name} (شخصي - يُسوّى لاحقاً)</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="w-full bg-[#D52B1E] hover:bg-[#A41F14] text-white py-3 rounded-xl text-sm md:text-base font-black transition flex items-center justify-center gap-2 cursor-pointer shadow-md"
+                  >
+                    <Plus size={18} />
+                    <span>تسجيل المصروف</span>
+                  </button>
+                </form>
+              ) : (
+                <div className="text-center py-6 text-gray-400 text-xs font-medium space-y-2">
+                  <Lock size={20} className="mx-auto text-gray-300" />
+                  <p>التعديل مقفول حالياً.</p>
+                </div>
+              )}
+            </section>
+
+            {/* ═════ SECTION 4: Expenses log ═════ */}
+            <section className="bg-white border border-[#ECE6DC] rounded-2xl p-5 space-y-3">
+              <div className="flex items-center justify-between border-b border-[#ECE6DC] pb-3">
+                <h3 className="text-base md:text-lg font-black text-[#D52B1E]">سجل المصروفات</h3>
+                <span className="text-[10px] bg-[#FAF7F2] border border-[#ECE6DC] text-gray-500 px-2 py-0.5 rounded font-bold">
+                  {expenses.length} مصروف
+                </span>
               </div>
-            </div>
+
+              {expenses.length === 0 ? (
+                <div className="text-center py-8 text-gray-400 text-sm font-medium">
+                  لا توجد مصروفات مسجلة بعد
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {[...expenses].reverse().map((expense) => {
+                    const cat = getCategoryMeta(expense.category);
+                    const fromFund = expense.paidBy === 'الصندوق';
+                    return (
+                      <div key={expense.id} className="bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl p-3 flex items-center gap-3">
+                        <span className={`text-[10px] md:text-xs font-black border px-2 py-1 rounded-lg shrink-0 ${cat.theme}`}>
+                          {cat.label}
+                        </span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs md:text-sm font-bold text-[#14172A] truncate m-0">{expense.description}</p>
+                          <p className="text-[10px] text-gray-500 mt-0.5">
+                            {expense.date} · {fromFund ? 'من الصندوق' : `دفع: ${expense.paidBy}`}
+                          </p>
+                        </div>
+                        <div className="text-left shrink-0">
+                          <p className={`text-sm md:text-base font-black tabular-nums m-0 ${fromFund ? 'text-[#D52B1E]' : 'text-[#2A3F7E]'}`}>
+                            {fromFund && '−'}{Number(expense.amountSar).toLocaleString()}
+                          </p>
+                          <p className="text-[9px] text-gray-400 font-bold">ر.س</p>
+                        </div>
+                        {canEdit && (
+                          <button
+                            onClick={() => handleDeleteExpense(expense.id)}
+                            className="text-rose-500 hover:text-rose-700 cursor-pointer opacity-70 hover:opacity-100"
+                            title="حذف"
+                          >
+                            <Trash2 size={15} />
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </section>
+
+            {/* ═════ SECTION 5: Settlement instructions (only if there are personal expenses) ═════ */}
+            {financeStats.settlementInstructions && financeStats.settlementInstructions.length > 0 && (
+              <section className="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-5 space-y-3">
+                <div className="flex items-center gap-2 border-b border-emerald-200/60 pb-3">
+                  <Coins className="text-emerald-700" size={18} />
+                  <h3 className="text-base md:text-lg font-black text-emerald-800">خطة التسوية بين الأعضاء</h3>
+                </div>
+                <p className="text-xs text-emerald-700 leading-relaxed">
+                  بناءً على المصروفات الشخصية، هذه أبسط خطة لتسوية الحسابات بأقل عدد تحويلات ممكنة:
+                </p>
+                <div className="space-y-2">
+                  {financeStats.settlementInstructions.map((s, i) => (
+                    <div key={i} className="bg-white border border-emerald-200 rounded-xl p-3 flex items-center justify-between text-sm">
+                      <span className="font-bold text-[#14172A]">{s.from} <span className="text-emerald-700 mx-1">→</span> {s.to}</span>
+                      <span className="font-black text-emerald-700 tabular-nums">{s.amount.toLocaleString()} ر.س</span>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
           </div>
         )}
+
 
         {/* TAB 8: PROPOSALS & VOTING BOARD */}
         {activeTab === 'proposals' && (

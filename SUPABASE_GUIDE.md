@@ -35,6 +35,19 @@ NOTIFY pgrst, 'reload schema';
 
 ---
 
+## 💰 تصنيف المصروفات (Expense category)
+
+نفّذ هذا في SQL Editor — يضيف عمود تصنيف للمصروفات (طيران، فنادق، مطاعم...):
+
+```sql
+ALTER TABLE expenses ADD COLUMN IF NOT EXISTS category TEXT DEFAULT 'أخرى';
+NOTIFY pgrst, 'reload schema';
+```
+
+اضغط **Run** ثم أعد تحميل الموقع.
+
+---
+
 ## 📍 الأماكن المتعددة لكل يوم (Itinerary places)
 
 نفّذ هذا في SQL Editor — يضيف عمود JSONB للجدول لحفظ أماكن متعددة لكل يوم (مطاعم، مقاهي، معالم):
