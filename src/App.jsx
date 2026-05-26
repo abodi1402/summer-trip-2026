@@ -297,6 +297,14 @@ function App() {
   const [expenses, setExpenses] = useState([]);
   const [dataLoadError, setDataLoadError] = useState(null);
 
+  // Lightweight toast — used to confirm add/save actions so the user doesn't
+  // have to hunt for the newly added item in long mobile lists.
+  const [toast, setToast] = useState(null); // { message: string, kind: 'success' | 'error' }
+  const showToast = (message, kind = 'success') => {
+    setToast({ message, kind });
+    setTimeout(() => setToast(t => (t && t.message === message ? null : t)), 2800);
+  };
+
   // ─── Fetch all shared trip data from Supabase on mount ───
   useEffect(() => {
     let cancelled = false;
@@ -410,6 +418,16 @@ function App() {
   // Countdown timer calculations
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0, isPast: false });
   
+  // Lock background scroll when any blocking modal is open (welcome / mobile menu)
+  useEffect(() => {
+    const shouldLock = showWelcome || isMobileMenuOpen;
+    if (shouldLock) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => { document.body.style.overflow = prev; };
+    }
+  }, [showWelcome, isMobileMenuOpen]);
+
   useEffect(() => {
     const targetDate = new Date(`${tripStartDate}T08:00:00`).getTime();
     
@@ -448,7 +466,7 @@ function App() {
     switch (leaderName) {
       case 'عبدالله الزهراني':
         return {
-          role: 'المشرف المالي للرحلة (Finance Leader) 💳',
+          role: 'المشرف المالي للرحلة (Finance Leader)',
           themeClass: 'bg-amber-50/70 border-amber-200 text-amber-950',
           badgeClass: 'bg-amber-100 text-amber-800 border-amber-200',
           tasks: [
@@ -460,7 +478,7 @@ function App() {
         };
       case 'عبدالعزيز الحميد':
         return {
-          role: 'مسؤول الملاحة والتوجيه (Navigation Leader) 🗺️',
+          role: 'مسؤول الملاحة والتوجيه (Navigation Leader)',
           themeClass: 'bg-blue-50/70 border-blue-200 text-blue-950',
           badgeClass: 'bg-blue-100 text-blue-800 border-blue-200',
           tasks: [
@@ -472,7 +490,7 @@ function App() {
         };
       case 'حسن الدوسري':
         return {
-          role: 'منسق الأنشطة والترجمة (Activities Coordinator) 🎟️',
+          role: 'منسق الأنشطة والترجمة (Activities Coordinator)',
           themeClass: 'bg-purple-50/70 border-purple-200 text-purple-950',
           badgeClass: 'bg-purple-100 text-purple-800 border-purple-200',
           tasks: [
@@ -484,7 +502,7 @@ function App() {
         };
       case 'فهد بن جديد':
         return {
-          role: 'مشرف الإعاشة والخدمات اللوجستية (Logistics Leader) ☕',
+          role: 'مشرف الإعاشة والخدمات اللوجستية (Logistics Leader)',
           themeClass: 'bg-rose-50/70 border-rose-200 text-rose-950',
           badgeClass: 'bg-rose-100 text-rose-800 border-rose-200',
           tasks: [
@@ -496,7 +514,7 @@ function App() {
         };
       default:
         return {
-          role: 'قائد اليوم العام (General Leader) 👑',
+          role: 'قائد اليوم العام (General Leader)',
           themeClass: 'bg-emerald-50/70 border-emerald-200 text-emerald-950',
           badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-200',
           tasks: [
@@ -850,6 +868,7 @@ function App() {
       return { ...prev, [currentUser.id]: userList };
     });
     setNewPersonalItem({ title: '', category: 'إلكترونيات' });
+    showToast('تمت إضافة الغرض إلى حقيبتك');
   };
 
   const deletePersonalPackingItem = (itemId) => {
@@ -965,10 +984,12 @@ function App() {
     const { data, error } = await supabase.from('tasks').insert([payload]).select().single();
     if (error) {
       console.error('[Supabase Error] handleAddTask:', error.message);
+      showToast('تعذّر حفظ المهمة، حاول مرة أخرى', 'error');
       return;
     }
     setTasks(prev => prev.some(t => t.id === data.id) ? prev : [...prev, mapTaskFromDb(data)]);
     setNewTask({ title: '', assignee: 'الجميع', category: 'تجهيزات', isCritical: false });
+    showToast('تمت إضافة المهمة بنجاح');
   };
 
   const startEditingTask = (task) => {
@@ -1004,10 +1025,12 @@ function App() {
     const { data, error } = await supabase.from('expenses').insert([payload]).select().single();
     if (error) {
       console.error('[Supabase Error] handleAddExpense:', error.message);
+      showToast('تعذّر حفظ المصروف، حاول مرة أخرى', 'error');
       return;
     }
     setExpenses(prev => prev.some(x => x.id === data.id) ? prev : [...prev, mapExpenseFromDb(data)]);
     setNewExpense({ description: '', amountSar: '', paidBy: 'الصندوق' });
+    showToast('تمت إضافة المصروف بنجاح');
   };
 
   const handleDeleteExpense = async (id) => {
@@ -1040,10 +1063,12 @@ function App() {
     const { data, error } = await supabase.from('bookings').insert([payload]).select().single();
     if (error) {
       console.error('[Supabase Error] handleAddBooking:', error.message);
+      showToast('تعذّر حفظ الحجز، حاول مرة أخرى', 'error');
       return;
     }
     setBookings(prev => prev.some(x => x.id === data.id) ? prev : [...prev, mapBookingFromDb(data)]);
     setNewBooking({ type: 'طيران', title: '', status: 'مستهدف', details: '' });
+    showToast('تمت إضافة الحجز بنجاح');
   };
 
   const handleDeleteBooking = async (id) => {
@@ -1093,6 +1118,7 @@ function App() {
     const { data, error } = await supabase.from('itinerary').insert([payload]).select().single();
     if (error) {
       console.error('[Supabase Error] handleAddActivity:', error.message);
+      showToast('تعذّر حفظ النشاط، حاول مرة أخرى', 'error');
       return;
     }
     setItinerary(prev => {
@@ -1100,6 +1126,7 @@ function App() {
       return [...prev, mapItineraryFromDb(data)].sort((a, b) => a.day - b.day);
     });
     setNewActivity({ day: 1, city: 'موسكو', title: '', activities: '', leader: 'عبدالله الزهراني', notes: '' });
+    showToast('تمت إضافة النشاط بنجاح');
   };
 
   const handleDeleteActivity = async (id) => {
@@ -1149,15 +1176,15 @@ function App() {
     const dayData = itinerary.find(item => item.day === (simulatedActiveDay || 1)) || itinerary[0];
     const relatedTasks = tasks.filter(t => !t.completed).slice(0, 2);
     
-    const formatted = `🤖 *بوت شدّاد الذكي* | جدول اليوم ${dayData.day} 🚀
+    const formatted = `*بوت شدّاد الذكي* | جدول اليوم ${dayData.day}
 -----------------------------------
-📍 *الوجهة والمدينة:* ${dayData.city}
-📅 *التاريخ:* ${getDateForDay(tripStartDate, dayData.day)}
-👑 *قائد اليوم:* ${dayData.leader || 'غير محدد'}
-🏛 *النشاط الأساسي:* ${dayData.title}
-📝 *التفاصيل:* ${dayData.activities}
+*الوجهة والمدينة:* ${dayData.city}
+*التاريخ:* ${getDateForDay(tripStartDate, dayData.day)}
+*قائد اليوم:* ${dayData.leader || 'غير محدد'}
+*النشاط الأساسي:* ${dayData.title}
+*التفاصيل:* ${dayData.activities}
 
-🚨 *المهام المشتركة المعلقة:*
+*المهام المشتركة المعلقة:*
 ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n') || '- لا توجد مهام معلقة لهذا اليوم.'}`;
     
     setTelegramMockContent(formatted);
@@ -1294,7 +1321,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
             {/* Travel Quote Banner above the login inputs */}
             <div className="bg-[#2D6A4F]/5 border border-[#2D6A4F]/10 px-5 py-4 rounded-2xl text-center">
               <p className="text-sm md:text-base text-[#2D6A4F] font-bold leading-relaxed m-0">
-                « السفر يُريك الدنيا بعيونٍ جديدة، ويصنع ذكريات تدوم مدى العمر. سفرة ممتعة يا أصدقاء » ✈️🇷🇺
+                « السفر يُريك الدنيا بعيونٍ جديدة، ويصنع ذكريات تدوم مدى العمر. سفرة ممتعة يا أصدقاء »
               </p>
             </div>
 
@@ -1303,7 +1330,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
               {isSettingNewPassword ? (
                 <form onSubmit={handlePasswordChangeSubmit} className="space-y-4">
                   <div className="text-center py-4 px-5 bg-emerald-50 border border-emerald-100 text-emerald-800 rounded-2xl text-sm md:text-base font-bold leading-relaxed">
-                    🔐 مرحباً بك يا {tempTravelerForPasswordChange?.name}<br/>
+                    مرحباً بك يا {tempTravelerForPasswordChange?.name}<br/>
                     يرجى تعيين كلمة مرور جديدة لحماية حسابك. ستُحفظ في السحابة وستعمل من جميع أجهزتك.
                   </div>
 
@@ -1398,13 +1425,21 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
             {/* Mobile Quote Footer */}
             <div className="block md:hidden text-center bg-[#F9F7F4] p-4 rounded-2xl border border-[#E8E0D5]/60">
               <p className="text-[10px] text-gray-600 font-medium leading-relaxed m-0">
-                « السفر يُريك الدنيا بعيونٍ جديدة، ويصنع ذكريات تدوم مدى العمر » ✈️🇷🇺
+                « السفر يُريك الدنيا بعيونٍ جديدة، ويصنع ذكريات تدوم مدى العمر »
               </p>
             </div>
 
-            {/* Footer trademark info */}
-            <div className="text-[9px] text-gray-400 text-center font-mono">
-              Summer Trip Planner © 2026
+            {/* Footer — handcrafted credit */}
+            <div className="text-center space-y-1.5 pt-2 border-t border-[#E8E0D5]/60">
+              <p className="text-xs md:text-sm text-[#2D6A4F] font-bold m-0 leading-relaxed">
+                صُنع بحب للأصحاب · نظام تفاعلي لتنسيق رحلتنا إلى روسيا 2026
+              </p>
+              <p className="text-[10px] md:text-[11px] text-gray-500 font-medium m-0">
+                بإشراف وتنظيم: <span className="text-[#1A1A1A] font-bold">عبدالله الزهراني</span>
+              </p>
+              <p className="text-[9px] md:text-[10px] text-gray-400 font-mono m-0">
+                Summer Trip Planner © 2026
+              </p>
             </div>
           </div>
 
@@ -1425,7 +1460,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                     className="w-full h-full object-cover object-center scale-105"
                   />
                   <span className="absolute top-3 right-3 bg-white/95 text-[#1B4332] px-2.5 py-1 rounded-full text-[9px] font-black shadow-sm">
-                    وجهتنا: روسيا 🇷🇺
+                    وجهتنا: روسيا
                   </span>
                 </div>
                 <div className="text-right text-white space-y-1">
@@ -1440,7 +1475,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
             {/* Travel Quote at the bottom of the art side */}
             <div className="relative z-10 text-center border-t border-white/10 pt-4">
               <p className="text-[10px] text-emerald-200 font-medium leading-relaxed m-0">
-                « السفر يُريك الدنيا بعيونٍ جديدة، ويصنع ذكريات تدوم مدى العمر » ✈️🇷🇺
+                « السفر يُريك الدنيا بعيونٍ جديدة، ويصنع ذكريات تدوم مدى العمر »
               </p>
             </div>
           </div>
@@ -1451,7 +1486,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
   }
 
   return (
-    <div className="min-h-screen bg-[#F9F7F4] text-[#1A1A1A] flex flex-col md:flex-row font-sans relative pb-20 md:pb-0 animate-fadeIn" dir="rtl">
+    <div className="min-h-screen bg-[#F9F7F4] text-[#1A1A1A] flex flex-col md:flex-row font-sans relative pb-20 md:pb-0" dir="rtl">
       
       {/* Mobile Top Header */}
       <header className="md:hidden bg-white border-b border-[#E8E0D5] px-5 py-4 flex items-center justify-between sticky top-0 z-30 w-full shrink-0">
@@ -1488,7 +1523,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
       )}
 
       {/* 1. RIGHT SIDEBAR */}
-      <aside className={`fixed md:sticky top-0 right-0 h-screen w-72 bg-white border-l border-[#E8E0D5] p-6 flex flex-col justify-between shrink-0 gap-6 z-50 transition-transform duration-300 md:translate-x-0 ${
+      <aside className={`fixed md:sticky top-0 right-0 h-screen w-72 bg-white border-l border-[#E8E0D5] p-6 flex flex-col shrink-0 gap-6 z-50 overflow-y-auto transition-transform duration-300 md:translate-x-0 ${
          isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full md:translate-x-0'
       }`}>
         {/* Mobile Close Button */}
@@ -1508,7 +1543,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
             </div>
             <div>
               <h1 className="text-lg font-extrabold tracking-tight text-[#1A1A1A] font-sans m-0">رحلة صيف ٢٠٢٦</h1>
-              <p className="text-[10px] text-[#2D6A4F] font-bold m-0">المخطط الجماعي للأصدقاء 🧭</p>
+              <p className="text-[10px] text-[#2D6A4F] font-bold m-0">المخطط الجماعي للأصدقاء</p>
             </div>
           </div>
 
@@ -1543,7 +1578,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
           {/* No SaaS Upgrade Sidebar Banner */}
 
           {/* Navigation Links */}
-          <nav className="flex flex-col gap-1 overflow-y-auto max-h-[50vh] pr-1">
+          <nav className="flex flex-col gap-1 pr-1">
             {[
               { id: 'dashboard', label: 'لوحة التحكم', icon: Award },
               { id: 'personal', label: 'حقيبتي وأوراقي', icon: Briefcase },
@@ -1580,7 +1615,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
 
         {/* Footer in Sidebar */}
         <div className="text-[10px] text-gray-400 border-t border-[#E8E0D5] pt-4 font-sans text-center">
-          <p className="m-0">رحلتنا الخاصة 🧭 صيف 2026</p>
+          <p className="m-0">رحلتنا الخاصة · صيف 2026</p>
         </div>
       </aside>
 
@@ -1662,7 +1697,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
             {/* Travel Quote Banner */}
             <div className="bg-gradient-to-r from-[#2D6A4F]/10 via-[#74C69D]/5 to-transparent border-r-4 border-[#2D6A4F] p-4 rounded-xl text-right animate-fadeIn">
               <p className="text-xs text-[#1B4332] font-black italic m-0">
-                « السفر ميزان الأخلاق، وترياق العقول، ومولد الذكريات الجميلة التي لا تنتهي. سفرة ممتعة يا أصدقاء » 🌟✈️🇷🇺
+                « السفر ميزان الأخلاق، وترياق العقول، ومولد الذكريات الجميلة التي لا تنتهي. سفرة ممتعة يا أصدقاء »
               </p>
             </div>
 
@@ -1713,7 +1748,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                           <p className="text-[11px] text-emerald-700 font-medium">قائد اليوم المسؤول عن التوجيه والتنظيم: <strong className="font-bold underline">{activeLeaderName || 'عبدالله الزهراني'}</strong></p>
                         </div>
                       </div>
-                      <span className="text-[9px] bg-emerald-600 text-white px-3 py-1 rounded-full font-bold animate-pulse">اليوم نشط 🟢</span>
+                      <span className="text-[9px] bg-emerald-600 text-white px-3 py-1 rounded-full font-bold animate-pulse">اليوم نشط</span>
                     </div>
 
                     {/* Daily Leader Checklist Card */}
@@ -1794,7 +1829,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                   <div className="white-card p-6 rounded-2xl space-y-4 text-right shadow-xs animate-fadeIn">
                     <div className="flex items-center gap-2 border-b border-[#E8E0D5] pb-3 justify-start">
                       <Megaphone className="text-[#2D6A4F]" size={16} />
-                      <h3 className="text-xs font-black text-gray-800">إعلانات وتنبيهات الإدارة 📣</h3>
+                      <h3 className="text-xs font-black text-gray-800">إعلانات وتنبيهات الإدارة</h3>
                     </div>
                     <div className="grid grid-cols-1 gap-4">
                       {marketingBanners
@@ -1829,7 +1864,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                 <div className="white-card p-6 rounded-2xl space-y-4 text-right shadow-xs">
                   <div className="flex items-center gap-2 border-b border-gray-100 pb-3 justify-start">
                     <Briefcase className="text-[#2D6A4F] shrink-0" size={16} />
-                    <h3 className="text-xs font-black text-gray-800">مؤشر جاهزية الأصدقاء للرحلة 🎒</h3>
+                    <h3 className="text-xs font-black text-gray-800">مؤشر جاهزية الأصدقاء للرحلة</h3>
                   </div>
                   <p className="text-[10px] text-gray-400 leading-relaxed font-light">
                     يقيس هذا المؤشر نسبة جاهزية كل مسافر بناءً على إنجاز قائمة مستلزمات حقيبته ورفع وثائق السفر الرسمية بنجاح.
@@ -2370,7 +2405,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                               <p className="text-xs text-gray-600 font-light leading-relaxed m-0">{item.activities}</p>
                               {item.notes && (
                                 <div className="bg-[#2D6A4F]/5 border-r-2 border-[#2D6A4F] p-2.5 rounded-l-lg text-[11px] text-[#1B4332] font-semibold mt-1">
-                                  📝 {item.notes}
+                                  · {item.notes}
                                 </div>
                               )}
                             </>
@@ -2742,7 +2777,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                               onChange={(e) => setEditTaskData(prev => ({ ...prev, assignee: e.target.value }))}
                               className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-lg p-2 text-xs text-right cursor-pointer font-bold"
                             >
-                              <option value="الجميع">الجميع 👥</option>
+                              <option value="الجميع">الجميع</option>
                               {travelers.map(t => (
                                 <option key={t.id} value={t.name}>{t.name}</option>
                               ))}
@@ -2866,7 +2901,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                         onChange={(e) => setNewTask(prev => ({ ...prev, assignee: e.target.value }))}
                         className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl px-3 py-2 text-xs text-[#1A1A1A] focus:outline-none focus:border-[#2D6A4F] text-right cursor-pointer font-bold"
                       >
-                        <option value="الجميع">الجميع 👥</option>
+                        <option value="الجميع">الجميع</option>
                         {travelers.map(t => (
                           <option key={t.id} value={t.name}>{t.name}</option>
                         ))}
@@ -2990,7 +3025,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                     <h3 className="text-xs font-black text-gray-800">حالة دفع قطة السفر المشتركة (المستهدف: 5,000 ر.س لكل شخص)</h3>
                     {isFinanceSupervisor && (
                       <span className="text-[8px] bg-[#2D6A4F]/10 border border-[#2D6A4F]/30 text-[#2D6A4F] px-2 py-0.5 rounded font-black">
-                        أنت مخول بالتعديل ✍️
+                        أنت مخول بالتعديل
                       </span>
                     )}
                   </div>
@@ -3228,7 +3263,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
 
                   {/* Greedy matching ledger (SaaS premium lock) */}
                   <div className="pt-2 border-t border-gray-100 space-y-3">
-                    <h4 className="text-xs font-black text-gray-800">خارطة التحويلات والتسويات المباشرة لإنهاء العوالق 💸</h4>
+                    <h4 className="text-xs font-black text-gray-800">خارطة التحويلات والتسويات المباشرة لإنهاء العوالق</h4>
                     
                     {pricingPlan === 'free' ? (
                       <div className="py-6 flex flex-col items-center justify-center text-center space-y-2 bg-[#F9F7F4]/60 rounded-xl border border-dashed border-[#E8E0D5] p-4">
@@ -3250,7 +3285,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                       <div>
                         {financeStats.settlementInstructions.length === 0 ? (
                           <div className="p-4 bg-emerald-50 border border-emerald-100 text-emerald-800 text-center rounded-xl text-xs font-bold">
-                            جميع المديونيات تمت تسويتها بالكامل! الحساب صافي بين الشباب 🌸
+                            جميع المديونيات تمت تسويتها بالكامل. الحساب صافي بين الشباب.
                           </div>
                         ) : (
                           <div className="space-y-2">
@@ -3500,7 +3535,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                               className="bg-amber-600 hover:bg-amber-700 text-white font-bold px-3 py-1.5 rounded-xl text-[10px] transition flex items-center gap-1 cursor-pointer"
                             >
                               <Crown size={11} />
-                              <span>إغلاق التصويت واعتماد الخيار الفائز بالمسار 🚀</span>
+                              <span>إغلاق التصويت واعتماد الخيار الفائز بالمسار</span>
                             </button>
                           </div>
                         )}
@@ -3563,7 +3598,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                                   : 'bg-white border-[#E8E0D5] text-gray-600 hover:bg-emerald-50/50'
                               }`}
                             >
-                              <span>👍 مؤيد</span>
+                              <span>مؤيد</span>
                               <span className="font-mono font-bold">({prop.votesUp.length})</span>
                             </button>
                             
@@ -3575,7 +3610,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                                   : 'bg-white border-[#E8E0D5] text-gray-600 hover:bg-rose-50/50'
                               }`}
                             >
-                              <span>👎 معارض</span>
+                              <span>معارض</span>
                               <span className="font-mono font-bold">({prop.votesDown.length})</span>
                             </button>
                           </div>
@@ -4055,7 +4090,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                         onChange={(e) => setNewTask(prev => ({ ...prev, assignee: e.target.value }))}
                         className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl px-3 py-2 text-xs text-[#1A1A1A] focus:outline-none focus:border-[#2D6A4F] text-right cursor-pointer font-bold"
                       >
-                        <option value="الجميع">الجميع 👥</option>
+                        <option value="الجميع">الجميع</option>
                         {travelers.map(t => (
                           <option key={t.id} value={t.name}>{t.name}</option>
                         ))}
@@ -4149,7 +4184,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
           <div className="bg-white border border-[#E8E0D5] max-w-md w-full rounded-2xl p-6 space-y-4 text-right shadow-xl">
             <div className="flex items-center gap-2 border-b border-gray-100 pb-3 justify-start">
               <Bot className="text-[#2D6A4F]" size={20} />
-              <h3 className="text-sm font-bold text-gray-800">محاكاة تكامل بوت تيليجرام 🤖</h3>
+              <h3 className="text-sm font-bold text-gray-800">محاكاة تكامل بوت تيليجرام</h3>
             </div>
             
             <p className="text-xs text-gray-500 font-light leading-normal">
@@ -4161,7 +4196,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
             </div>
 
             <div className="bg-emerald-50 border border-emerald-100 p-3 rounded-xl flex items-center gap-2 justify-end">
-              <span className="text-[10px] text-emerald-800 font-bold">تم الإرسال بنجاح لمحاورة التكامل الفعلي 🚀</span>
+              <span className="text-[10px] text-emerald-800 font-bold">تم الإرسال بنجاح لمحاورة التكامل الفعلي</span>
               <CheckCircle size={14} className="text-emerald-700" />
             </div>
 
@@ -4201,33 +4236,54 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
         </div>
       )}
 
+      {/* TOAST NOTIFICATION (success/error confirmations) */}
+      {toast && (
+        <div className="fixed bottom-24 md:bottom-8 left-1/2 -translate-x-1/2 z-[110] animate-fadeIn pointer-events-none">
+          <div className={`px-5 py-3 rounded-xl shadow-lg font-bold text-sm border ${
+            toast.kind === 'error'
+              ? 'bg-rose-50 border-rose-200 text-rose-900'
+              : 'bg-emerald-50 border-emerald-200 text-emerald-900'
+          }`}>
+            {toast.message}
+          </div>
+        </div>
+      )}
+
       {/* WELCOME MODAL ON SUCCESSFUL LOGIN */}
       {showWelcome && currentUser && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fadeIn">
-          <div className="bg-white max-w-md w-full rounded-3xl p-8 space-y-6 text-center shadow-2xl relative border border-[#E8E0D5]">
-            <div className="w-16 h-16 bg-gradient-to-tr from-[#2D6A4F] to-[#74C69D] rounded-full flex items-center justify-center mx-auto text-white shadow-md animate-bounce">
-              <Compass size={28} />
-            </div>
-            
-            <div className="space-y-2">
-              <h3 className="text-xl font-black text-gray-800">أهلاً بك يا {currentUser.name} 👋</h3>
-              <p className="text-xs text-gray-500 font-bold">عضو في فريق: {currentUser.role}</p>
-              
-              <div className="py-4 px-3 bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl text-xs text-[#2D6A4F] leading-relaxed font-bold">
-                🇷🇺✈️ نتمنى لك وللأصدقاء سفرة ممتعة ومغامرة شيقة وجميلة في ربوع روسيا صيف 2026
-              </div>
-              
-              <p className="text-[11px] text-gray-400 leading-relaxed pt-2">
-                تطبيق الرحلة يتيح لك متابعة الجدول اليومي، التذاكر، المهام المطلوبة منك، وتفاصيل القطة المالية المشتركة بشكل فوري.
-              </p>
-            </div>
-
-            <button
-              onClick={() => setShowWelcome(false)}
-              className="w-full bg-[#2D6A4F] hover:bg-[#1B4332] text-white py-3 rounded-xl text-xs font-black transition shadow-md cursor-pointer text-center"
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-md z-[100] overflow-y-auto animate-fadeIn"
+          onClick={() => setShowWelcome(false)}
+        >
+          <div className="min-h-full flex items-center justify-center p-4">
+            <div
+              className="bg-white max-w-md w-full rounded-3xl p-6 md:p-8 space-y-5 text-center shadow-2xl relative border border-[#E8E0D5]"
+              onClick={(e) => e.stopPropagation()}
             >
-              دخول واستكشاف المخطط 🧭
-            </button>
+              <div className="w-16 h-16 bg-gradient-to-tr from-[#2D6A4F] to-[#74C69D] rounded-full flex items-center justify-center mx-auto text-white shadow-md">
+                <Compass size={28} />
+              </div>
+
+              <div className="space-y-2">
+                <h3 className="text-lg md:text-xl font-black text-gray-800">أهلاً بك يا {currentUser.name}</h3>
+                <p className="text-sm text-gray-500 font-bold">عضو في فريق: {currentUser.role}</p>
+
+                <div className="py-4 px-3 bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl text-sm text-[#2D6A4F] leading-relaxed font-bold">
+                  نتمنى لك وللأصدقاء سفرة ممتعة ومغامرة شيقة وجميلة في ربوع روسيا صيف 2026
+                </div>
+
+                <p className="text-xs text-gray-400 leading-relaxed pt-2">
+                  تطبيق الرحلة يتيح لك متابعة الجدول اليومي، التذاكر، المهام المطلوبة منك، وتفاصيل القطة المالية المشتركة بشكل فوري.
+                </p>
+              </div>
+
+              <button
+                onClick={() => setShowWelcome(false)}
+                className="w-full bg-[#2D6A4F] hover:bg-[#1B4332] text-white py-3 rounded-xl text-base font-black transition shadow-md cursor-pointer text-center"
+              >
+                دخول واستكشاف المخطط
+              </button>
+            </div>
           </div>
         </div>
       )}
