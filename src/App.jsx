@@ -179,19 +179,28 @@ const INITIAL_TRAVELERS = [
   { id: '4', name: 'فهد بن جديد', role: 'منسق الأنشطة والبرامج', phone: '0590099919', avatarColor: 'from-[#2A3F7E] to-[#2A3F7E]', visaStatus: 'معفى (دخول بدون تأشيرة)', flightBooked: true, password: '123456' },
 ];
 
+// ─── 4 + 4 + 4 trip structure ───
+// First Moscow block (days 1-4): city + countryside on day 4
+// Saint Petersburg block (days 5-8): train transfer + 3 days
+// Second Moscow block (days 9-12): return + new exploration + departure
 const INITIAL_ITINERARY = [
-  { id: 'd1', day: 1, date: '2026-06-24', city: 'موسكو', title: 'الوصول واستكشاف شارع نيكولسكايا', activities: 'الوصول إلى مطار شيريميتيفو بموسكو، الانتقال إلى الفندق والاستقرار. في المساء، جولة مشي في شارع نيكولسكايا (Nikolskaya Street) القريب من الساحة الحمراء للاستمتاع بالإنارة الليلية الرائعة.', notes: 'اقتراح عشاء/قهوة: كافيه Grand Kafe Dr. Zhivago (تجربة كيكة العسل بالتوت - يتطلب انتظار أو حجز مسبق).', leader: 'عبدالله الزهراني' },
-  { id: 'd2', day: 2, date: '2026-06-25', city: 'موسكو', title: 'الكرملين، الساحة الحمراء وحديقة زريادي', activities: 'جولة تاريخية تشمل قصر الكرملين، الساحة الحمراء، وكاتدرائية سانت باسيل الاستثنائية. الاستمتاع بالتسوق في مجمع GUM التاريخي. عصراً، زيارة حديقة زريادي (Zaryadye Park) الحديثة والمشي فوق الجسر الطائر (Floating Bridge) ذو الإطلالة البانورامية على نهر موسكفا.', notes: 'اقتراح قهوة: Bosco Coffee في مول GUM (القهوة والتيراميسو). عشاء: برقر SHE أو مطعم إيطالي IL PIZZAIOLO.', leader: 'عبدالله الزهراني' },
-  { id: 'd3', day: 3, date: '2026-06-26', city: 'موسكو', title: 'شوارع التسوق وبحيرة البطريرك', activities: 'التمشي في شارع تفيرسكايا (Tverskaya Street) الرئيسي، وشارع بتروفكا (Petrovka Street) الشهير بالبوتيكات والماركات الفخمة. الانتقال بعد العصر إلى شارع ملايا برونايا (Malaya Bronnaya Street) الهادئ للتمشي بجوار بحيرة البطريرك (Patriarch Ponds) الجميلة.', notes: 'اقتراح فطور: Remy Kitchen Bakery. قهوة: Surf Coffee أو كافيه Pino (تجربة الفرنش توست والكريم بروليه).', leader: 'عبدالله الزهراني' },
-  { id: 'd4', day: 4, date: '2026-06-27', city: 'ريف موسكو', title: 'استجمام وهدوء في ريف موسكو الطبيعي', activities: 'قضاء يوم كامل خارج صخب المدينة للاستمتاع بالطبيعة الريفية الروسية، والمشي في الغابات المحيطة وتناول وجبة تقليدية في الهواء الطلق.', notes: 'اقتراح قهوة: Skuratov Coffee Roasters أو Rockets Concept Store.', leader: 'عبدالعزيز الحميد' },
-  { id: 'd5', day: 5, date: '2026-06-28', city: 'موسكو', title: 'جولة أربات التاريخية والمترو الفني', activities: 'استكشاف محطات مترو موسكو التاريخية الفنية، ثم قضاء فترة العصر والمشاة في شارع أربات القديم (Old Arbat) المليء بالفنانين والمقاهي ومحلات الهدايا التذكارية، ومقارنته بشارع أربات الجديد الذاخر بالمطاعم الكبيرة.', notes: 'فطور: Remy Kitchen Bakery. قهوة مختصة: Surf Coffee أو ABC Coffee.', leader: 'عبدالعزيز الحميد' },
-  { id: 'd6', day: 6, date: '2026-06-29', city: 'موسكو', title: 'حديقة غوركي وسكاي بارك', activities: 'قضاء يوم مفتوح في حديقة غوركي (Gorky Park) الشاسعة لركوب الدراجات أو القوارب المائية. الانتقال عصراً بالمترو إلى سكاي بارك (Skypark) بالقرب من محطة Vorobyovy Gory للمشاركة في الفعاليات الترفيهية والتلفريك.', notes: 'قهوة: كافيه Aist (يضم محمصة قهوة في الداخل). عشاء: مطعم هندي Tandoor أو Taj Mahal.', leader: 'فهد بن جديد' },
-  { id: 'd7', day: 7, date: '2026-06-30', city: 'موسكو', title: 'حديقة فدنخا الترفيهية والتلفريك', activities: 'زيارة حديقة فدنخا (VDNKh) التاريخية لمشاهدة عين موسكو الدوارة، وركوب التلفريك، وزيارة الأكواريوم ومتحف الفضاء.', notes: 'اقتراح كافيه: Miss You (كروسان اللوز).', leader: 'فهد بن جديد' },
-  { id: 'd8', day: 8, date: '2026-07-01', city: 'سانت بطرسبرغ', title: 'السفر بقطار سابسان السريع إلى سانت بطرسبرغ', activities: 'الانتقال صباحاً بقطار سابسان (Sapsan) السريع من موسكو إلى العاصمة الثقافية سانت بطرسبرغ. الاستقرار في السكن، ثم جولة حرة في شارع نيفسكي (Nevsky Prospekt) للتمشي والاستطلاع الأول للمدينة وقنواتها المائية.', notes: 'قهوة مساءً في كافيه Bolshoi أو Surf Coffee.', leader: 'عبدالعزيز الحميد' },
-  { id: 'd9', day: 9, date: '2026-07-02', city: 'سانت بطرسبرغ', title: 'متحف الإرميتاج العريق وجولة القنوات المائية', activities: 'تخصيص يوم كامل لاستكشاف متحف الإرميتاج (Hermitage Museum) الضخم الذي يضم كنوز القياصرة الروس. في المساء، جولة تفصيلية بالقارب في القنوات المائية الساحرة تحت الجسور المتحركة.', notes: 'عشاء: مطعم Tandoor أو Taj Mahal الهندي في سانت بطرسبرغ.', leader: 'حسن الدوسري' },
-  { id: 'd10', day: 10, date: '2026-07-03', city: 'سانت بطرسبرغ', title: 'قصر بيترهوف والنافورات الذهبية وكاتدرائية الدم', activities: 'زيارة قصر القيصر بطرس الأكبر (بيترهوف Peterhof Palace) المطل على خليج فنلندا ومشاهدة النافورات الذهبية العجيبة. العودة للمدينة لزيارة كاتدرائية المخلص على الدم المراق (Savior on Spilled Blood).', notes: 'يوم طويل للتصوير واستنشاق أجواء بحر البلطيق.', leader: 'حسن الدوسري' },
-  { id: 'd11', day: 11, date: '2026-07-04', city: 'موسكو', title: 'العودة بقطار سابسان وجولة في شوارع المقاهي المزدحمة', activities: 'ركوب قطار سابسان للعودة إلى موسكو والاستقرار. قضاء العصر في التمشي الطويل بشارعي مياسنيتسكايا (Myasnitskaya Street) وبيايتنيتسكايا (Pyatnitskaya Street) المليئين بالمقاهي المتنوعة والأجواء الحيوية الشبابية.', notes: 'تعد الشوارع أقل سياحية ولكنها من الأكثر متعة للمشي الطويل والمطاعم.', leader: 'فهد بن جديد' },
-  { id: 'd12', day: 12, date: '2026-07-05', city: 'موسكو', title: 'شراء الهدايا التذكارية والمغادرة للوطن', activities: 'شراء الهدايا التذكارية وأحذية الفرو والجلود بأسعار معقولة من السوق تحت الأرضي بجوار الساحة الحمراء، ثم تسجيل الخروج والتوجه لمطار شيريميتيفو للعودة بسلامة الله إلى أرض الوطن.', notes: 'نهاية الرحلة والعودة إلى الرياض.', leader: 'فهد بن جديد' }
+  // ─── Moscow Block 1 (Days 1-4) ───
+  { id: 'd1',  day: 1,  date: '2026-06-24', city: 'موسكو',     title: 'الوصول واستكشاف شارع نيكولسكايا',          activities: 'الوصول إلى مطار شيريميتيفو، الانتقال إلى الفندق والاستقرار. في المساء، جولة مشي في شارع نيكولسكايا (Nikolskaya Street) القريب من الساحة الحمراء للاستمتاع بالإنارة الليلية.',                                                                       notes: 'عشاء/قهوة: كافيه Grand Kafe Dr. Zhivago (كيكة العسل بالتوت - يحتاج حجز).',                                                       leader: 'عبدالله الزهراني' },
+  { id: 'd2',  day: 2,  date: '2026-06-25', city: 'موسكو',     title: 'الكرملين، الساحة الحمراء وحديقة زريادي',     activities: 'جولة تاريخية في قصر الكرملين، الساحة الحمراء، وكاتدرائية سانت باسيل. تسوق في مجمع GUM. عصراً زيارة حديقة زريادي (Zaryadye Park) والجسر الطائر بإطلالة على نهر موسكفا.',                                              notes: 'قهوة: Bosco Coffee في GUM. عشاء: برقر SHE أو IL PIZZAIOLO.',                                                                     leader: 'عبدالله الزهراني' },
+  { id: 'd3',  day: 3,  date: '2026-06-26', city: 'موسكو',     title: 'شوارع التسوق وبحيرة البطريرك',                 activities: 'التمشي في شارع تفيرسكايا (Tverskaya) الرئيسي، وشارع بتروفكا (Petrovka) للبوتيكات. عصراً شارع ملايا برونايا (Malaya Bronnaya) الهادئ بجوار بحيرة البطريرك (Patriarch Ponds).',                                            notes: 'فطور: Remy Kitchen Bakery. قهوة: Surf Coffee أو Pino.',                                                                          leader: 'عبدالله الزهراني' },
+  { id: 'd4',  day: 4,  date: '2026-06-27', city: 'ريف موسكو', title: 'يوم استجمام في ريف موسكو الطبيعي',             activities: 'يوم كامل خارج صخب المدينة في الطبيعة الريفية الروسية: غابات، مشي طويل، وجبة تقليدية في الهواء الطلق. تجهيز للسفر إلى سانت بطرسبرغ مساءً.',                                                                                     notes: 'يفضل تجهيز الحقائب الصغيرة لرحلة القطار الصباحية يوم 5.',                                                                       leader: 'عبدالعزيز الحميد' },
+
+  // ─── Saint Petersburg Block (Days 5-8) ───
+  { id: 'd5',  day: 5,  date: '2026-06-28', city: 'سانت بطرسبرغ', title: 'قطار سابسان السريع + جولة نيفسكي',            activities: 'الانتقال صباحاً بقطار سابسان (Sapsan) من موسكو إلى العاصمة الثقافية سانت بطرسبرغ. الاستقرار في السكن. مساءً جولة حرة في شارع نيفسكي (Nevsky Prospekt) للتمشي والقنوات المائية.',                                  notes: 'قهوة مساءً: كافيه Bolshoi أو Surf Coffee.',                                                                                      leader: 'عبدالعزيز الحميد' },
+  { id: 'd6',  day: 6,  date: '2026-06-29', city: 'سانت بطرسبرغ', title: 'متحف الإرميتاج العريق وجولة القنوات',         activities: 'يوم كامل في متحف الإرميتاج (Hermitage Museum) لاستكشاف كنوز القياصرة. مساءً جولة بالقارب في القنوات المائية تحت الجسور المتحركة.',                                                                                                 notes: 'عشاء: مطعم Tandoor أو Taj Mahal الهندي.',                                                                                        leader: 'حسن الدوسري' },
+  { id: 'd7',  day: 7,  date: '2026-06-30', city: 'سانت بطرسبرغ', title: 'قصر بيترهوف والنافورات الذهبية',              activities: 'زيارة قصر القيصر بطرس الأكبر (Peterhof Palace) المطل على خليج فنلندا ومشاهدة النافورات الذهبية. العودة لزيارة كاتدرائية المخلص على الدم المراق (Savior on Spilled Blood).',                                              notes: 'يوم طويل للتصوير واستنشاق أجواء بحر البلطيق.',                                                                                   leader: 'حسن الدوسري' },
+  { id: 'd8',  day: 8,  date: '2026-07-01', city: 'سانت بطرسبرغ', title: 'قصر كاترين وسوق التحف + قطار العودة',         activities: 'زيارة قصر كاترين الذهبي (Catherine Palace) في بوشكين، وسوق التحف للهدايا التذكارية. مساءً ركوب قطار سابسان للعودة إلى موسكو.',                                                                                       notes: 'تجهيز الحقائب الكبيرة قبل الانطلاق - فندق موسكو الجديد يستقبلكم ليلاً.',                                                       leader: 'حسن الدوسري' },
+
+  // ─── Moscow Block 2 (Days 9-12) ───
+  { id: 'd9',  day: 9,  date: '2026-07-02', city: 'موسكو',     title: 'شوارع المقاهي المزدحمة',                       activities: 'تمشي طويل في شارعي مياسنيتسكايا (Myasnitskaya) وبيايتنيتسكايا (Pyatnitskaya) المليئين بالمقاهي والأجواء الحيوية الشبابية.',                                                                                                 notes: 'أقل سياحية لكن من الأمتع للمشي والمطاعم.',                                                                                        leader: 'فهد بن جديد' },
+  { id: 'd10', day: 10, date: '2026-07-03', city: 'موسكو',     title: 'جولة أربات التاريخية والمترو الفني',           activities: 'استكشاف محطات مترو موسكو التاريخية الفنية. عصراً المشي في شارع أربات القديم (Old Arbat) المليء بالفنانين والمقاهي. مقارنته بشارع أربات الجديد.',                                                                          notes: 'فطور: Remy Kitchen Bakery. قهوة: Surf Coffee أو ABC Coffee.',                                                                   leader: 'فهد بن جديد' },
+  { id: 'd11', day: 11, date: '2026-07-04', city: 'موسكو',     title: 'حديقة غوركي وحديقة فدنخا',                     activities: 'صباحاً حديقة غوركي (Gorky Park) لركوب الدراجات والقوارب. عصراً حديقة فدنخا (VDNKh) لعين موسكو الدوارة، التلفريك، الأكواريوم، ومتحف الفضاء.',                                                                              notes: 'قهوة: كافيه Aist. عشاء: Tandoor أو Taj Mahal الهندي.',                                                                          leader: 'فهد بن جديد' },
+  { id: 'd12', day: 12, date: '2026-07-05', city: 'موسكو',     title: 'الهدايا التذكارية والمغادرة للوطن',            activities: 'شراء الهدايا التذكارية وأحذية الفرو من السوق تحت الأرضي بجوار الساحة الحمراء، ثم تسجيل الخروج والتوجه لمطار شيريميتيفو للعودة بسلامة الله.',                                                                            notes: 'نهاية الرحلة والعودة إلى الرياض.',                                                                                                leader: 'فهد بن جديد' }
 ];
 
 // Packing checklist defaults per traveler
@@ -1450,11 +1459,15 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                   </div>
                 </form>
               ) : (
-                <form onSubmit={handleLoginSubmit} className="space-y-5">
+                <form onSubmit={handleLoginSubmit} className="space-y-5" autoComplete="on">
                   <div className="space-y-2">
-                    <label className="text-sm md:text-base font-bold text-gray-700 block">أدخل رقم جوالك لتسجيل الدخول</label>
+                    <label htmlFor="login-phone" className="text-sm md:text-base font-bold text-gray-700 block">أدخل رقم جوالك لتسجيل الدخول</label>
                     <input
-                      type="text"
+                      id="login-phone"
+                      name="phone"
+                      type="tel"
+                      inputMode="tel"
+                      autoComplete="username tel"
                       placeholder="05XXXXXXXX"
                       value={loginPhoneInput}
                       onChange={(e) => setLoginPhoneInput(e.target.value)}
@@ -1464,9 +1477,12 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm md:text-base font-bold text-gray-700 block">كلمة المرور</label>
+                    <label htmlFor="login-password" className="text-sm md:text-base font-bold text-gray-700 block">كلمة المرور</label>
                     <input
+                      id="login-password"
+                      name="password"
                       type="password"
+                      autoComplete="current-password"
                       placeholder="********"
                       value={loginPasswordInput}
                       onChange={(e) => setLoginPasswordInput(e.target.value)}
@@ -1551,7 +1567,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                   </span>
                 </div>
                 <div className="text-right text-white space-y-1">
-                  <h3 className="font-extrabold text-sm text-white m-0">موسكو • سان بطرسبرغ • سوتشي</h3>
+                  <h3 className="font-extrabold text-sm text-white m-0">موسكو · سان بطرسبرغ · موسكو</h3>
                   <p className="text-[10px] text-emerald-100 opacity-90 leading-relaxed font-light m-0">
                     نظام موحد لإدارة مسار الرحلة، الحجوزات، الميزانية المشتركة، وجاهزية الحقائب مع الأصدقاء.
                   </p>
@@ -1801,15 +1817,16 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                 </div>
 
                 {!timeLeft.isPast && (
-                  <div className="flex gap-2 md:gap-3 self-end md:self-auto" dir="ltr">
+                  <div className="flex gap-1.5 md:gap-2 self-end md:self-auto" dir="ltr">
                     {[
                       { v: timeLeft.days,    l: 'يوم' },
                       { v: timeLeft.hours,   l: 'ساعة' },
                       { v: timeLeft.minutes, l: 'دقيقة' },
+                      { v: timeLeft.seconds, l: 'ثانية', subtle: true },
                     ].map((u, i) => (
-                      <div key={i} className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl px-3 py-2 text-center min-w-[58px]">
-                        <div className="text-xl md:text-2xl font-black tabular-nums">{String(u.v).padStart(2, '0')}</div>
-                        <div className="text-[10px] md:text-xs text-white/75 mt-0.5">{u.l}</div>
+                      <div key={i} className={`bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl px-2.5 py-2 text-center min-w-[52px] ${u.subtle ? 'opacity-80' : ''}`}>
+                        <div className="text-lg md:text-2xl font-black tabular-nums">{String(u.v).padStart(2, '0')}</div>
+                        <div className="text-[9px] md:text-[11px] text-white/75 mt-0.5">{u.l}</div>
                       </div>
                     ))}
                   </div>
@@ -2034,7 +2051,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                   <Lock size={18} />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-[#14172A]">
+                  <h2 className="text-xl md:text-2xl font-black text-[#D52B1E]">
                     المساحة الشخصية والوثائق لـ {currentUser.name}
                   </h2>
                   <p className="text-xs text-gray-500 mt-1">تجهيز حقيبتك ومستندات سفرك. هذه البيانات خاصة بك وتظهر فقط للمستخدم النشط.</p>
@@ -2047,12 +2064,12 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Document Tracker List (FileUpload integration) */}
-              <div className="white-card p-6 rounded-2xl space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+              {/* Document Tracker List — placed second on mobile */}
+              <div className="white-card p-5 md:p-6 rounded-2xl space-y-5 order-2 lg:order-1">
                 <div className="flex items-center gap-2 border-b border-[#ECE6DC] pb-3">
-                  <FileText className="text-[#2A3F7E]" size={18} />
-                  <h3 className="text-sm font-bold text-[#14172A]">أوراق ومستندات السفر الرسمية</h3>
+                  <FileText className="text-[#D52B1E]" size={20} />
+                  <h3 className="text-base md:text-lg font-black text-[#D52B1E]">أوراق ومستندات السفر الرسمية</h3>
                 </div>
 
                 <div className="space-y-4">
@@ -2166,12 +2183,12 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                 </div>
               </div>
 
-              {/* Personal Packing Checklist */}
-              <div className="lg:col-span-2 white-card p-6 rounded-2xl space-y-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#ECE6DC] pb-3">
+              {/* Personal Packing Checklist — placed first on mobile */}
+              <div className="lg:col-span-2 white-card p-5 md:p-6 rounded-2xl space-y-5 order-1 lg:order-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#ECE6DC] pb-3">
                   <div className="flex items-center gap-2">
-                    <Briefcase className="text-[#2A3F7E]" size={18} />
-                    <h3 className="text-sm font-bold text-[#14172A]">حقيبتي الشخصية (مستلزمات السفر)</h3>
+                    <Briefcase className="text-[#D52B1E]" size={20} />
+                    <h3 className="text-base md:text-lg font-black text-[#D52B1E]">حقيبتي الشخصية (مستلزمات السفر)</h3>
                   </div>
                   <div className="flex items-center gap-2 text-xs">
                     <span className="text-gray-500 font-bold">الأغراض المجهزة:</span>
@@ -2259,13 +2276,13 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
             {/* Header and filters */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#ECE6DC] pb-6">
               <div>
-                <h2 className="text-xl font-bold text-[#14172A]">مسار الرحلة والنشاطات اليومية</h2>
+                <h2 className="text-xl md:text-2xl font-black text-[#D52B1E]">مسار الرحلة والنشاطات اليومية</h2>
                 <p className="text-xs text-gray-500 mt-1">تتبع خط سير الرحلة وقادة اليوم المسؤولين عن التنسيق والمجموعات</p>
               </div>
 
               {/* City selector buttons */}
               <div className="flex gap-1.5 bg-[#ECE6DC]/50 p-1 rounded-xl border border-[#ECE6DC]">
-                {['الكل', 'موسكو', 'سان بطرسبرغ', 'سوتشي'].map((c) => (
+                {['الكل', 'موسكو', 'سان بطرسبرغ', 'ريف موسكو'].map((c) => (
                   <button
                     key={c}
                     onClick={() => setItineraryCityFilter(c)}
@@ -2553,7 +2570,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
         {activeTab === 'bookings' && (
           <div className="space-y-8 animate-fadeIn">
             <div className="border-b border-[#ECE6DC] pb-6">
-              <h2 className="text-xl font-bold text-[#14172A]">الحجوزات والتذاكر المؤكدة</h2>
+              <h2 className="text-xl md:text-2xl font-black text-[#D52B1E]">الحجوزات والتذاكر المؤكدة</h2>
               <p className="text-xs text-gray-500 mt-1">تأكيد ومتابعة حجوزات الطيران الدولي والداخلي والسكن المشترك والقطارات</p>
             </div>
 
@@ -2762,7 +2779,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
           <div className="space-y-8 animate-fadeIn text-right">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#ECE6DC] pb-6">
               <div>
-                <h2 className="text-xl font-bold text-[#14172A]">قائمة المهام المشتركة</h2>
+                <h2 className="text-xl md:text-2xl font-black text-[#D52B1E]">قائمة المهام المشتركة</h2>
                 <p className="text-xs text-gray-500 mt-1">توزيع التجهيزات والمهام التنظيمية العامة قبل الرحلة ومتابعة جاهزيتها</p>
               </div>
               <div className="flex items-center gap-2 text-xs font-bold text-gray-600 justify-end">
@@ -2920,7 +2937,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                       <label className="text-[10px] font-bold text-gray-500">المهمة</label>
                       <input 
                         type="text" 
-                        placeholder="مثال: حجز طيران سوتشي الداخلي"
+                        placeholder="مثال: حجز قطار سابسان"
                         value={newTask.title}
                         onChange={(e) => setNewTask(prev => ({ ...prev, title: e.target.value }))}
                         className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-3 py-2 text-xs text-[#14172A] focus:outline-none focus:border-[#2A3F7E]"
@@ -2990,7 +3007,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
           <div className="space-y-8 animate-fadeIn text-right">
             <div className="border-b border-[#ECE6DC] pb-6 flex items-center justify-between flex-wrap gap-4">
               <div>
-                <h2 className="text-xl font-bold text-[#14172A]">صندوق الرحلة والميزانية العامة (المالية والقطة)</h2>
+                <h2 className="text-xl md:text-2xl font-black text-[#D52B1E]">صندوق الرحلة والميزانية العامة (المالية والقطة)</h2>
                 <p className="text-xs text-gray-500 mt-1">تتبع الصندوق والقطة المشتركة، مبالغ الاحتياطي، وتسجيل نفقات الصندوق أو المشتريات الشخصية بالتفصيل</p>
               </div>
               {pricingPlan === 'free' && (
@@ -3004,48 +3021,82 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
               )}
             </div>
 
-            {/* Fund State Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-[#2A3F7E]/5 border-2 border-[#2A3F7E] p-5 rounded-2xl flex flex-col justify-between shadow-sm relative overflow-hidden">
-                <div className="z-10">
-                  <span className="text-[10px] text-gray-500 font-bold block">الرصيد المتبقي بالصندوق المشترك</span>
-                  <span className="text-2xl font-black text-[#2A3F7E] block mt-1">
-                    {financeStats.remainingFund.toLocaleString()} ر.س
-                  </span>
-                  <div className="w-full bg-gray-200 h-1.5 rounded-full overflow-hidden mt-3">
-                    <div 
-                      className="bg-[#2A3F7E] h-full" 
-                      style={{ width: `${Math.min(100, Math.round((financeStats.remainingFund / (financeStats.totalFundCollected || 1)) * 100))}%` }}
-                    ></div>
+            {/* ─── BUDGET BANNER: single prominent hero card with smart color states ─── */}
+            {(() => {
+              const isDeficit = financeStats.remainingFund < 0;
+              const isLow = !isDeficit && financeStats.totalFundCollected > 0 && financeStats.remainingFund / financeStats.totalFundCollected < 0.2;
+              const pctSpent = financeStats.totalFundCollected > 0
+                ? Math.min(100, Math.round((financeStats.spentFromFund / financeStats.totalFundCollected) * 100))
+                : 0;
+              const bannerBg = isDeficit
+                ? 'bg-gradient-to-br from-[#D52B1E] via-[#B92214] to-[#8C1810]'
+                : 'bg-gradient-to-br from-[#2A3F7E] via-[#1B2D64] to-[#0F1E48]';
+              return (
+                <div className={`relative overflow-hidden rounded-3xl ${bannerBg} text-white p-5 md:p-7 shadow-lg`}>
+                  {/* Russian flag stripe */}
+                  <div className="absolute top-0 left-0 right-0 h-1 flex">
+                    <div className="flex-1 bg-white"></div>
+                    <div className="flex-1 bg-[#0036A7]"></div>
+                    <div className="flex-1 bg-[#D62718]"></div>
+                  </div>
+                  <div className="absolute -bottom-8 -left-8 opacity-10 pointer-events-none">
+                    <Coins size={140} />
+                  </div>
+
+                  <div className="relative z-10 space-y-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-xs md:text-sm text-white/75 font-medium">
+                          {isDeficit ? 'الصندوق في عجز - يحتاج تغذية' : 'الرصيد المتبقي في الصندوق المشترك'}
+                        </p>
+                        <p className="text-3xl md:text-4xl font-black tabular-nums leading-tight mt-1.5" dir="ltr" style={{ textAlign: 'right' }}>
+                          {isDeficit && '−'}{Math.abs(financeStats.remainingFund).toLocaleString()} <span className="text-lg md:text-xl font-bold opacity-90">ر.س</span>
+                        </p>
+                      </div>
+                      {isDeficit && (
+                        <span className="bg-white/15 border border-white/30 backdrop-blur-sm rounded-full px-3 py-1 text-[10px] md:text-xs font-black whitespace-nowrap">
+                          عجز
+                        </span>
+                      )}
+                      {isLow && (
+                        <span className="bg-amber-400/20 border border-amber-300/40 text-amber-100 rounded-full px-3 py-1 text-[10px] md:text-xs font-black whitespace-nowrap">
+                          منخفض
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Progress bar — only meaningful when there's fund collected */}
+                    {financeStats.totalFundCollected > 0 && !isDeficit && (
+                      <div>
+                        <div className="flex justify-between text-[10px] md:text-xs text-white/70 mb-1.5 font-bold">
+                          <span>صُرف {financeStats.spentFromFund.toLocaleString()} ر.س</span>
+                          <span>من {financeStats.totalFundCollected.toLocaleString()} ر.س</span>
+                        </div>
+                        <div className="w-full bg-white/10 h-2 rounded-full overflow-hidden">
+                          <div className="bg-white h-full rounded-full transition-all duration-500" style={{ width: `${pctSpent}%` }}></div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Quick stats row */}
+                    <div className="grid grid-cols-3 gap-2 pt-2">
+                      <div className="bg-white/10 backdrop-blur-sm border border-white/15 rounded-xl p-2.5 text-center">
+                        <p className="text-[9px] md:text-[10px] text-white/70 font-bold">المُحصّل</p>
+                        <p className="text-sm md:text-base font-black tabular-nums mt-0.5">{financeStats.totalFundCollected.toLocaleString()}</p>
+                      </div>
+                      <div className="bg-white/10 backdrop-blur-sm border border-white/15 rounded-xl p-2.5 text-center">
+                        <p className="text-[9px] md:text-[10px] text-white/70 font-bold">المصروف</p>
+                        <p className="text-sm md:text-base font-black tabular-nums mt-0.5">{financeStats.spentFromFund.toLocaleString()}</p>
+                      </div>
+                      <div className="bg-white/10 backdrop-blur-sm border border-white/15 rounded-xl p-2.5 text-center">
+                        <p className="text-[9px] md:text-[10px] text-white/70 font-bold">شخصي مستحق</p>
+                        <p className="text-sm md:text-base font-black tabular-nums mt-0.5">{financeStats.totalPersonalSpent.toLocaleString()}</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <Coins className="absolute left-2 bottom-2 text-[#2A3F7E]/10 w-24 h-24" />
-              </div>
-
-              <div className="white-card p-5 rounded-2xl flex flex-col justify-between">
-                <div>
-                  <span className="text-[10px] text-gray-500 font-bold block">إجمالي المحصل بالصندوق (القطة)</span>
-                  <span className="text-xl font-bold text-gray-800 block mt-1">
-                    {financeStats.totalFundCollected.toLocaleString()} ر.س
-                  </span>
-                  <span className="text-[9px] text-gray-400 block mt-1 font-semibold">
-                    القطة من الأعضاء: {(financeStats.totalFundCollected - reserveFund).toLocaleString()} ر.س | الاحتياطي: {reserveFund.toLocaleString()} ر.س
-                  </span>
-                </div>
-              </div>
-
-              <div className="white-card p-5 rounded-2xl flex flex-col justify-between">
-                <div>
-                  <span className="text-[10px] text-gray-500 font-bold block">المنصرف من الصندوق لحساب المشتريات</span>
-                  <span className="text-xl font-bold text-amber-800 block mt-1">
-                    {financeStats.spentFromFund.toLocaleString()} ر.س
-                  </span>
-                  <span className="text-[9px] text-gray-400 block mt-1 font-semibold">
-                    المدفوعات الشخصية الأخرى (توزع لاحقاً): {financeStats.totalPersonalSpent.toLocaleString()} ر.س
-                  </span>
-                </div>
-              </div>
-            </div>
+              );
+            })()}
 
             {/* Contribution and Reserve Cash Dashboard */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -3345,8 +3396,8 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                 </div>
 
                 {/* 5. Expenses Log & Registry */}
-                <div className="white-card p-6 rounded-2xl space-y-4">
-                  <h3 className="text-xs font-black text-gray-800 border-b border-gray-100 pb-3">سجل المصروفات ومشتريات الصندوق</h3>
+                <div className="white-card p-6 rounded-2xl space-y-4 order-2 lg:order-1">
+                  <h3 className="text-sm md:text-base font-black text-[#D52B1E] border-b border-[#ECE6DC] pb-3">سجل المصروفات ومشتريات الصندوق</h3>
                   
                   <div className="divide-y divide-[#ECE6DC]/50">
                     {expenses.map((expense) => {
@@ -3392,11 +3443,11 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                 </div>
               </div>
 
-              {/* Add Expense Sidebar Form */}
-              <div className="white-card p-6 rounded-2xl h-fit space-y-4">
+              {/* Add Expense Sidebar Form — placed first on mobile so it's easy to find */}
+              <div className="white-card p-6 rounded-2xl h-fit space-y-4 order-1 lg:order-2 border-2 border-[#2A3F7E]/20">
                 <div className="flex items-center gap-2 border-b border-[#ECE6DC] pb-3 justify-start">
-                  <Plus className="text-[#2A3F7E]" size={18} />
-                  <h3 className="text-sm font-bold text-[#14172A]">تسجيل مصروف جديد</h3>
+                  <Plus className="text-[#D52B1E]" size={20} />
+                  <h3 className="text-base md:text-lg font-black text-[#D52B1E]">تسجيل مصروف جديد</h3>
                 </div>
 
                 {canEdit ? (
@@ -3462,7 +3513,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
         {activeTab === 'proposals' && (
           <div className="space-y-8 animate-fadeIn text-right">
             <div className="border-b border-[#ECE6DC] pb-6">
-              <h2 className="text-xl font-bold text-[#14172A]">مجلس المقترحات والقرارات المشتركة</h2>
+              <h2 className="text-xl md:text-2xl font-black text-[#D52B1E]">مجلس المقترحات والقرارات المشتركة</h2>
               <p className="text-xs text-gray-500 mt-1">اطرح استطلاعات رأي أو مقترحات ثنائية لتصويت الشباب لحسم الخيارات والأنشطة وإدماجها تلقائياً بالجدول</p>
             </div>
 

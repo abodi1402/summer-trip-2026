@@ -24,15 +24,25 @@
   color-scheme: light;
 }
 
-body {
-  background-color: #F9F7F4; /* Warm Light Cream Background */
-  color: #1A1A1A; /* Dark Text */
+html, body {
+  background-color: #FAF7F2;
+  color: #14172A;
   min-height: 100vh;
   margin: 0;
+  /* Lock horizontal scroll & jitter on mobile */
   overflow-x: hidden;
-  font-size: 16px; /* Default base */
-  -webkit-text-size-adjust: 100%;
+  width: 100%;
+  max-width: 100vw;
+  position: relative;
 }
+body {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  /* Prevent iOS rubber-band horizontal scroll */
+  overscroll-behavior-x: none;
+}
+/* Belt-and-suspenders: kill any element from overflowing the viewport */
+#root { max-width: 100vw; overflow-x: hidden; }
 
 /* ───── Mobile readability boost ─────
    Bumps the smallest Tailwind text classes (text-[8px]–text-xs)
@@ -106,10 +116,12 @@ body {
 }
 .home-tile:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 24px -8px rgba(27, 45, 100, 0.15);
-  border-color: #2A3F7E;
+  box-shadow: 0 10px 24px -8px rgba(27, 45, 100, 0.18), 0 0 0 1px rgba(213, 43, 30, 0.15);
+  border-color: #D52B1E;
 }
 .home-tile:active { transform: scale(0.98); }
+/* Light red bottom accent on rest state */
+.home-tile { border-bottom: 2px solid rgba(213, 43, 30, 0.15); }
 
 .home-tile-icon {
   width: 44px;
