@@ -1517,7 +1517,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
 
                 {/* Signature */}
                 <div className="space-y-0.5">
-                  <p className="text-[10px] text-gray-400 font-medium m-0 tracking-wide">بإشراف وتنظيم</p>
+                  <p className="text-[10px] text-gray-400 font-medium m-0 tracking-wide">صمّمه وأعدّه</p>
                   <p className="text-base md:text-lg text-[#14172A] font-black m-0" style={{ fontFamily: '"Tajawal", serif', letterSpacing: '0.02em' }}>
                     عبدالله الزهراني
                   </p>
