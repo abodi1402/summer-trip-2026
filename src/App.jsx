@@ -3820,6 +3820,53 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
               <p className="text-xs text-gray-500 mt-1">أدوات إشرافية متكاملة للتحكم في تواريخ الرحلة، بث التنبيهات العاجلة، وقفل التعديل والمحاكاة.</p>
             </div>
 
+            {/* ─── PASSWORD RESET (admin can wipe any member's password) ─── */}
+            <div className="bg-white border-2 border-[#D52B1E]/30 rounded-2xl p-5 space-y-4">
+              <div className="flex items-center gap-2 border-b border-[#ECE6DC] pb-3">
+                <LockKeyhole className="text-[#D52B1E]" size={20} />
+                <h3 className="text-base md:text-lg font-black text-[#D52B1E]">تصفير كلمة سر عضو</h3>
+              </div>
+              <p className="text-xs text-gray-600 leading-relaxed">
+                إذا نسي أحد الشباب كلمة المرور، اضغط "تصفير" أمام اسمه. راح يتمكن من الدخول بكلمة المرور الافتراضية ({DEFAULT_PASSWORD}) ويعيد ضبط واحدة جديدة.
+              </p>
+              <div className="space-y-2">
+                {travelers.map((t) => (
+                  <div key={t.id} className="flex items-center justify-between gap-3 bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl p-3">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${t.avatarColor} text-white font-black text-xs flex items-center justify-center shrink-0`}>
+                        {t.name[0]}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs md:text-sm font-bold text-[#14172A] truncate m-0">{t.name}</p>
+                        <p className="text-[10px] text-gray-500 font-mono m-0">{t.phone}</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={async () => {
+                        if (!window.confirm(`تأكيد تصفير كلمة المرور لـ ${t.name}؟\nراح يحتاج يدخل بكلمة 123456 ويسوي جديدة.`)) return;
+                        const { error } = await supabase.from('traveler_passwords').delete().eq('phone', t.phone);
+                        if (error) {
+                          console.error('[Supabase Error] reset password:', error.message);
+                          showToast('تعذّر تصفير كلمة المرور', 'error');
+                          return;
+                        }
+                        // Also clear from in-memory travelers state so the next login of this user picks default
+                        setTravelers(prev => prev.map(tr => tr.phone === t.phone ? { ...tr, password: DEFAULT_PASSWORD } : tr));
+                        showToast(`تم تصفير كلمة سر ${t.name.split(' ')[0]}`);
+                      }}
+                      className="bg-[#D52B1E] hover:bg-[#A41F14] text-white text-xs font-black px-3 py-2 rounded-lg cursor-pointer shrink-0 transition flex items-center gap-1"
+                    >
+                      <Trash2 size={13} />
+                      <span>تصفير</span>
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <p className="text-[10px] text-gray-400 leading-relaxed mt-2">
+                ملاحظة: التصفير يحذف الكلمة المحفوظة من السحابة فقط — لا يؤثر على بيانات العضو الأخرى.
+              </p>
+            </div>
+
             {/* Metrics cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
               {[
