@@ -70,8 +70,8 @@ const mapBookingToDb = (b) => ({ type: b.type, title: b.title, status: b.status,
 const mapExpenseFromDb = (r) => ({ id: r.id, description: r.description, amountSar: Number(r.amount_sar), paidBy: r.paid_by, date: r.date });
 const mapExpenseToDb = (e) => ({ description: e.description, amount_sar: Number(e.amountSar), paid_by: e.paidBy, date: e.date });
 
-const mapItineraryFromDb = (r) => ({ id: r.id, day: r.day, date: r.date, city: r.city, title: r.title, activities: r.activities, leader: r.leader, notes: r.notes || '' });
-const mapItineraryToDb = (i) => ({ day: i.day, date: i.date, city: i.city, title: i.title, activities: i.activities, leader: i.leader, notes: i.notes || '' });
+const mapItineraryFromDb = (r) => ({ id: r.id, day: r.day, date: r.date, city: r.city, title: r.title, activities: r.activities, leader: r.leader, notes: r.notes || '', places: Array.isArray(r.places) ? r.places : [] });
+const mapItineraryToDb = (i) => ({ day: i.day, date: i.date, city: i.city, title: i.title, activities: i.activities, leader: i.leader, notes: i.notes || '', places: Array.isArray(i.places) ? i.places : [] });
 
 const DEFAULT_PASSWORD = '123456';
 
@@ -1250,6 +1250,50 @@ function App() {
     setItinerary(prev => prev.map(item => item.id === id ? mapItineraryFromDb(data) : item).sort((a, b) => a.day - b.day));
     setEditingActivityId(null);
   };
+
+  // ─── Per-day places (restaurants/cafes/sights) ───
+  const updateDayPlaces = async (dayId, newPlaces) => {
+    if (!canEdit) {
+      showToast('التعديل مقفول حالياً', 'error');
+      return false;
+    }
+    const day = itinerary.find(d => d.id === dayId);
+    if (!day) return false;
+    // Optimistic update
+    setItinerary(prev => prev.map(d => d.id === dayId ? { ...d, places: newPlaces } : d));
+    const { error } = await supabase.from('itinerary').update({ places: newPlaces }).eq('id', dayId);
+    if (error) {
+      console.error('[Supabase Error] updateDayPlaces:', error.message);
+      // Rollback
+      setItinerary(prev => prev.map(d => d.id === dayId ? day : d));
+      if (error.message?.includes('column')) {
+        showToast('فعّل عمود places في Supabase أولاً (SUPABASE_GUIDE.md)', 'error');
+      } else {
+        showToast('تعذّر حفظ التعديل', 'error');
+      }
+      return false;
+    }
+    return true;
+  };
+
+  const addPlaceToDay = async (dayId, place) => {
+    const day = itinerary.find(d => d.id === dayId);
+    if (!day) return;
+    const newPlace = { id: `pl_${Date.now()}`, ...place };
+    const ok = await updateDayPlaces(dayId, [...(day.places || []), newPlace]);
+    if (ok) showToast('تمت إضافة المكان');
+  };
+
+  const deletePlaceFromDay = async (dayId, placeId) => {
+    const day = itinerary.find(d => d.id === dayId);
+    if (!day) return;
+    const ok = await updateDayPlaces(dayId, (day.places || []).filter(p => p.id !== placeId));
+    if (ok) showToast('تم حذف المكان');
+  };
+
+  // Inline add-place form state — keyed by day id
+  const [newPlaceByDay, setNewPlaceByDay] = useState({});
+  const [openPlaceFormDay, setOpenPlaceFormDay] = useState(null);
 
   // Simulate sending active day itinerary to Telegram group
   const triggerTelegramSimulation = () => {
@@ -2456,6 +2500,113 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                               {item.notes && (
                                 <div className="bg-[#2A3F7E]/5 border-r-2 border-[#2A3F7E] p-2.5 rounded-l-lg text-[11px] text-[#1B2D64] font-semibold mt-1">
                                   · {item.notes}
+                                </div>
+                              )}
+
+                              {/* ─── PLACES (multi-stop) ─── */}
+                              {((item.places || []).length > 0 || canEdit) && (
+                                <div className="mt-3 pt-3 border-t border-[#ECE6DC] space-y-2">
+                                  <div className="flex items-center justify-between">
+                                    <h5 className="text-[11px] font-black text-[#D52B1E] flex items-center gap-1">
+                                      <MapPin size={12} />
+                                      <span>أماكن مقترحة لهذا اليوم</span>
+                                    </h5>
+                                    {canEdit && (
+                                      <button
+                                        type="button"
+                                        onClick={() => setOpenPlaceFormDay(openPlaceFormDay === item.id ? null : item.id)}
+                                        className="text-[10px] font-black text-[#2A3F7E] bg-[#EEF1F8] hover:bg-[#2A3F7E] hover:text-white px-2.5 py-1 rounded-lg transition flex items-center gap-1 cursor-pointer"
+                                      >
+                                        <Plus size={11} />
+                                        <span>{openPlaceFormDay === item.id ? 'إلغاء' : 'مكان'}</span>
+                                      </button>
+                                    )}
+                                  </div>
+
+                                  {/* Places list */}
+                                  {(item.places || []).map((place) => {
+                                    const typeColor = place.type === 'مطعم' ? 'bg-rose-50 text-rose-700 border-rose-200'
+                                      : place.type === 'مقهى' ? 'bg-amber-50 text-amber-700 border-amber-200'
+                                      : 'bg-blue-50 text-blue-700 border-blue-200';
+                                    return (
+                                      <div key={place.id} className="flex items-start gap-2 bg-white border border-[#ECE6DC] rounded-xl p-2.5 group">
+                                        <span className={`text-[9px] font-black border px-2 py-0.5 rounded-full shrink-0 ${typeColor}`}>
+                                          {place.type || 'معلم'}
+                                        </span>
+                                        <div className="flex-1 min-w-0">
+                                          <p className="text-xs font-bold text-[#14172A] truncate m-0">{place.name}</p>
+                                          {place.note && <p className="text-[10px] text-gray-500 mt-0.5 m-0">{place.note}</p>}
+                                        </div>
+                                        {canEdit && (
+                                          <button
+                                            type="button"
+                                            onClick={() => deletePlaceFromDay(item.id, place.id)}
+                                            className="opacity-60 hover:opacity-100 text-rose-600 cursor-pointer"
+                                            title="حذف"
+                                          >
+                                            <Trash2 size={13} />
+                                          </button>
+                                        )}
+                                      </div>
+                                    );
+                                  })}
+
+                                  {/* Inline add form */}
+                                  {canEdit && openPlaceFormDay === item.id && (
+                                    <form
+                                      onSubmit={(e) => {
+                                        e.preventDefault();
+                                        const data = newPlaceByDay[item.id] || {};
+                                        if (!data.name?.trim()) {
+                                          showToast('اكتب اسم المكان', 'error');
+                                          return;
+                                        }
+                                        addPlaceToDay(item.id, {
+                                          name: data.name.trim(),
+                                          type: data.type || 'معلم',
+                                          note: (data.note || '').trim()
+                                        });
+                                        setNewPlaceByDay(prev => ({ ...prev, [item.id]: { name: '', type: 'معلم', note: '' } }));
+                                        setOpenPlaceFormDay(null);
+                                      }}
+                                      className="bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl p-3 space-y-2"
+                                    >
+                                      <div className="flex gap-2">
+                                        <select
+                                          value={newPlaceByDay[item.id]?.type || 'معلم'}
+                                          onChange={(e) => setNewPlaceByDay(prev => ({ ...prev, [item.id]: { ...(prev[item.id] || {}), type: e.target.value } }))}
+                                          className="bg-white border border-[#ECE6DC] rounded-lg px-2 py-1.5 text-[11px] font-bold text-[#14172A] focus:outline-none focus:border-[#2A3F7E] cursor-pointer"
+                                        >
+                                          <option value="معلم">معلم</option>
+                                          <option value="مطعم">مطعم</option>
+                                          <option value="مقهى">مقهى</option>
+                                          <option value="تسوق">تسوق</option>
+                                          <option value="جولة">جولة</option>
+                                        </select>
+                                        <input
+                                          type="text"
+                                          placeholder="اسم المكان"
+                                          value={newPlaceByDay[item.id]?.name || ''}
+                                          onChange={(e) => setNewPlaceByDay(prev => ({ ...prev, [item.id]: { ...(prev[item.id] || {}), name: e.target.value } }))}
+                                          className="flex-1 bg-white border border-[#ECE6DC] rounded-lg px-2 py-1.5 text-[11px] text-[#14172A] focus:outline-none focus:border-[#2A3F7E]"
+                                        />
+                                      </div>
+                                      <input
+                                        type="text"
+                                        placeholder="ملاحظة (اختياري)"
+                                        value={newPlaceByDay[item.id]?.note || ''}
+                                        onChange={(e) => setNewPlaceByDay(prev => ({ ...prev, [item.id]: { ...(prev[item.id] || {}), note: e.target.value } }))}
+                                        className="w-full bg-white border border-[#ECE6DC] rounded-lg px-2 py-1.5 text-[11px] text-[#14172A] focus:outline-none focus:border-[#2A3F7E]"
+                                      />
+                                      <button
+                                        type="submit"
+                                        className="w-full bg-[#2A3F7E] hover:bg-[#1B2D64] text-white py-1.5 rounded-lg text-[11px] font-black cursor-pointer flex items-center justify-center gap-1"
+                                      >
+                                        <Plus size={12} />
+                                        <span>حفظ المكان</span>
+                                      </button>
+                                    </form>
+                                  )}
                                 </div>
                               )}
                             </>

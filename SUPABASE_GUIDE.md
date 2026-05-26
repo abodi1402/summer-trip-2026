@@ -35,6 +35,19 @@ NOTIFY pgrst, 'reload schema';
 
 ---
 
+## 📍 الأماكن المتعددة لكل يوم (Itinerary places)
+
+نفّذ هذا في SQL Editor — يضيف عمود JSONB للجدول لحفظ أماكن متعددة لكل يوم (مطاعم، مقاهي، معالم):
+
+```sql
+ALTER TABLE itinerary ADD COLUMN IF NOT EXISTS places JSONB DEFAULT '[]'::jsonb;
+NOTIFY pgrst, 'reload schema';
+```
+
+اضغط **Run** ثم أعد تحميل الموقع. ستظهر إمكانية إضافة أماكن إلى كل يوم في صفحة الجدول.
+
+---
+
 ## 🔑 جدول كلمات المرور (للمزامنة بين الأجهزة)
 
 نفّذ هذا في SQL Editor — حتى يتمكن الشباب من تغيير كلمة المرور مرة واحدة فقط من أي جهاز وتعمل في كل الأجهزة:
