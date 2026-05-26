@@ -64,8 +64,8 @@ import './App.css';
 const mapTaskFromDb = (r) => ({ id: r.id, title: r.title, assignee: r.assignee, category: r.category, completed: r.completed, isCritical: r.is_critical });
 const mapTaskToDb = (t) => ({ title: t.title, assignee: t.assignee, category: t.category, completed: !!t.completed, is_critical: !!t.isCritical });
 
-const mapBookingFromDb = (r) => ({ id: r.id, type: r.type, title: r.title, status: r.status, details: r.details });
-const mapBookingToDb = (b) => ({ type: b.type, title: b.title, status: b.status, details: b.details });
+const mapBookingFromDb = (r) => ({ id: r.id, type: r.type, title: r.title, status: r.status, details: r.details, attachments: Array.isArray(r.attachments) ? r.attachments : [] });
+const mapBookingToDb = (b) => ({ type: b.type, title: b.title, status: b.status, details: b.details, attachments: Array.isArray(b.attachments) ? b.attachments : [] });
 
 const mapExpenseFromDb = (r) => ({ id: r.id, description: r.description, amountSar: Number(r.amount_sar), paidBy: r.paid_by, date: r.date, category: r.category || 'أخرى' });
 const mapExpenseToDb = (e) => ({ description: e.description, amount_sar: Number(e.amountSar), paid_by: e.paidBy, date: e.date, category: e.category || 'أخرى' });
@@ -1189,6 +1189,62 @@ function App() {
     }
     setBookings(prev => prev.map(b => b.id === id ? mapBookingFromDb(data) : b));
     setEditingBookingId(null);
+  };
+
+  // ─── Booking attachments (PDF/image upload, stored as base64 in JSONB) ───
+  const MAX_ATTACHMENT_BYTES = 2 * 1024 * 1024; // 2MB per file
+  const handleBookingFileUpload = (bookingId, file) => {
+    if (!canEdit) {
+      showToast('التعديل مقفول حالياً', 'error');
+      return;
+    }
+    if (!file) return;
+    if (file.size > MAX_ATTACHMENT_BYTES) {
+      showToast('حجم الملف أكبر من 2 ميقا', 'error');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const booking = bookings.find(b => b.id === bookingId);
+      if (!booking) return;
+      const newAttachment = {
+        id: `att_${Date.now()}`,
+        name: file.name,
+        type: file.type || 'application/octet-stream',
+        size: file.size,
+        data: reader.result // base64 data URL
+      };
+      const updated = [...(booking.attachments || []), newAttachment];
+      const { error } = await supabase.from('bookings').update({ attachments: updated }).eq('id', bookingId);
+      if (error) {
+        console.error('[Supabase Error] upload attachment:', error.message);
+        if (error.message?.includes('column')) {
+          showToast('فعّل عمود attachments من SUPABASE_GUIDE.md', 'error');
+        } else {
+          showToast('تعذّر رفع الملف', 'error');
+        }
+        return;
+      }
+      setBookings(prev => prev.map(b => b.id === bookingId ? { ...b, attachments: updated } : b));
+      showToast(`تم رفع ${file.name}`);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleDeleteBookingAttachment = async (bookingId, attachmentId) => {
+    if (!canEdit) return;
+    const booking = bookings.find(b => b.id === bookingId);
+    if (!booking) return;
+    if (!window.confirm('حذف هذا المرفق نهائياً؟')) return;
+    const updated = (booking.attachments || []).filter(a => a.id !== attachmentId);
+    const { error } = await supabase.from('bookings').update({ attachments: updated }).eq('id', bookingId);
+    if (error) {
+      console.error('[Supabase Error] delete attachment:', error.message);
+      showToast('تعذّر حذف المرفق', 'error');
+      return;
+    }
+    setBookings(prev => prev.map(b => b.id === bookingId ? { ...b, attachments: updated } : b));
+    showToast('تم حذف المرفق');
   };
 
   const handleAddActivity = async (e) => {
@@ -2825,10 +2881,66 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                               <span className="text-[9px] text-[#2A3F7E] bg-[#2A3F7E]/10 px-1.5 py-0.5 rounded font-bold">{booking.type}</span>
                               <h4 className="font-extrabold text-[#14172A] text-sm">{booking.title}</h4>
                             </div>
-                            <p className="text-xs text-gray-600 font-light leading-relaxed m-0">{booking.details}</p>
+                            <p className="text-xs text-gray-600 font-light leading-relaxed m-0 whitespace-pre-wrap">{booking.details}</p>
+
+                            {/* ─── ATTACHMENTS (PDFs / images for this booking) ─── */}
+                            {((booking.attachments || []).length > 0 || canEdit) && (
+                              <div className="mt-3 pt-3 border-t border-[#ECE6DC] space-y-2 w-full">
+                                <div className="flex items-center justify-between">
+                                  <h5 className="text-[11px] font-black text-[#D52B1E] flex items-center gap-1">
+                                    <FileText size={12} />
+                                    <span>المرفقات ({(booking.attachments || []).length})</span>
+                                  </h5>
+                                  {canEdit && (
+                                    <label className="text-[10px] font-black text-[#2A3F7E] bg-[#EEF1F8] hover:bg-[#2A3F7E] hover:text-white px-2.5 py-1 rounded-lg transition flex items-center gap-1 cursor-pointer">
+                                      <Upload size={11} />
+                                      <span>رفع ملف</span>
+                                      <input
+                                        type="file"
+                                        accept="application/pdf,image/*"
+                                        onChange={(e) => {
+                                          handleBookingFileUpload(booking.id, e.target.files[0]);
+                                          e.target.value = '';
+                                        }}
+                                        className="hidden"
+                                      />
+                                    </label>
+                                  )}
+                                </div>
+
+                                {/* Attachments list */}
+                                {(booking.attachments || []).map((att) => (
+                                  <div key={att.id} className="flex items-center gap-2 bg-white border border-[#ECE6DC] rounded-xl p-2">
+                                    <FileText size={16} className="text-[#D52B1E] shrink-0" />
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-[11px] font-bold text-[#14172A] truncate m-0">{att.name}</p>
+                                      <p className="text-[9px] text-gray-400 m-0">{att.type?.includes('pdf') ? 'PDF' : 'صورة'} · {(att.size / 1024).toFixed(0)} KB</p>
+                                    </div>
+                                    <a
+                                      href={att.data}
+                                      download={att.name}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="bg-[#2A3F7E] hover:bg-[#1B2D64] text-white text-[10px] font-black px-2.5 py-1.5 rounded-lg transition cursor-pointer"
+                                    >
+                                      فتح
+                                    </a>
+                                    {canEdit && (
+                                      <button
+                                        onClick={() => handleDeleteBookingAttachment(booking.id, att.id)}
+                                        className="text-rose-500 hover:text-rose-700 cursor-pointer opacity-70 hover:opacity-100"
+                                        title="حذف"
+                                      >
+                                        <Trash2 size={13} />
+                                      </button>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         </div>
-                        
+
                         <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 border-[#ECE6DC] pt-3 sm:pt-0">
                           <span className={`px-2.5 py-1 rounded-lg text-xs font-bold border flex items-center gap-1 ${
                             booking.status === 'مؤكد' 

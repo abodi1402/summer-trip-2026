@@ -35,6 +35,19 @@ NOTIFY pgrst, 'reload schema';
 
 ---
 
+## 📎 مرفقات للحجوزات (Booking attachments)
+
+نفّذ هذا في SQL Editor — يضيف عمود لحفظ ملفات PDF/صور للحجوزات:
+
+```sql
+ALTER TABLE bookings ADD COLUMN IF NOT EXISTS attachments JSONB DEFAULT '[]'::jsonb;
+NOTIFY pgrst, 'reload schema';
+```
+
+اضغط **Run**. ستظهر إمكانية رفع PDF أو صور تذاكر الطيران، الفنادق، الفيزا، إلخ.
+
+---
+
 ## 💰 تصنيف المصروفات (Expense category)
 
 نفّذ هذا في SQL Editor — يضيف عمود تصنيف للمصروفات (طيران، فنادق، مطاعم...):
