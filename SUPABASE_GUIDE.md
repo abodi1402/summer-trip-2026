@@ -35,6 +35,33 @@ NOTIFY pgrst, 'reload schema';
 
 ---
 
+## 🔑 جدول كلمات المرور (للمزامنة بين الأجهزة)
+
+نفّذ هذا في SQL Editor — حتى يتمكن الشباب من تغيير كلمة المرور مرة واحدة فقط من أي جهاز وتعمل في كل الأجهزة:
+
+```sql
+-- جدول حفظ كلمات المرور لكل مسافر (مفتاحه رقم الجوال)
+CREATE TABLE IF NOT EXISTS traveler_passwords (
+  phone TEXT PRIMARY KEY,
+  password TEXT NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- تفعيل RLS مع سياسة وصول للأصدقاء
+ALTER TABLE traveler_passwords ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "allow_all_passwords"
+  ON traveler_passwords FOR ALL
+  USING (true) WITH CHECK (true);
+
+-- تحديث المخطط فوراً
+NOTIFY pgrst, 'reload schema';
+```
+
+> ⚠️ ملاحظة أمنية: نظراً لأن هذه مجموعة أصدقاء خاصة، الكلمات تُحفظ كنص عادي. لو كان التطبيق عاماً لاحقاً، يجب تشفيرها (bcrypt) واستخدام Supabase Auth الرسمية.
+
+---
+
 ## 🚨 الخطوة الوحيدة المطلوبة: إنشاء جداول البيانات
 
 انتقل إلى **SQL Editor** في لوحة تحكم Supabase، افتح استعلاماً جديداً (New Query) ثم الصق الكود التالي بأكمله واضغط **Run**:

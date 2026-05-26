@@ -21,6 +21,25 @@ body {
   min-height: 100vh;
   margin: 0;
   overflow-x: hidden;
+  font-size: 16px; /* Default base */
+  -webkit-text-size-adjust: 100%;
+}
+
+/* ───── Mobile readability boost ─────
+   Bumps the smallest Tailwind text classes (text-[8px]–text-xs)
+   on small screens so the app stays comfortable on phones,
+   while preserving the dense look on tablets and desktops. */
+@media (max-width: 767px) {
+  body { font-size: 17px; }
+  .text-\[8px\]   { font-size: 11px !important; }
+  .text-\[9px\]   { font-size: 12px !important; }
+  .text-\[10px\]  { font-size: 13px !important; }
+  .text-\[11px\]  { font-size: 14px !important; }
+  .text-xs        { font-size: 15px !important; line-height: 1.55 !important; }
+  .text-sm        { font-size: 16px !important; line-height: 1.55 !important; }
+  .text-base      { font-size: 17px !important; }
+  /* Slightly relax tracking so Arabic letters don't squeeze */
+  .tracking-widest { letter-spacing: 0.08em !important; }
 }
 
 /* Custom premium scrollbar for light theme */

@@ -73,6 +73,8 @@ const mapExpenseToDb = (e) => ({ description: e.description, amount_sar: Number(
 const mapItineraryFromDb = (r) => ({ id: r.id, day: r.day, date: r.date, city: r.city, title: r.title, activities: r.activities, leader: r.leader, notes: r.notes || '' });
 const mapItineraryToDb = (i) => ({ day: i.day, date: i.date, city: i.city, title: i.title, activities: i.activities, leader: i.leader, notes: i.notes || '' });
 
+const DEFAULT_PASSWORD = '123456';
+
 // Premium Custom SVG Logo for Summer Trip (Russian Onion Domes + Travel Compass detailing)
 function ShaddadLogo({ className = "w-full h-full" }) {
   return (
@@ -300,13 +302,22 @@ function App() {
     let cancelled = false;
     async function fetchAll() {
       try {
-        const [itineraryRes, bookingsRes, tasksRes, expensesRes] = await Promise.all([
+        const [itineraryRes, bookingsRes, tasksRes, expensesRes, passwordsRes] = await Promise.all([
           supabase.from('itinerary').select('*').order('day', { ascending: true }),
           supabase.from('bookings').select('*').order('created_at', { ascending: true }),
           supabase.from('tasks').select('*').order('created_at', { ascending: true }),
           supabase.from('expenses').select('*').order('created_at', { ascending: true }),
+          supabase.from('traveler_passwords').select('*'),
         ]);
         if (cancelled) return;
+
+        // Merge stored passwords into travelers (so cross-device login works)
+        if (passwordsRes.data && passwordsRes.data.length > 0) {
+          setTravelers(prev => prev.map(t => {
+            const stored = passwordsRes.data.find(p => p.phone === t.phone);
+            return stored ? { ...t, password: stored.password } : t;
+          }));
+        }
 
         const firstErr = [itineraryRes, bookingsRes, tasksRes, expensesRes].find(r => r.error);
         if (firstErr) {
@@ -498,33 +509,50 @@ function App() {
     }
   };
 
-  // Login handler with password check
-  const handleLoginSubmit = (e) => {
+  // Login handler with password check (always re-checks Supabase for latest password)
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
     const cleanPhone = loginPhoneInput.trim();
     const cleanPassword = loginPasswordInput.trim();
-    
+
     const targetTraveler = travelers.find(t => t.phone === cleanPhone);
     if (!targetTraveler) {
       setLoginError('عذراً، رقم الجوال المدخل غير مطابق لأي مسافر مسجل. حاول مرة أخرى.');
       return;
     }
-    
-    const travelerPassword = targetTraveler.password || '123456';
+
+    // Always read the latest password from Supabase (in case it was changed on another device)
+    let travelerPassword = targetTraveler.password || DEFAULT_PASSWORD;
+    try {
+      const { data: pwRow } = await supabase
+        .from('traveler_passwords')
+        .select('password')
+        .eq('phone', cleanPhone)
+        .maybeSingle();
+      if (pwRow && pwRow.password) {
+        travelerPassword = pwRow.password;
+        // sync into in-memory travelers so later checks see it
+        setTravelers(prev => prev.map(t => t.phone === cleanPhone ? { ...t, password: pwRow.password } : t));
+      }
+    } catch (err) {
+      console.warn('[Supabase] could not fetch latest password, falling back to in-memory:', err);
+    }
+
     if (cleanPassword !== travelerPassword) {
       setLoginError('عذراً، كلمة المرور المدخلة غير صحيحة. حاول مرة أخرى.');
       return;
     }
-    
-    // Force changing default password if it is '123456'
-    if (travelerPassword === '123456') {
+
+    // Force changing default password only if still on the default
+    if (travelerPassword === DEFAULT_PASSWORD) {
       setTempTravelerForPasswordChange(targetTraveler);
       setIsSettingNewPassword(true);
       setLoginError('');
       return;
     }
-    
-    setCurrentUser(targetTraveler);
+
+    const finalUser = { ...targetTraveler, password: travelerPassword };
+    setCurrentUser(finalUser);
     setIsLoggedIn(true);
     setShowWelcome(true);
     setLoginError('');
@@ -534,27 +562,38 @@ function App() {
     setActiveTab('dashboard');
   };
 
-  const handlePasswordChangeSubmit = (e) => {
+  const handlePasswordChangeSubmit = async (e) => {
     e.preventDefault();
     const newPass = newPasswordInput.trim();
     const confirmPass = confirmPasswordInput.trim();
-    
+
     if (!newPass) {
       setLoginError('الرجاء إدخال كلمة مرور صالحة.');
       return;
     }
-    
-    if (newPass === '123456') {
-      setLoginError('عذراً، يجب اختيار كلمة مرور مختلفة عن كلمة المرور الافتراضية 123456.');
+
+    if (newPass === DEFAULT_PASSWORD) {
+      setLoginError('عذراً، يجب اختيار كلمة مرور مختلفة عن كلمة المرور الافتراضية.');
       return;
     }
-    
+
     if (newPass !== confirmPass) {
       setLoginError('كلمتا المرور غير متطابقتين. يرجى التأكيد بشكل صحيح.');
       return;
     }
-    
-    // Update password in travelers list
+
+    // Persist to Supabase so the password works on every device
+    const { error: pwErr } = await supabase
+      .from('traveler_passwords')
+      .upsert({ phone: tempTravelerForPasswordChange.phone, password: newPass, updated_at: new Date().toISOString() }, { onConflict: 'phone' });
+
+    if (pwErr) {
+      console.error('[Supabase Error] save password:', pwErr.message);
+      setLoginError('تعذّر حفظ كلمة المرور في قاعدة البيانات. تأكد من إعداد جدول traveler_passwords.');
+      return;
+    }
+
+    // Update password in travelers list (in-memory)
     const updatedTravelers = travelers.map(t => {
       if (t.id === tempTravelerForPasswordChange.id) {
         return { ...t, password: newPass };
@@ -1243,18 +1282,18 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
           <div className="w-full md:w-1/2 p-8 md:p-12 lg:p-16 flex flex-col justify-between space-y-8 bg-white">
             {/* Top header/logo */}
             <div className="flex items-center gap-4 justify-start">
-              <div className="w-12 h-12">
+              <div className="w-14 h-14 md:w-12 md:h-12">
                 <ShaddadLogo />
               </div>
               <div className="text-right">
-                <h2 className="text-base md:text-xl font-black text-[#1A1A1A] m-0">رحلة صيف ٢٠٢٦</h2>
-                <p className="text-xs text-[#2D6A4F] font-bold m-0">بوابة دخول الأصدقاء والمنسقين</p>
+                <h2 className="text-xl md:text-2xl font-black text-[#1A1A1A] m-0">رحلة صيف ٢٠٢٦</h2>
+                <p className="text-sm md:text-base text-[#2D6A4F] font-bold m-0">بوابة دخول الأصدقاء والمنسقين</p>
               </div>
             </div>
 
             {/* Travel Quote Banner above the login inputs */}
             <div className="bg-[#2D6A4F]/5 border border-[#2D6A4F]/10 px-5 py-4 rounded-2xl text-center">
-              <p className="text-xs md:text-sm text-[#2D6A4F] font-bold leading-relaxed m-0">
+              <p className="text-sm md:text-base text-[#2D6A4F] font-bold leading-relaxed m-0">
                 « السفر يُريك الدنيا بعيونٍ جديدة، ويصنع ذكريات تدوم مدى العمر. سفرة ممتعة يا أصدقاء » ✈️🇷🇺
               </p>
             </div>
@@ -1263,37 +1302,37 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
             <div className="space-y-6">
               {isSettingNewPassword ? (
                 <form onSubmit={handlePasswordChangeSubmit} className="space-y-4">
-                  <div className="text-center py-4 px-5 bg-emerald-50 border border-emerald-100 text-emerald-800 rounded-2xl text-xs md:text-sm font-bold leading-relaxed">
+                  <div className="text-center py-4 px-5 bg-emerald-50 border border-emerald-100 text-emerald-800 rounded-2xl text-sm md:text-base font-bold leading-relaxed">
                     🔐 مرحباً بك يا {tempTravelerForPasswordChange?.name}<br/>
-                    يرجى تعيين كلمة مرور جديدة لحماية حسابك بدلاً من الكلمة الافتراضية.
+                    يرجى تعيين كلمة مرور جديدة لحماية حسابك. ستُحفظ في السحابة وستعمل من جميع أجهزتك.
                   </div>
-                  
+
                   <div className="space-y-2">
-                    <label className="text-xs md:text-sm font-bold text-gray-700 block">كلمة المرور الجديدة</label>
-                    <input 
+                    <label className="text-sm md:text-base font-bold text-gray-700 block">كلمة المرور الجديدة</label>
+                    <input
                       type="password"
                       placeholder="********"
                       value={newPasswordInput}
                       onChange={(e) => setNewPasswordInput(e.target.value)}
-                      className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl px-4 py-4 text-sm md:text-base text-center focus:outline-none focus:border-[#2D6A4F] focus:bg-white tracking-widest text-[#1A1A1A]"
+                      className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl px-4 py-4 text-base md:text-lg text-center focus:outline-none focus:border-[#2D6A4F] focus:bg-white tracking-widest text-[#1A1A1A]"
                       required
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-xs md:text-sm font-bold text-gray-700 block">تأكيد كلمة المرور الجديدة</label>
-                    <input 
+                    <label className="text-sm md:text-base font-bold text-gray-700 block">تأكيد كلمة المرور الجديدة</label>
+                    <input
                       type="password"
                       placeholder="********"
                       value={confirmPasswordInput}
                       onChange={(e) => setConfirmPasswordInput(e.target.value)}
-                      className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl px-4 py-4 text-sm md:text-base text-center focus:outline-none focus:border-[#2D6A4F] focus:bg-white tracking-widest text-[#1A1A1A]"
+                      className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl px-4 py-4 text-base md:text-lg text-center focus:outline-none focus:border-[#2D6A4F] focus:bg-white tracking-widest text-[#1A1A1A]"
                       required
                     />
                   </div>
 
                   {loginError && (
-                    <div className="bg-rose-50 border border-rose-100 p-4 rounded-xl text-xs md:text-sm text-rose-800 leading-relaxed font-bold text-right">
+                    <div className="bg-rose-50 border border-rose-100 p-4 rounded-xl text-sm md:text-base text-rose-800 leading-relaxed font-bold text-right">
                       {loginError}
                     </div>
                   )}
@@ -1301,14 +1340,14 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                   <div className="flex gap-3 pt-2">
                     <button
                       type="submit"
-                      className="flex-1 bg-[#2D6A4F] hover:bg-[#1b4332] text-white font-black py-4 rounded-xl text-xs md:text-sm transition duration-300 cursor-pointer shadow-sm text-center"
+                      className="flex-1 bg-[#2D6A4F] hover:bg-[#1b4332] text-white font-black py-4 rounded-xl text-base md:text-lg transition duration-300 cursor-pointer shadow-sm text-center"
                     >
                       تحديث وحفظ كلمة المرور
                     </button>
                     <button
                       type="button"
                       onClick={handleLogout}
-                      className="bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold py-4 px-5 rounded-xl text-xs md:text-sm transition cursor-pointer"
+                      className="bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold py-4 px-5 rounded-xl text-sm md:text-base transition cursor-pointer"
                     >
                       إلغاء
                     </button>
@@ -1317,38 +1356,38 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
               ) : (
                 <form onSubmit={handleLoginSubmit} className="space-y-5">
                   <div className="space-y-2">
-                    <label className="text-xs md:text-sm font-bold text-gray-700 block">أدخل رقم جوالك لتسجيل الدخول</label>
-                    <input 
+                    <label className="text-sm md:text-base font-bold text-gray-700 block">أدخل رقم جوالك لتسجيل الدخول</label>
+                    <input
                       type="text"
-                      placeholder="مثال: 050******"
+                      placeholder="05XXXXXXXX"
                       value={loginPhoneInput}
                       onChange={(e) => setLoginPhoneInput(e.target.value)}
-                      className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl px-4 py-4 text-sm md:text-base text-center font-mono focus:outline-none focus:border-[#2D6A4F] focus:bg-white tracking-widest text-[#1A1A1A]"
+                      className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl px-4 py-4 text-base md:text-lg text-center font-mono focus:outline-none focus:border-[#2D6A4F] focus:bg-white tracking-widest text-[#1A1A1A]"
                       required
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-xs md:text-sm font-bold text-gray-700 block">كلمة المرور</label>
-                    <input 
+                    <label className="text-sm md:text-base font-bold text-gray-700 block">كلمة المرور</label>
+                    <input
                       type="password"
-                      placeholder="كلمة المرور الافتراضية: 123456"
+                      placeholder="********"
                       value={loginPasswordInput}
                       onChange={(e) => setLoginPasswordInput(e.target.value)}
-                      className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl px-4 py-4 text-sm md:text-base text-center focus:outline-none focus:border-[#2D6A4F] focus:bg-white tracking-widest text-[#1A1A1A]"
+                      className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl px-4 py-4 text-base md:text-lg text-center focus:outline-none focus:border-[#2D6A4F] focus:bg-white tracking-widest text-[#1A1A1A]"
                       required
                     />
                   </div>
 
                   {loginError && (
-                    <div className="bg-rose-50 border border-rose-100 p-4 rounded-xl text-xs md:text-sm text-rose-800 leading-relaxed font-bold text-right">
+                    <div className="bg-rose-50 border border-rose-100 p-4 rounded-xl text-sm md:text-base text-rose-800 leading-relaxed font-bold text-right">
                       {loginError}
                     </div>
                   )}
 
                   <button
                     type="submit"
-                    className="w-full bg-[#2D6A4F] hover:bg-[#1b4332] text-white font-black py-4 rounded-xl text-sm md:text-base transition duration-300 cursor-pointer shadow-md text-center"
+                    className="w-full bg-[#2D6A4F] hover:bg-[#1b4332] text-white font-black py-4 rounded-xl text-base md:text-lg transition duration-300 cursor-pointer shadow-md text-center"
                   >
                     تأكيد ودخول للرحلة
                   </button>
