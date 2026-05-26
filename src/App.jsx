@@ -89,6 +89,78 @@ const mapItineraryToDb = (i) => ({ day: i.day, date: i.date, city: i.city, title
 
 const DEFAULT_PASSWORD = '123456';
 
+// ─── Helpers for booking attachments (PDF/image open + share) ───
+const dataUrlToBlob = (dataUrl) => {
+  const [header, b64] = dataUrl.split(',');
+  const mime = (header.match(/data:(.*?);base64/) || [])[1] || 'application/octet-stream';
+  const binary = atob(b64);
+  const len = binary.length;
+  const bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i++) bytes[i] = binary.charCodeAt(i);
+  return new Blob([bytes], { type: mime });
+};
+
+const openAttachment = (attachment) => {
+  try {
+    const blob = dataUrlToBlob(attachment.data);
+    const url = URL.createObjectURL(blob);
+    // iOS Safari: open in new tab — user can save/share from there
+    const win = window.open(url, '_blank');
+    if (!win) {
+      // Fallback: trigger download
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = attachment.name;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+    // Release the URL after a delay (give browser time to load)
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+  } catch (e) {
+    console.error('openAttachment error:', e);
+    alert('تعذّر فتح الملف. حاول إعادة التحميل.');
+  }
+};
+
+const shareAttachment = async (attachment, title) => {
+  try {
+    const blob = dataUrlToBlob(attachment.data);
+    const file = new File([blob], attachment.name, { type: blob.type });
+    // Prefer native share with file
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: title || attachment.name, text: title || '' });
+      return;
+    }
+    // Fallback: share just text + link
+    if (navigator.share) {
+      await navigator.share({ title: title || attachment.name, text: title || attachment.name });
+      return;
+    }
+    // Last fallback: open it (user can save manually)
+    openAttachment(attachment);
+  } catch (e) {
+    if (e.name !== 'AbortError') {
+      console.error('shareAttachment error:', e);
+    }
+  }
+};
+
+const shareBookingText = async (booking) => {
+  const text = `${booking.title}\n\n${booking.details || ''}\n\n— من تطبيق رحلة روسيا 2026\nhttps://trip-26.vercel.app`;
+  try {
+    if (navigator.share) {
+      await navigator.share({ title: booking.title, text });
+      return;
+    }
+    // Fallback: open WhatsApp web/app share link
+    const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank');
+  } catch (e) {
+    if (e.name !== 'AbortError') console.error('shareBookingText error:', e);
+  }
+};
+
 // ─── Casual, per-person welcome lines ─────
 // Picked by phone number to keep the data structure simple. Each entry returns
 // an array of variations — the modal picks one at random for variety on each login.
@@ -440,6 +512,8 @@ function App() {
   const [newBooking, setNewBooking] = useState({ type: 'طيران', title: '', status: 'مستهدف', details: '' });
   const [newTask, setNewTask] = useState({ title: '', assignee: 'الجميع', category: 'تجهيزات', isCritical: false });
   const [newExpense, setNewExpense] = useState({ description: '', amountSar: '', paidBy: 'الصندوق', category: 'مطاعم' });
+  const [bookingTypeFilter, setBookingTypeFilter] = useState('الكل');
+  const [expandedBookings, setExpandedBookings] = useState(new Set());
   const [newPersonalItem, setNewPersonalItem] = useState({ title: '', category: 'إلكترونيات' });
   const [calcAmountSar, setCalcAmountSar] = useState('100');
   const [calcAmountRub, setCalcAmountRub] = useState('1000');
@@ -2787,109 +2861,190 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
             </div>
           </div>
         )}
+        {/* TAB 4: BOOKINGS — Redesigned with type tabs + compact collapsible cards + share */}
+        {activeTab === 'bookings' && (() => {
+          const TYPE_META = {
+            'طيران':   { label: 'الطيران',   short: 'طيران',   icon: Plane,    color: '#D52B1E' },
+            'سكن':     { label: 'الفنادق',   short: 'فنادق',   icon: Hotel,    color: '#2A3F7E' },
+            'قطار':    { label: 'القطارات',  short: 'قطارات',  icon: Briefcase, color: '#7C3AED' },
+            'فعالية':  { label: 'الفعاليات', short: 'فعاليات', icon: Vote,     color: '#059669' },
+          };
+          const counts = bookings.reduce((acc, b) => { acc[b.type] = (acc[b.type] || 0) + 1; return acc; }, {});
+          const filtered = bookingTypeFilter === 'الكل' ? bookings : bookings.filter(b => b.type === bookingTypeFilter);
+          const sortedFiltered = [...filtered].sort((a, b) => (a.status === 'مؤكد' ? -1 : 1) - (b.status === 'مؤكد' ? -1 : 1));
 
-        {/* TAB 4: BOOKINGS */}
-        {activeTab === 'bookings' && (
-          <div className="space-y-8 animate-fadeIn">
-            <div className="border-b border-[#ECE6DC] pb-6">
-              <h2 className="text-xl md:text-2xl font-black text-[#D52B1E]">الحجوزات والتذاكر المؤكدة</h2>
-              <p className="text-xs text-gray-500 mt-1">تأكيد ومتابعة حجوزات الطيران الدولي والداخلي والسكن المشترك والقطارات</p>
-            </div>
-
-            {/* LOCKED WARNING */}
-            {!canEdit && (
-              <div className="bg-amber-50 border border-amber-200 text-amber-900 px-4 py-3 rounded-xl text-xs flex items-center gap-2">
-                <Lock size={14} className="text-amber-700" />
-                <span>تم قفل تعديل الحجوزات من قبل منظم الرحلة. يمكنك الاطلاع فقط.</span>
+          return (
+            <div className="space-y-5 animate-fadeIn">
+              {/* Header */}
+              <div className="border-b border-[#ECE6DC] pb-4">
+                <h2 className="text-xl md:text-2xl font-black text-[#D52B1E]">الحجوزات والتذاكر</h2>
+                <p className="text-xs md:text-sm text-gray-500 mt-1 leading-relaxed">تنظيم تذاكر الطيران، الفنادق، القطارات، والفعاليات في مكان واحد</p>
               </div>
-            )}
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Bookings List */}
-              <div className="lg:col-span-2 space-y-4">
-                {bookings.map((booking) => (
-                  <div key={booking.id} className="white-card p-5 rounded-xl flex flex-col justify-between gap-4 hover:border-[#ECE6DC] transition-all duration-200">
-                    {editingBookingId === booking.id ? (
-                      <div className="w-full space-y-3 text-right">
-                        <div className="grid grid-cols-2 gap-2">
-                          <div>
-                            <label className="text-[10px] text-gray-400 font-bold block">النوع</label>
+              {/* Locked warning */}
+              {!canEdit && (
+                <div className="bg-amber-50 border border-amber-200 text-amber-900 px-4 py-3 rounded-xl text-xs flex items-center gap-2">
+                  <Lock size={14} className="text-amber-700" />
+                  <span>تم قفل تعديل الحجوزات. يمكنك الاطلاع فقط.</span>
+                </div>
+              )}
+
+              {/* ─── TYPE FILTER TABS ─── */}
+              <div className="bg-white border border-[#ECE6DC] rounded-2xl p-1.5 flex items-center gap-1 overflow-x-auto">
+                <button
+                  onClick={() => setBookingTypeFilter('الكل')}
+                  className={`shrink-0 px-3 py-2 rounded-xl text-xs md:text-sm font-black transition flex items-center gap-1.5 cursor-pointer ${
+                    bookingTypeFilter === 'الكل' ? 'bg-[#2A3F7E] text-white shadow-sm' : 'text-gray-600 hover:bg-[#FAF7F2]'
+                  }`}
+                >
+                  <span>الكل</span>
+                  <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${bookingTypeFilter === 'الكل' ? 'bg-white/20' : 'bg-gray-100'}`}>{bookings.length}</span>
+                </button>
+                {Object.entries(TYPE_META).map(([key, meta]) => {
+                  const Icon = meta.icon;
+                  const isActive = bookingTypeFilter === key;
+                  const cnt = counts[key] || 0;
+                  return (
+                    <button
+                      key={key}
+                      onClick={() => setBookingTypeFilter(key)}
+                      className={`shrink-0 px-3 py-2 rounded-xl text-xs md:text-sm font-black transition flex items-center gap-1.5 cursor-pointer ${
+                        isActive ? 'text-white shadow-sm' : 'text-gray-600 hover:bg-[#FAF7F2]'
+                      }`}
+                      style={isActive ? { background: meta.color } : {}}
+                    >
+                      <Icon size={14} />
+                      <span>{meta.short}</span>
+                      {cnt > 0 && (
+                        <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${isActive ? 'bg-white/20' : 'bg-gray-100'}`}>{cnt}</span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* ─── BOOKINGS LIST (compact cards) ─── */}
+              {sortedFiltered.length === 0 ? (
+                <div className="bg-white border border-dashed border-[#ECE6DC] rounded-2xl py-10 text-center space-y-2">
+                  <p className="text-sm text-gray-500 font-bold">لا توجد حجوزات في هذا التصنيف</p>
+                  <p className="text-xs text-gray-400">اضغط زر "+" لإضافة حجز جديد</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {sortedFiltered.map((booking) => {
+                    const isExpanded = expandedBookings.has(booking.id);
+                    const meta = TYPE_META[booking.type] || TYPE_META['طيران'];
+                    const Icon = meta.icon;
+                    const isConfirmed = booking.status === 'مؤكد';
+                    const attCount = (booking.attachments || []).length;
+                    const isEditing = editingBookingId === booking.id;
+
+                    if (isEditing) {
+                      // Edit mode — keep simple form
+                      return (
+                        <div key={booking.id} className="bg-white border-2 border-[#2A3F7E] rounded-2xl p-4 space-y-3">
+                          <input
+                            type="text"
+                            value={editBookingData.title}
+                            onChange={(e) => setEditBookingData(prev => ({ ...prev, title: e.target.value }))}
+                            className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-3 py-2 text-sm font-bold text-[#14172A] focus:outline-none focus:border-[#2A3F7E]"
+                          />
+                          <div className="grid grid-cols-2 gap-2">
                             <select
                               value={editBookingData.type}
                               onChange={(e) => setEditBookingData(prev => ({ ...prev, type: e.target.value }))}
-                              className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-lg p-2 text-xs text-right cursor-pointer"
+                              className="bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-3 py-2 text-xs font-bold focus:outline-none focus:border-[#2A3F7E] cursor-pointer"
                             >
                               <option value="طيران">طيران</option>
-                              <option value="سكن">سكن</option>
+                              <option value="سكن">فنادق</option>
                               <option value="قطار">قطار</option>
                               <option value="فعالية">فعالية</option>
                             </select>
-                          </div>
-                          <div>
-                            <label className="text-[10px] text-gray-400 font-bold block">الحالة</label>
                             <select
                               value={editBookingData.status}
                               onChange={(e) => setEditBookingData(prev => ({ ...prev, status: e.target.value }))}
-                              className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-lg p-2 text-xs text-right cursor-pointer"
+                              className="bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-3 py-2 text-xs font-bold focus:outline-none focus:border-[#2A3F7E] cursor-pointer"
                             >
                               <option value="مستهدف">مستهدف</option>
                               <option value="مؤكد">مؤكد</option>
                             </select>
                           </div>
-                        </div>
-                        <div>
-                          <label className="text-[10px] text-gray-400 font-bold block">اسم الحجز</label>
-                          <input 
-                            type="text"
-                            value={editBookingData.title}
-                            onChange={(e) => setEditBookingData(prev => ({ ...prev, title: e.target.value }))}
-                            className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-lg p-2 text-xs"
-                          />
-                        </div>
-                        <div>
-                          <label className="text-[10px] text-gray-400 font-bold block">التفاصيل</label>
-                          <textarea 
-                            rows="2"
+                          <textarea
+                            rows="4"
                             value={editBookingData.details}
                             onChange={(e) => setEditBookingData(prev => ({ ...prev, details: e.target.value }))}
-                            className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-lg p-2 text-xs leading-relaxed"
+                            className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-3 py-2 text-xs text-[#14172A] focus:outline-none focus:border-[#2A3F7E] leading-relaxed"
                           />
-                        </div>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleSaveBookingEdit(booking.id)}
-                            className="bg-[#2A3F7E] hover:bg-[#1B2D64] text-white px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer"
-                          >
-                            حفظ
-                          </button>
-                          <button
-                            onClick={() => setEditingBookingId(null)}
-                            className="bg-gray-100 hover:bg-gray-200 text-gray-600 px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer"
-                          >
-                            إلغاء
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 w-full">
-                        <div className="flex items-start gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-[#FAF7F2] border border-[#ECE6DC] flex items-center justify-center shrink-0 text-[#2A3F7E]">
-                            {booking.type === 'طيران' ? <Plane size={20} /> : booking.type === 'سكن' ? <Hotel size={20} /> : <FileText size={20} />}
+                          <div className="flex gap-2">
+                            <button onClick={() => handleSaveBookingEdit(booking.id)} className="flex-1 bg-[#2A3F7E] hover:bg-[#1B2D64] text-white py-2 rounded-xl text-xs font-black cursor-pointer">حفظ</button>
+                            <button onClick={() => setEditingBookingId(null)} className="bg-gray-100 hover:bg-gray-200 text-gray-600 px-4 py-2 rounded-xl text-xs font-bold cursor-pointer">إلغاء</button>
                           </div>
-                          <div className="text-right space-y-0.5">
-                            <div className="flex items-center gap-2">
-                              <span className="text-[9px] text-[#2A3F7E] bg-[#2A3F7E]/10 px-1.5 py-0.5 rounded font-bold">{booking.type}</span>
-                              <h4 className="font-extrabold text-[#14172A] text-sm">{booking.title}</h4>
-                            </div>
-                            <p className="text-xs text-gray-600 font-light leading-relaxed m-0 whitespace-pre-wrap">{booking.details}</p>
+                        </div>
+                      );
+                    }
 
-                            {/* ─── ATTACHMENTS (PDFs / images for this booking) ─── */}
-                            {((booking.attachments || []).length > 0 || canEdit) && (
-                              <div className="mt-3 pt-3 border-t border-[#ECE6DC] space-y-2 w-full">
+                    return (
+                      <div key={booking.id} className="bg-white border border-[#ECE6DC] rounded-2xl overflow-hidden transition hover:border-[#2A3F7E]/40">
+                        {/* COMPACT HEADER (always visible) */}
+                        <button
+                          onClick={() => setExpandedBookings(prev => {
+                            const next = new Set(prev);
+                            if (next.has(booking.id)) next.delete(booking.id); else next.add(booking.id);
+                            return next;
+                          })}
+                          className="w-full p-4 flex items-center gap-3 text-right cursor-pointer hover:bg-[#FAF7F2]/50 transition"
+                        >
+                          <div
+                            className="w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0"
+                            style={{ background: meta.color }}
+                          >
+                            <Icon size={18} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span
+                                className="text-[10px] font-black border px-2 py-0.5 rounded-full"
+                                style={{ background: `${meta.color}15`, color: meta.color, borderColor: `${meta.color}40` }}
+                              >
+                                {meta.short}
+                              </span>
+                              <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border flex items-center gap-1 ${
+                                isConfirmed ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'
+                              }`}>
+                                {isConfirmed ? <CheckCircle2 size={10} /> : <Clock size={10} />}
+                                <span>{booking.status}</span>
+                              </span>
+                              {attCount > 0 && (
+                                <span className="text-[10px] font-bold bg-gray-100 text-gray-600 border border-gray-200 px-2 py-0.5 rounded-full flex items-center gap-1">
+                                  <FileText size={10} />
+                                  <span>{attCount}</span>
+                                </span>
+                              )}
+                            </div>
+                            <h4 className="font-black text-sm md:text-base text-[#14172A] mt-1 truncate">{booking.title}</h4>
+                          </div>
+                          <ChevronLeft
+                            size={18}
+                            className={`text-gray-400 shrink-0 transition-transform ${isExpanded ? '-rotate-90' : ''}`}
+                          />
+                        </button>
+
+                        {/* EXPANDED DETAILS */}
+                        {isExpanded && (
+                          <div className="border-t border-[#ECE6DC] bg-[#FAF7F2]/30 p-4 space-y-3">
+                            {booking.details && (
+                              <div className="bg-white border border-[#ECE6DC] rounded-xl p-3">
+                                <p className="text-xs md:text-sm text-[#14172A] font-medium leading-relaxed whitespace-pre-wrap m-0">{booking.details}</p>
+                              </div>
+                            )}
+
+                            {/* Attachments */}
+                            {(attCount > 0 || canEdit) && (
+                              <div className="space-y-2">
                                 <div className="flex items-center justify-between">
                                   <h5 className="text-[11px] font-black text-[#D52B1E] flex items-center gap-1">
                                     <FileText size={12} />
-                                    <span>المرفقات ({(booking.attachments || []).length})</span>
+                                    <span>المرفقات ({attCount})</span>
                                   </h5>
                                   {canEdit && (
                                     <label className="text-[10px] font-black text-[#2A3F7E] bg-[#EEF1F8] hover:bg-[#2A3F7E] hover:text-white px-2.5 py-1 rounded-lg transition flex items-center gap-1 cursor-pointer">
@@ -2898,159 +3053,145 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                                       <input
                                         type="file"
                                         accept="application/pdf,image/*"
-                                        onChange={(e) => {
-                                          handleBookingFileUpload(booking.id, e.target.files[0]);
-                                          e.target.value = '';
-                                        }}
+                                        onChange={(e) => { handleBookingFileUpload(booking.id, e.target.files[0]); e.target.value = ''; }}
                                         className="hidden"
                                       />
                                     </label>
                                   )}
                                 </div>
-
-                                {/* Attachments list */}
                                 {(booking.attachments || []).map((att) => (
-                                  <div key={att.id} className="flex items-center gap-2 bg-white border border-[#ECE6DC] rounded-xl p-2">
-                                    <FileText size={16} className="text-[#D52B1E] shrink-0" />
+                                  <div key={att.id} className="flex items-center gap-2 bg-white border border-[#ECE6DC] rounded-xl p-2.5">
+                                    <FileText size={18} className="text-[#D52B1E] shrink-0" />
                                     <div className="flex-1 min-w-0">
-                                      <p className="text-[11px] font-bold text-[#14172A] truncate m-0">{att.name}</p>
-                                      <p className="text-[9px] text-gray-400 m-0">{att.type?.includes('pdf') ? 'PDF' : 'صورة'} · {(att.size / 1024).toFixed(0)} KB</p>
+                                      <p className="text-xs font-bold text-[#14172A] truncate m-0">{att.name}</p>
+                                      <p className="text-[10px] text-gray-400 m-0">{att.type?.includes('pdf') ? 'PDF' : 'صورة'} · {(att.size / 1024).toFixed(0)} KB</p>
                                     </div>
-                                    <a
-                                      href={att.data}
-                                      download={att.name}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="bg-[#2A3F7E] hover:bg-[#1B2D64] text-white text-[10px] font-black px-2.5 py-1.5 rounded-lg transition cursor-pointer"
+                                    <button
+                                      onClick={() => openAttachment(att)}
+                                      className="bg-[#2A3F7E] hover:bg-[#1B2D64] text-white text-[11px] font-black px-3 py-1.5 rounded-lg transition cursor-pointer"
                                     >
                                       فتح
-                                    </a>
+                                    </button>
+                                    <button
+                                      onClick={() => shareAttachment(att, booking.title)}
+                                      className="bg-emerald-100 hover:bg-emerald-500 hover:text-white text-emerald-700 text-[11px] font-black px-2.5 py-1.5 rounded-lg transition cursor-pointer flex items-center gap-1"
+                                      title="مشاركة"
+                                    >
+                                      <Share2 size={12} />
+                                    </button>
                                     {canEdit && (
                                       <button
                                         onClick={() => handleDeleteBookingAttachment(booking.id, att.id)}
                                         className="text-rose-500 hover:text-rose-700 cursor-pointer opacity-70 hover:opacity-100"
-                                        title="حذف"
                                       >
-                                        <Trash2 size={13} />
+                                        <Trash2 size={14} />
                                       </button>
                                     )}
                                   </div>
                                 ))}
                               </div>
                             )}
-                          </div>
-                        </div>
 
-                        <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 border-[#ECE6DC] pt-3 sm:pt-0">
-                          <span className={`px-2.5 py-1 rounded-lg text-xs font-bold border flex items-center gap-1 ${
-                            booking.status === 'مؤكد' 
-                              ? 'bg-[#2A3F7E]/10 text-[#2A3F7E] border-[#2A3F7E]/25' 
-                              : 'bg-amber-50 text-amber-700 border-amber-200'
-                          }`}>
-                            {booking.status === 'مؤكد' ? <CheckCircle2 size={12} /> : <Clock size={12} />}
-                            <span>{booking.status}</span>
-                          </span>
-                          
-                          {canEdit && (
-                            <div className="flex items-center gap-1">
-                              <button 
-                                onClick={() => startEditingBooking(booking)}
-                                className="text-gray-400 hover:text-[#2A3F7E] p-1 rounded-lg hover:bg-gray-100 transition cursor-pointer"
-                                title="تعديل الحجز"
+                            {/* Action row */}
+                            <div className="flex items-center gap-2 pt-1">
+                              <button
+                                onClick={() => shareBookingText(booking)}
+                                className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-black px-3 py-2 rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer"
                               >
-                                <Edit3 size={15} />
+                                <Share2 size={13} />
+                                <span>مشاركة الحجز</span>
                               </button>
-                              <button 
-                                onClick={() => handleDeleteBooking(booking.id)}
-                                className="text-gray-400 hover:text-red-700 p-1 rounded-lg hover:bg-gray-100 transition cursor-pointer"
-                                title="حذف الحجز"
-                              >
-                                <Trash2 size={15} />
-                              </button>
+                              {canEdit && (
+                                <>
+                                  <button
+                                    onClick={() => startEditingBooking(booking)}
+                                    className="bg-[#FAF7F2] border border-[#ECE6DC] hover:border-[#2A3F7E] hover:text-[#2A3F7E] text-gray-600 text-xs font-black p-2 rounded-xl transition cursor-pointer"
+                                    title="تعديل"
+                                  >
+                                    <Edit3 size={14} />
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteBooking(booking.id)}
+                                    className="bg-[#FAF7F2] border border-[#ECE6DC] hover:border-rose-300 hover:text-rose-600 text-gray-600 text-xs font-black p-2 rounded-xl transition cursor-pointer"
+                                    title="حذف"
+                                  >
+                                    <Trash2 size={14} />
+                                  </button>
+                                </>
+                              )}
                             </div>
-                          )}
-                        </div>
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              {/* Add Booking Sidebar */}
-              <div className="white-card p-6 rounded-2xl h-fit space-y-4">
-                <div className="flex items-center gap-2 border-b border-[#ECE6DC] pb-3 justify-start">
-                  <Plus className="text-[#2A3F7E]" size={18} />
-                  <h3 className="text-sm font-bold text-[#14172A]">إضافة حجز جديد للرحلة</h3>
+                    );
+                  })}
                 </div>
+              )}
 
-                {canEdit ? (
-                  <form onSubmit={handleAddBooking} className="space-y-4">
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-gray-500">نوع الحجز</label>
-                      <select
-                        value={newBooking.type}
-                        onChange={(e) => setNewBooking(prev => ({ ...prev, type: e.target.value }))}
-                        className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-3 py-2 text-xs text-[#14172A] focus:outline-none focus:border-[#2A3F7E] text-right cursor-pointer font-bold"
-                      >
-                        <option value="طيران">طيران دولي أو داخلي</option>
-                        <option value="سكن">فندق أو شقة</option>
-                        <option value="قطار">تذكرة قطار بين المدن</option>
-                        <option value="فعالية">جولات وتذاكر فعاليات</option>
-                      </select>
+              {/* ─── ADD BOOKING FORM (collapsed by default to save space) ─── */}
+              {canEdit && (
+                <details className="bg-white border-2 border-dashed border-[#2A3F7E]/30 rounded-2xl overflow-hidden">
+                  <summary className="p-4 flex items-center gap-2 cursor-pointer hover:bg-[#FAF7F2]/50 list-none">
+                    <Plus className="text-[#2A3F7E]" size={20} />
+                    <h3 className="text-base md:text-lg font-black text-[#2A3F7E]">إضافة حجز جديد</h3>
+                  </summary>
+                  <form onSubmit={handleAddBooking} className="p-4 pt-0 space-y-3 border-t border-[#ECE6DC]/60">
+                    <div className="grid grid-cols-2 gap-2 pt-3">
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-bold text-gray-500">نوع الحجز</label>
+                        <select
+                          value={newBooking.type}
+                          onChange={(e) => setNewBooking(prev => ({ ...prev, type: e.target.value }))}
+                          className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-3 py-2 text-xs font-bold text-[#14172A] focus:outline-none focus:border-[#2A3F7E] cursor-pointer"
+                        >
+                          <option value="طيران">طيران</option>
+                          <option value="سكن">فندق / شقة</option>
+                          <option value="قطار">قطار</option>
+                          <option value="فعالية">فعالية / جولة</option>
+                        </select>
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-bold text-gray-500">الحالة</label>
+                        <select
+                          value={newBooking.status}
+                          onChange={(e) => setNewBooking(prev => ({ ...prev, status: e.target.value }))}
+                          className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-3 py-2 text-xs font-bold text-[#14172A] focus:outline-none focus:border-[#2A3F7E] cursor-pointer"
+                        >
+                          <option value="مستهدف">مستهدف</option>
+                          <option value="مؤكد">مؤكد</option>
+                        </select>
+                      </div>
                     </div>
-
                     <div className="space-y-1">
                       <label className="text-[10px] font-bold text-gray-500">اسم الحجز / الوصف</label>
-                      <input 
-                        type="text" 
-                        placeholder="مثال: قطار سابسان"
+                      <input
+                        type="text"
+                        placeholder="مثال: قطار سابسان موسكو-سان بطرسبرغ"
                         value={newBooking.title}
                         onChange={(e) => setNewBooking(prev => ({ ...prev, title: e.target.value }))}
                         className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-3 py-2 text-xs text-[#14172A] focus:outline-none focus:border-[#2A3F7E]"
                       />
                     </div>
-
                     <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-gray-500">حالة الحجز</label>
-                      <select
-                        value={newBooking.status}
-                        onChange={(e) => setNewBooking(prev => ({ ...prev, status: e.target.value }))}
-                        className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-3 py-2 text-xs text-[#14172A] focus:outline-none focus:border-[#2A3F7E] text-right cursor-pointer font-bold"
-                      >
-                        <option value="مستهدف">مستهدف / غير محجوز</option>
-                        <option value="مؤكد">مؤكد ومحجوز</option>
-                      </select>
-                    </div>
-
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-gray-500">تفاصيل الحجز</label>
-                      <textarea 
+                      <label className="text-[10px] font-bold text-gray-500">التفاصيل</label>
+                      <textarea
                         rows="3"
-                        placeholder="رقم الرحلة، العنوان، السعر..."
+                        placeholder="رقم الرحلة، العنوان، السعر، المقاعد..."
                         value={newBooking.details}
                         onChange={(e) => setNewBooking(prev => ({ ...prev, details: e.target.value }))}
                         className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-3 py-2 text-xs text-[#14172A] focus:outline-none focus:border-[#2A3F7E] leading-relaxed"
                       />
                     </div>
-
-                    <button 
-                      type="submit"
-                      className="w-full bg-[#2A3F7E] hover:bg-[#1b4332] text-white py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
-                    >
+                    <button type="submit" className="w-full bg-[#2A3F7E] hover:bg-[#1B2D64] text-white py-2.5 rounded-xl text-sm font-black transition flex items-center justify-center gap-1.5 cursor-pointer">
                       <Plus size={14} />
-                      <span>إضافة الحجز جديد</span>
+                      <span>تسجيل الحجز</span>
                     </button>
                   </form>
-                ) : (
-                  <div className="text-center py-6 text-gray-400 text-xs font-medium space-y-2">
-                    <Lock size={20} className="mx-auto text-gray-300" />
-                    <p>نموذج الإضافة معطل بسبب قفل التعديل.</p>
-                  </div>
-                )}
-              </div>
+                </details>
+              )}
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* TAB 5: TASKS */}
         {activeTab === 'tasks' && (
