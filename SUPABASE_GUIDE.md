@@ -35,6 +35,41 @@ NOTIFY pgrst, 'reload schema';
 
 ---
 
+## 💵 قطة الأعضاء والصندوق الاحتياطي (Fund persistence)
+
+نفّذ هذا في SQL Editor — يحفظ مساهمات كل عضو والمبلغ الاحتياطي في السحابة بدل الذاكرة المؤقتة:
+
+```sql
+-- جدول قطة الأعضاء (مفتاحه رقم جوال المسافر)
+CREATE TABLE IF NOT EXISTS fund_contributions (
+  phone TEXT PRIMARY KEY,
+  target_sar NUMERIC(10,2) DEFAULT 5000,
+  paid_sar NUMERIC(10,2) DEFAULT 0,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE fund_contributions ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "allow_all_contributions"
+  ON fund_contributions FOR ALL USING (true) WITH CHECK (true);
+
+-- جدول عام للإعدادات (المبلغ الاحتياطي، تواريخ الرحلة، إلخ)
+CREATE TABLE IF NOT EXISTS trip_settings (
+  key TEXT PRIMARY KEY,
+  value JSONB NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE trip_settings ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "allow_all_settings"
+  ON trip_settings FOR ALL USING (true) WITH CHECK (true);
+
+NOTIFY pgrst, 'reload schema';
+```
+
+اضغط **Run**. ستُحفظ قطة كل عضو ومبلغ الاحتياطي في السحابة وتعمل من جميع الأجهزة.
+
+---
+
 ## 📎 مرفقات للحجوزات (Booking attachments)
 
 نفّذ هذا في SQL Editor — يضيف عمود لحفظ ملفات PDF/صور للحجوزات:

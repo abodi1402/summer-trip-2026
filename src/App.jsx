@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { 
   Calendar, 
   CheckSquare, 
@@ -375,10 +375,10 @@ function App() {
 
   // Fund Contribution State ("القطة والمالية")
   const [fundContributions, setFundContributions] = useState([
-    { id: '1', name: 'عبدالله الزهراني', target: 0, paid: 0 },
-    { id: '2', name: 'عبدالعزيز الحميد', target: 0, paid: 0 },
-    { id: '3', name: 'حسن الدوسري', target: 0, paid: 0 },
-    { id: '4', name: 'فهد بن جديد', target: 0, paid: 0 },
+    { id: '1', phone: '0506230054', name: 'عبدالله الزهراني', target: 5000, paid: 0 },
+    { id: '2', phone: '0555255181', name: 'عبدالعزيز الحميد', target: 5000, paid: 0 },
+    { id: '3', phone: '0599967664', name: 'حسن الدوسري',       target: 5000, paid: 0 },
+    { id: '4', phone: '0590099919', name: 'فهد بن جديد',       target: 5000, paid: 0 },
   ]);
   const [reserveFund, setReserveFund] = useState(0); // Mabalgh Ehteyateyah
 
@@ -434,12 +434,14 @@ function App() {
     let cancelled = false;
     async function fetchAll() {
       try {
-        const [itineraryRes, bookingsRes, tasksRes, expensesRes, passwordsRes] = await Promise.all([
+        const [itineraryRes, bookingsRes, tasksRes, expensesRes, passwordsRes, contribsRes, settingsRes] = await Promise.all([
           supabase.from('itinerary').select('*').order('day', { ascending: true }),
           supabase.from('bookings').select('*').order('created_at', { ascending: true }),
           supabase.from('tasks').select('*').order('created_at', { ascending: true }),
           supabase.from('expenses').select('*').order('created_at', { ascending: true }),
           supabase.from('traveler_passwords').select('*'),
+          supabase.from('fund_contributions').select('*'),
+          supabase.from('trip_settings').select('*'),
         ]);
         if (cancelled) return;
 
@@ -449,6 +451,23 @@ function App() {
             const stored = passwordsRes.data.find(p => p.phone === t.phone);
             return stored ? { ...t, password: stored.password } : t;
           }));
+        }
+
+        // Merge stored fund contributions (overwrites defaults)
+        if (contribsRes.data && contribsRes.data.length > 0) {
+          setFundContributions(prev => prev.map(c => {
+            const stored = contribsRes.data.find(r => r.phone === c.phone);
+            return stored ? { ...c, target: Number(stored.target_sar) || c.target, paid: Number(stored.paid_sar) || 0 } : c;
+          }));
+        }
+
+        // Trip settings (reserve fund, etc.)
+        if (settingsRes.data) {
+          const reserveRow = settingsRes.data.find(r => r.key === 'reserve_fund');
+          if (reserveRow && reserveRow.value !== null) {
+            const val = typeof reserveRow.value === 'number' ? reserveRow.value : Number(reserveRow.value);
+            if (!Number.isNaN(val)) setReserveFund(val);
+          }
         }
 
         const firstErr = [itineraryRes, bookingsRes, tasksRes, expensesRes].find(r => r.error);
@@ -1199,16 +1218,60 @@ function App() {
     }
   };
 
+  // Debounced upsert so typing doesn't flood Supabase
+  const contribSaveTimers = useRef({});
+  const queueContribSave = (member, paid, target) => {
+    if (contribSaveTimers.current[member.phone]) clearTimeout(contribSaveTimers.current[member.phone]);
+    contribSaveTimers.current[member.phone] = setTimeout(async () => {
+      const { error } = await supabase
+        .from('fund_contributions')
+        .upsert({ phone: member.phone, paid_sar: paid, target_sar: target, updated_at: new Date().toISOString() }, { onConflict: 'phone' });
+      if (error) {
+        console.error('[Supabase Error] save contribution:', error.message);
+        if (error.message?.includes('relation') || error.message?.includes('does not exist') || error.message?.includes('schema cache')) {
+          showToast('فعّل جدول fund_contributions من SUPABASE_GUIDE.md', 'error');
+        }
+      }
+    }, 500);
+  };
+
   const handleUpdateContribution = (travelerId, paidVal) => {
-    setFundContributions(prev => prev.map(c => 
-      c.id === travelerId ? { ...c, paid: parseFloat(paidVal) || 0 } : c
-    ));
+    const numPaid = parseFloat(paidVal) || 0;
+    setFundContributions(prev => {
+      const updated = prev.map(c => c.id === travelerId ? { ...c, paid: numPaid } : c);
+      const member = updated.find(c => c.id === travelerId);
+      if (member) queueContribSave(member, member.paid, member.target);
+      return updated;
+    });
   };
 
   const handleUpdateContTarget = (travelerId, targetVal) => {
-    setFundContributions(prev => prev.map(c => 
-      c.id === travelerId ? { ...c, target: parseFloat(targetVal) || 0 } : c
-    ));
+    const numTarget = parseFloat(targetVal) || 0;
+    setFundContributions(prev => {
+      const updated = prev.map(c => c.id === travelerId ? { ...c, target: numTarget } : c);
+      const member = updated.find(c => c.id === travelerId);
+      if (member) queueContribSave(member, member.paid, member.target);
+      return updated;
+    });
+  };
+
+  // Reserve fund persisted to trip_settings (debounced)
+  const reserveSaveTimer = useRef(null);
+  const handleUpdateReserveFund = (val) => {
+    const num = parseFloat(val) || 0;
+    setReserveFund(num);
+    if (reserveSaveTimer.current) clearTimeout(reserveSaveTimer.current);
+    reserveSaveTimer.current = setTimeout(async () => {
+      const { error } = await supabase
+        .from('trip_settings')
+        .upsert({ key: 'reserve_fund', value: num, updated_at: new Date().toISOString() }, { onConflict: 'key' });
+      if (error) {
+        console.error('[Supabase Error] save reserve fund:', error.message);
+        if (error.message?.includes('relation') || error.message?.includes('does not exist') || error.message?.includes('schema cache')) {
+          showToast('فعّل جدول trip_settings من SUPABASE_GUIDE.md', 'error');
+        }
+      }
+    }, 500);
   };
 
   const handleAddBooking = async (e) => {
@@ -3488,7 +3551,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                     type="number"
                     inputMode="numeric"
                     value={reserveFund}
-                    onChange={(e) => setReserveFund(parseFloat(e.target.value) || 0)}
+                    onChange={(e) => handleUpdateReserveFund(e.target.value)}
                     className="w-24 bg-white border border-amber-300 rounded-lg px-2 py-1.5 text-sm font-black text-amber-900 text-center focus:outline-none focus:border-amber-500"
                   />
                 </div>
