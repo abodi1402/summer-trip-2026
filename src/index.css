@@ -5,9 +5,9 @@
    Navy (calm) + Red (used sparingly for accents only) + Cream/White */
 @theme {
   --font-sans: 'Tajawal', system-ui, -apple-system, sans-serif;
-  --color-primary: #1B2D64;        /* Russian navy — calmer than flag blue */
-  --color-primary-dark: #0F1E48;
-  --color-primary-soft: #E8ECF5;   /* Tint for backgrounds */
+  --color-primary: #2A3F7E;        /* Russian navy — calmer than flag blue */
+  --color-primary-dark: #1B2D64;
+  --color-primary-soft: #EEF1F8;   /* Tint for backgrounds */
   --color-accent-red: #D52B1E;     /* Russian red — use sparingly */
   --color-accent-red-soft: #FCE9E8;
   --color-cream-bg: #FAF7F2;       /* Warm off-white */
@@ -107,7 +107,7 @@ body {
 .home-tile:hover {
   transform: translateY(-2px);
   box-shadow: 0 10px 24px -8px rgba(27, 45, 100, 0.15);
-  border-color: #1B2D64;
+  border-color: #2A3F7E;
 }
 .home-tile:active { transform: scale(0.98); }
 
@@ -129,13 +129,13 @@ body {
   left: 0;
   width: 3px;
   height: 100%;
-  background: linear-gradient(to bottom, #FFFFFF 0%, #FFFFFF 33%, #1B2D64 33%, #1B2D64 66%, #D52B1E 66%, #D52B1E 100%);
+  background: linear-gradient(to bottom, #FFFFFF 0%, #FFFFFF 33%, #2A3F7E 33%, #2A3F7E 66%, #D52B1E 66%, #D52B1E 100%);
   opacity: 0.5;
 }
 
 /* Compact countdown badge */
 .countdown-pill {
-  background: linear-gradient(135deg, #1B2D64 0%, #0F1E48 100%);
+  background: linear-gradient(135deg, #2A3F7E 0%, #1B2D64 100%);
   color: white;
   border-radius: 16px;
   padding: 14px 18px;
