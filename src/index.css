@@ -1,8 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: 'IBM Plex Sans Arabic', system-ui, -apple-system, sans-serif;
+  --font-sans: 'Tajawal', system-ui, -apple-system, sans-serif;
   --color-primary: #2D6A4F;
   --color-secondary: #74C69D;
   --color-cream-bg: #F9F7F4;
@@ -11,7 +11,7 @@
 }
 
 :root {
-  font-family: 'IBM Plex Sans Arabic', system-ui, -apple-system, sans-serif;
+  font-family: 'Tajawal', system-ui, -apple-system, sans-serif;
   color-scheme: light;
 }
 

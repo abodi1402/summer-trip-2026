@@ -75,6 +75,39 @@ const mapItineraryToDb = (i) => ({ day: i.day, date: i.date, city: i.city, title
 
 const DEFAULT_PASSWORD = '123456';
 
+// ─── Casual, per-person welcome lines ─────
+// Picked by phone number to keep the data structure simple. Each entry returns
+// an array of variations — the modal picks one at random for variety on each login.
+const WELCOME_LINES = {
+  '0506230054': [ // عبدالله — منظم الرحلة
+    { headline: 'حيّ الله أبو الشباب 👑', sub: 'قائدنا الكبير ومنظم الرحلة وصل، صار كل شي على بعضه.' },
+    { headline: 'هلا والله بقائدنا عبدالله 🧭', sub: 'الرحلة ما تمشي إلا بحضورك، حياك الله بين أصحابك.' },
+    { headline: 'يا هلا بأبو الفكرة عبدالله ✨', sub: 'منظم الرحلة دخل، خلونا نبدأ التنسيق.' },
+  ],
+  '0555255181': [ // عبدالعزيز — المشرف المالي
+    { headline: 'حياك الله يا حامي القطة 💰', sub: 'محاسبنا المعتمد عبدالعزيز وصل، الفلوس بأمان.' },
+    { headline: 'هلا بأبو الحسابات 🧾', sub: 'وزير المالية حضر، خلونا نشوف الميزانية على آخرها.' },
+    { headline: 'حياك يا عبدالعزيز ⚖️', sub: 'كل ريال محسوب من يوم تدخل، ما يضيع شي.' },
+  ],
+  '0599967664': [ // حسن — الخدمات اللوجستية
+    { headline: 'أرررحب ألف ومليون يا حسن 🎉', sub: 'مسؤول اللوجستيك حضر، الرحلة صارت أخف على القلب.' },
+    { headline: 'يا هلا بأبو الخطط 🗺️', sub: 'حسن دخل، الترتيبات والمواعيد كلها بإيد أمينة.' },
+    { headline: 'حياك ألف يا حسن الدوسري 🛬', sub: 'منسق الترحال بيننا حاضر، خلونا نرتب الجولات.' },
+  ],
+  '0590099919': [ // فهد — منسق الأنشطة
+    { headline: 'يا هلا بأبو الأجواء 🎯', sub: 'منسق الأنشطة فهد دخل، الفعاليات راح تنشط من الحين.' },
+    { headline: 'حياك يا فهد بن جديد 🎟️', sub: 'مسؤول البرامج والترفيه وصل، الرحلة بتصير حماس.' },
+    { headline: 'أهلين أهلين بفهد ⭐', sub: 'منسقنا للأنشطة حاضر، استعد لجدول مليان متعة.' },
+  ],
+};
+
+const getWelcomeLine = (user) => {
+  const lines = WELCOME_LINES[user.phone] || [
+    { headline: `أهلاً وسهلاً يا ${user.name} 👋`, sub: 'حياك الله بين أصحابك في مخطط الرحلة.' }
+  ];
+  return lines[Math.floor(Math.random() * lines.length)];
+};
+
 // Premium Custom SVG Logo for Summer Trip (Russian Onion Domes + Travel Compass detailing)
 function ShaddadLogo({ className = "w-full h-full" }) {
   return (
@@ -854,7 +887,11 @@ function App() {
 
   const addPersonalPackingItem = (e) => {
     e.preventDefault();
-    if (!currentUser || !newPersonalItem.title.trim()) return;
+    if (!currentUser) return;
+    if (!newPersonalItem.title.trim()) {
+      showToast('اكتب اسم الغرض قبل الإضافة', 'error');
+      return;
+    }
     setPersonalPacking(prev => {
       const userList = [
         ...prev[currentUser.id],
@@ -979,7 +1016,14 @@ function App() {
 
   const handleAddTask = async (e) => {
     e.preventDefault();
-    if (!newTask.title.trim() || !canEdit) return;
+    if (!canEdit) {
+      showToast('التعديل مقفول حالياً من قبل المنظم', 'error');
+      return;
+    }
+    if (!newTask.title.trim()) {
+      showToast('اكتب اسم المهمة قبل الإضافة', 'error');
+      return;
+    }
     const payload = mapTaskToDb({ ...newTask, completed: false });
     const { data, error } = await supabase.from('tasks').insert([payload]).select().single();
     if (error) {
@@ -1015,7 +1059,22 @@ function App() {
 
   const handleAddExpense = async (e) => {
     e.preventDefault();
-    if (!newExpense.description.trim() || !newExpense.amountSar || !newExpense.paidBy || !canEdit) return;
+    if (!canEdit) {
+      showToast('التعديل مقفول حالياً من قبل المنظم', 'error');
+      return;
+    }
+    if (!newExpense.description.trim()) {
+      showToast('اكتب وصف المصروف قبل الإضافة', 'error');
+      return;
+    }
+    if (!newExpense.amountSar) {
+      showToast('حدد المبلغ بالريال', 'error');
+      return;
+    }
+    if (!newExpense.paidBy) {
+      showToast('حدد الجهة الدافعة', 'error');
+      return;
+    }
     const payload = mapExpenseToDb({
       description: newExpense.description,
       amountSar: parseFloat(newExpense.amountSar),
@@ -1058,7 +1117,14 @@ function App() {
 
   const handleAddBooking = async (e) => {
     e.preventDefault();
-    if (!newBooking.title.trim() || !canEdit) return;
+    if (!canEdit) {
+      showToast('التعديل مقفول حالياً من قبل المنظم', 'error');
+      return;
+    }
+    if (!newBooking.title.trim()) {
+      showToast('اكتب وصف الحجز قبل الإضافة', 'error');
+      return;
+    }
     const payload = mapBookingToDb(newBooking);
     const { data, error } = await supabase.from('bookings').insert([payload]).select().single();
     if (error) {
@@ -1105,7 +1171,14 @@ function App() {
 
   const handleAddActivity = async (e) => {
     e.preventDefault();
-    if (!newActivity.title.trim() || !canEdit) return;
+    if (!canEdit) {
+      showToast('التعديل مقفول حالياً من قبل المنظم', 'error');
+      return;
+    }
+    if (!newActivity.title.trim()) {
+      showToast('اكتب عنوان النشاط قبل الإضافة', 'error');
+      return;
+    }
     const payload = mapItineraryToDb({
       day: parseInt(newActivity.day),
       date: getDateForDay(tripStartDate, parseInt(newActivity.day)),
@@ -1307,22 +1380,17 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
           
           {/* Right Side: Login Form */}
           <div className="w-full md:w-1/2 p-8 md:p-12 lg:p-16 flex flex-col justify-between space-y-8 bg-white">
-            {/* Top header/logo */}
-            <div className="flex items-center gap-4 justify-start">
-              <div className="w-14 h-14 md:w-12 md:h-12">
-                <ShaddadLogo />
+            {/* Top header/logo + minimal tagline */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-4 justify-start">
+                <div className="w-14 h-14 md:w-12 md:h-12">
+                  <ShaddadLogo />
+                </div>
+                <div className="text-right">
+                  <h2 className="text-xl md:text-2xl font-black text-[#1A1A1A] m-0">رحلة صيف ٢٠٢٦</h2>
+                  <p className="text-sm md:text-base text-[#2D6A4F] font-bold m-0">صُنع بحب للأصحاب</p>
+                </div>
               </div>
-              <div className="text-right">
-                <h2 className="text-xl md:text-2xl font-black text-[#1A1A1A] m-0">رحلة صيف ٢٠٢٦</h2>
-                <p className="text-sm md:text-base text-[#2D6A4F] font-bold m-0">بوابة دخول الأصدقاء والمنسقين</p>
-              </div>
-            </div>
-
-            {/* Travel Quote Banner above the login inputs */}
-            <div className="bg-[#2D6A4F]/5 border border-[#2D6A4F]/10 px-5 py-4 rounded-2xl text-center">
-              <p className="text-sm md:text-base text-[#2D6A4F] font-bold leading-relaxed m-0">
-                « السفر يُريك الدنيا بعيونٍ جديدة، ويصنع ذكريات تدوم مدى العمر. سفرة ممتعة يا أصدقاء »
-              </p>
             </div>
 
             {/* Login form or password change form */}
@@ -1422,22 +1490,9 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
               )}
             </div>
 
-            {/* Mobile Quote Footer */}
-            <div className="block md:hidden text-center bg-[#F9F7F4] p-4 rounded-2xl border border-[#E8E0D5]/60">
-              <p className="text-[10px] text-gray-600 font-medium leading-relaxed m-0">
-                « السفر يُريك الدنيا بعيونٍ جديدة، ويصنع ذكريات تدوم مدى العمر »
-              </p>
-            </div>
-
-            {/* Footer — handcrafted credit */}
-            <div className="text-center space-y-1.5 pt-2 border-t border-[#E8E0D5]/60">
-              <p className="text-xs md:text-sm text-[#2D6A4F] font-bold m-0 leading-relaxed">
-                صُنع بحب للأصحاب · نظام تفاعلي لتنسيق رحلتنا إلى روسيا 2026
-              </p>
-              <p className="text-[10px] md:text-[11px] text-gray-500 font-medium m-0">
-                بإشراف وتنظيم: <span className="text-[#1A1A1A] font-bold">عبدالله الزهراني</span>
-              </p>
-              <p className="text-[9px] md:text-[10px] text-gray-400 font-mono m-0">
+            {/* Minimal footer — full credit appears inside the app */}
+            <div className="text-center pt-2">
+              <p className="text-[10px] text-gray-400 font-mono m-0">
                 Summer Trip Planner © 2026
               </p>
             </div>
@@ -1472,12 +1527,6 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
               </div>
             </div>
             
-            {/* Travel Quote at the bottom of the art side */}
-            <div className="relative z-10 text-center border-t border-white/10 pt-4">
-              <p className="text-[10px] text-emerald-200 font-medium leading-relaxed m-0">
-                « السفر يُريك الدنيا بعيونٍ جديدة، ويصنع ذكريات تدوم مدى العمر »
-              </p>
-            </div>
           </div>
           
         </div>
@@ -1613,9 +1662,20 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
           </nav>
         </div>
 
-        {/* Footer in Sidebar */}
-        <div className="text-[10px] text-gray-400 border-t border-[#E8E0D5] pt-4 font-sans text-center">
-          <p className="m-0">رحلتنا الخاصة · صيف 2026</p>
+        {/* Footer in Sidebar — credit moved here from login screen */}
+        <div className="text-center space-y-1.5 border-t border-[#E8E0D5] pt-4 font-sans">
+          <p className="text-xs text-[#2D6A4F] font-bold m-0 leading-relaxed">
+            صُنع بحب للأصحاب
+          </p>
+          <p className="text-[11px] text-gray-500 m-0">
+            نظام تفاعلي لتنسيق رحلتنا إلى روسيا 2026
+          </p>
+          <p className="text-[10px] text-gray-500 font-medium m-0">
+            بإشراف وتنظيم: <span className="text-[#1A1A1A] font-bold">عبدالله الزهراني</span>
+          </p>
+          <p className="text-[9px] text-gray-400 font-mono m-0 pt-1">
+            Summer Trip Planner © 2026
+          </p>
         </div>
       </aside>
 
@@ -4250,43 +4310,42 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
       )}
 
       {/* WELCOME MODAL ON SUCCESSFUL LOGIN */}
-      {showWelcome && currentUser && (
-        <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-md z-[100] overflow-y-auto animate-fadeIn"
-          onClick={() => setShowWelcome(false)}
-        >
-          <div className="min-h-full flex items-center justify-center p-4">
-            <div
-              className="bg-white max-w-md w-full rounded-3xl p-6 md:p-8 space-y-5 text-center shadow-2xl relative border border-[#E8E0D5]"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="w-16 h-16 bg-gradient-to-tr from-[#2D6A4F] to-[#74C69D] rounded-full flex items-center justify-center mx-auto text-white shadow-md">
-                <Compass size={28} />
-              </div>
-
-              <div className="space-y-2">
-                <h3 className="text-lg md:text-xl font-black text-gray-800">أهلاً بك يا {currentUser.name}</h3>
-                <p className="text-sm text-gray-500 font-bold">عضو في فريق: {currentUser.role}</p>
-
-                <div className="py-4 px-3 bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl text-sm text-[#2D6A4F] leading-relaxed font-bold">
-                  نتمنى لك وللأصدقاء سفرة ممتعة ومغامرة شيقة وجميلة في ربوع روسيا صيف 2026
+      {showWelcome && currentUser && (() => {
+        const welcomeLine = getWelcomeLine(currentUser);
+        return (
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-md z-[100] overflow-y-auto animate-fadeIn"
+            onClick={() => setShowWelcome(false)}
+          >
+            <div className="min-h-full flex items-center justify-center p-4">
+              <div
+                className="bg-white max-w-md w-full rounded-3xl p-6 md:p-8 space-y-5 text-center shadow-2xl relative border border-[#E8E0D5]"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto text-white shadow-md bg-gradient-to-tr ${currentUser.avatarColor}`}>
+                  <span className="text-2xl font-black">{currentUser.name[0]}</span>
                 </div>
 
-                <p className="text-xs text-gray-400 leading-relaxed pt-2">
-                  تطبيق الرحلة يتيح لك متابعة الجدول اليومي، التذاكر، المهام المطلوبة منك، وتفاصيل القطة المالية المشتركة بشكل فوري.
-                </p>
-              </div>
+                <div className="space-y-2">
+                  <h3 className="text-xl md:text-2xl font-black text-gray-800 leading-tight">{welcomeLine.headline}</h3>
+                  <p className="text-sm text-gray-500 font-medium">{currentUser.role}</p>
 
-              <button
-                onClick={() => setShowWelcome(false)}
-                className="w-full bg-[#2D6A4F] hover:bg-[#1B4332] text-white py-3 rounded-xl text-base font-black transition shadow-md cursor-pointer text-center"
-              >
-                دخول واستكشاف المخطط
-              </button>
+                  <div className="py-4 px-4 bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl text-sm md:text-base text-[#1A1A1A] leading-relaxed font-medium">
+                    {welcomeLine.sub}
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setShowWelcome(false)}
+                  className="w-full bg-[#2D6A4F] hover:bg-[#1B4332] text-white py-3 rounded-xl text-base font-black transition shadow-md cursor-pointer text-center"
+                >
+                  يلا نبدأ
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
     </div>
   );
