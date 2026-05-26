@@ -1,13 +1,22 @@
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap');
 @import "tailwindcss";
 
+/* ───── Russian-inspired palette ─────
+   Navy (calm) + Red (used sparingly for accents only) + Cream/White */
 @theme {
   --font-sans: 'Tajawal', system-ui, -apple-system, sans-serif;
-  --color-primary: #2D6A4F;
-  --color-secondary: #74C69D;
-  --color-cream-bg: #F9F7F4;
-  --color-dark-txt: #1A1A1A;
-  --color-accent-card: #E8E0D5;
+  --color-primary: #1B2D64;        /* Russian navy — calmer than flag blue */
+  --color-primary-dark: #0F1E48;
+  --color-primary-soft: #E8ECF5;   /* Tint for backgrounds */
+  --color-accent-red: #D52B1E;     /* Russian red — use sparingly */
+  --color-accent-red-soft: #FCE9E8;
+  --color-cream-bg: #FAF7F2;       /* Warm off-white */
+  --color-card-border: #ECE6DC;
+  --color-dark-txt: #14172A;       /* Slightly cooler black */
+  --color-muted-txt: #6B7280;
+  /* Legacy compatibility (some components still reference these) */
+  --color-secondary: #4A6BB5;
+  --color-accent-card: #ECE6DC;
 }
 
 :root {
@@ -74,8 +83,63 @@ body {
 /* Custom layout utilities */
 .white-card {
   background-color: #FFFFFF;
-  border: 1px solid #E8E0D5;
+  border: 1px solid #ECE6DC;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+}
+
+/* ───── Home dashboard tiles ───── */
+.home-tile {
+  background: #FFFFFF;
+  border: 1px solid #ECE6DC;
+  border-radius: 20px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 14px;
+  min-height: 130px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  text-align: right;
+}
+.home-tile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px -8px rgba(27, 45, 100, 0.15);
+  border-color: #1B2D64;
+}
+.home-tile:active { transform: scale(0.98); }
+
+.home-tile-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Decorative subtle Russian-flag strip on the corner of tiles */
+.home-tile::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  background: linear-gradient(to bottom, #FFFFFF 0%, #FFFFFF 33%, #1B2D64 33%, #1B2D64 66%, #D52B1E 66%, #D52B1E 100%);
+  opacity: 0.5;
+}
+
+/* Compact countdown badge */
+.countdown-pill {
+  background: linear-gradient(135deg, #1B2D64 0%, #0F1E48 100%);
+  color: white;
+  border-radius: 16px;
+  padding: 14px 18px;
+  box-shadow: 0 8px 20px -6px rgba(27, 45, 100, 0.35);
 }
 
 .accent-block {

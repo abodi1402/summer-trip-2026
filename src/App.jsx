@@ -108,65 +108,59 @@ const getWelcomeLine = (user) => {
   return lines[Math.floor(Math.random() * lines.length)];
 };
 
-// Premium Custom SVG Logo for Summer Trip (Russian Onion Domes + Travel Compass detailing)
+// Russian-themed logo: St Basil's onion domes inside a circle, with a Russian flag accent.
 function ShaddadLogo({ className = "w-full h-full" }) {
   return (
     <svg viewBox="0 0 100 100" className={className}>
       <defs>
-        {/* Luxury Gold and Emerald Gradients */}
-        <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#FFF2E6" />
-          <stop offset="30%" stopColor="#F5D38A" />
-          <stop offset="70%" stopColor="#D4AF37" />
-          <stop offset="100%" stopColor="#AA7C11" />
+        <linearGradient id="navyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#2A3F7E" />
+          <stop offset="100%" stopColor="#0F1E48" />
         </linearGradient>
-        <linearGradient id="emeraldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#2D6A4F" />
-          <stop offset="50%" stopColor="#1B4332" />
-          <stop offset="100%" stopColor="#081C15" />
-        </linearGradient>
+        <clipPath id="circleClip">
+          <circle cx="50" cy="50" r="46" />
+        </clipPath>
       </defs>
-      
-      {/* Main Round Emblem */}
-      <circle cx="50" cy="50" r="44" fill="url(#emeraldGradient)" stroke="url(#goldGradient)" strokeWidth="2" />
-      <circle cx="50" cy="50" r="39" fill="none" stroke="url(#goldGradient)" strokeWidth="0.75" strokeDasharray="2 2" opacity="0.5" />
-      
-      {/* Castle/Cathedral Domes Graphic */}
-      <g transform="translate(0, 2)" fill="url(#goldGradient)">
-        {/* Center Dome Foundation / Spire */}
-        <path d="M44 70 L44 52 L56 52 L56 70 Z" opacity="0.8" />
-        {/* Center Onion Dome */}
-        <path d="M50 24 C53 32, 57 38, 50 52 C43 38, 47 32, 50 24 Z" stroke="url(#goldGradient)" strokeWidth="0.75" />
-        <line x1="50" y1="24" x2="50" y2="16" stroke="url(#goldGradient)" strokeWidth="1.5" />
-        <polygon points="50,14 51.5,16.5 48.5,16.5" />
-        
-        {/* Left Dome Foundation / Spire */}
-        <path d="M28 70 L28 58 L38 58 L38 70 Z" opacity="0.8" />
-        {/* Left Onion Dome */}
-        <path d="M33 38 C35.5 44, 39 48, 33 58 C27 48, 30.5 44, 33 38 Z" stroke="url(#goldGradient)" strokeWidth="0.5" />
-        <line x1="33" y1="38" x2="33" y2="32" stroke="url(#goldGradient)" strokeWidth="1" />
-        <circle cx="33" cy="32" r="0.75" />
 
-        {/* Right Dome Foundation / Spire */}
-        <path d="M62 70 L62 58 L72 58 L72 70 Z" opacity="0.8" />
-        {/* Right Onion Dome */}
-        <path d="M67 38 C69.5 44, 73 48, 67 58 C61 48, 64.5 44, 67 38 Z" stroke="url(#goldGradient)" strokeWidth="0.5" />
-        <line x1="67" y1="38" x2="67" y2="32" stroke="url(#goldGradient)" strokeWidth="1" />
-        <circle cx="67" cy="32" r="0.75" />
-        
-        {/* Horizontal Castle Wall Base */}
-        <path d="M20 68 L80 68 L80 72 L20 72 Z" />
-        
-        {/* Small Arches inside the foundations */}
-        <path d="M47 70 C47 67, 53 67, 53 70 Z" fill="#1B4332" />
-        <path d="M31 70 C31 68, 35 68, 35 70 Z" fill="#1B4332" />
-        <path d="M65 70 C65 68, 69 68, 69 70 Z" fill="#1B4332" />
+      {/* Outer ring */}
+      <circle cx="50" cy="50" r="48" fill="#FAF7F2" stroke="#1B2D64" strokeWidth="2" />
+
+      {/* Russian flag stripes inside circle, as a soft background */}
+      <g clipPath="url(#circleClip)" opacity="0.08">
+        <rect x="0" y="4"  width="100" height="32" fill="#FFFFFF" />
+        <rect x="0" y="36" width="100" height="30" fill="#1B2D64" />
+        <rect x="0" y="66" width="100" height="32" fill="#D52B1E" />
       </g>
-      
-      {/* Subtle Decorative Star Dots */}
-      <circle cx="25" cy="30" r="0.75" fill="url(#goldGradient)" opacity="0.6" />
-      <circle cx="75" cy="30" r="0.75" fill="url(#goldGradient)" opacity="0.6" />
-      <circle cx="50" cy="88" r="1.5" fill="url(#goldGradient)" />
+
+      {/* Center onion dome (St Basil's silhouette) */}
+      <g fill="url(#navyGrad)">
+        {/* Center dome */}
+        <path d="M50 22 C55 30, 60 38, 50 50 C40 38, 45 30, 50 22 Z" />
+        <rect x="48" y="50" width="4" height="18" />
+        <line x1="50" y1="22" x2="50" y2="14" stroke="#1B2D64" strokeWidth="1.5" />
+        <circle cx="50" cy="13" r="1.8" fill="#D52B1E" />
+
+        {/* Left dome */}
+        <path d="M32 36 C36 42, 40 47, 32 56 C25 47, 29 42, 32 36 Z" />
+        <rect x="30" y="56" width="4" height="12" />
+        <line x1="32" y1="36" x2="32" y2="30" stroke="#1B2D64" strokeWidth="1" />
+        <circle cx="32" cy="29.5" r="1.2" fill="#D52B1E" />
+
+        {/* Right dome */}
+        <path d="M68 36 C72 42, 76 47, 68 56 C61 47, 65 42, 68 36 Z" />
+        <rect x="66" y="56" width="4" height="12" />
+        <line x1="68" y1="36" x2="68" y2="30" stroke="#1B2D64" strokeWidth="1" />
+        <circle cx="68" cy="29.5" r="1.2" fill="#D52B1E" />
+
+        {/* Cathedral base wall */}
+        <rect x="22" y="68" width="56" height="4" />
+        <rect x="22" y="72" width="56" height="8" fill="#1B2D64" opacity="0.85" />
+
+        {/* Small arched windows in the base */}
+        <path d="M28 80 L28 75 C28 72, 32 72, 32 75 L32 80 Z" fill="#FAF7F2" />
+        <path d="M46 80 L46 74 C46 71, 54 71, 54 74 L54 80 Z" fill="#FAF7F2" />
+        <path d="M68 80 L68 75 C68 72, 72 72, 72 75 L72 80 Z" fill="#FAF7F2" />
+      </g>
     </svg>
   );
 }
@@ -179,10 +173,10 @@ const TRAVEL_QUOTES = [
 
 // Predefined travelers data (Exempt from Visa)
 const INITIAL_TRAVELERS = [
-  { id: '1', name: 'عبدالله الزهراني', role: 'منظم الرحلة', phone: '0506230054', avatarColor: 'from-[#2D6A4F] to-[#74C69D]', visaStatus: 'معفى (دخول بدون تأشيرة)', flightBooked: true, password: '123456' },
-  { id: '2', name: 'عبدالعزيز الحميد', role: 'المشرف المالي', phone: '0555255181', avatarColor: 'from-[#2D6A4F] to-[#D8D0C5]', visaStatus: 'معفى (دخول بدون تأشيرة)', flightBooked: true, password: '123456' },
-  { id: '3', name: 'حسن الدوسري', role: 'مسؤول الخدمات اللوجستية', phone: '0599967664', avatarColor: 'from-[#2D6A4F] to-[#b8b0a5]', visaStatus: 'معفى (دخول بدون تأشيرة)', flightBooked: false, password: '123456' },
-  { id: '4', name: 'فهد بن جديد', role: 'منسق الأنشطة والبرامج', phone: '0590099919', avatarColor: 'from-[#2D6A4F] to-[#40916C]', visaStatus: 'معفى (دخول بدون تأشيرة)', flightBooked: true, password: '123456' },
+  { id: '1', name: 'عبدالله الزهراني', role: 'منظم الرحلة', phone: '0506230054', avatarColor: 'from-[#1B2D64] to-[#4A6BB5]', visaStatus: 'معفى (دخول بدون تأشيرة)', flightBooked: true, password: '123456' },
+  { id: '2', name: 'عبدالعزيز الحميد', role: 'المشرف المالي', phone: '0555255181', avatarColor: 'from-[#1B2D64] to-[#D8D0C5]', visaStatus: 'معفى (دخول بدون تأشيرة)', flightBooked: true, password: '123456' },
+  { id: '3', name: 'حسن الدوسري', role: 'مسؤول الخدمات اللوجستية', phone: '0599967664', avatarColor: 'from-[#1B2D64] to-[#b8b0a5]', visaStatus: 'معفى (دخول بدون تأشيرة)', flightBooked: false, password: '123456' },
+  { id: '4', name: 'فهد بن جديد', role: 'منسق الأنشطة والبرامج', phone: '0590099919', avatarColor: 'from-[#1B2D64] to-[#2A3F7E]', visaStatus: 'معفى (دخول بدون تأشيرة)', flightBooked: true, password: '123456' },
 ];
 
 const INITIAL_ITINERARY = [
@@ -1371,12 +1365,12 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
   // IF NOT LOGGED IN: Render Direct Login Gate (Split Screen Layout)
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-0 md:p-6 bg-[#F9F7F4] relative font-sans" dir="rtl">
+      <div className="min-h-screen flex items-center justify-center p-0 md:p-6 bg-[#FAF7F2] relative font-sans" dir="rtl">
         {/* Decorative Background Accents for Mobile */}
-        <div className="absolute top-10 right-10 w-72 h-72 bg-gradient-to-br from-[#74C69D]/10 to-[#2D6A4F]/10 rounded-full blur-3xl opacity-40 md:hidden"></div>
-        <div className="absolute bottom-10 left-10 w-80 h-80 bg-gradient-to-br from-[#D4AF37]/5 to-[#74C69D]/10 rounded-full blur-3xl opacity-40 md:hidden"></div>
+        <div className="absolute top-10 right-10 w-72 h-72 bg-gradient-to-br from-[#4A6BB5]/10 to-[#1B2D64]/10 rounded-full blur-3xl opacity-40 md:hidden"></div>
+        <div className="absolute bottom-10 left-10 w-80 h-80 bg-gradient-to-br from-[#D4AF37]/5 to-[#4A6BB5]/10 rounded-full blur-3xl opacity-40 md:hidden"></div>
  
-        <div className="w-full max-w-5xl bg-white border border-[#E8E0D5] rounded-none md:rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-screen md:min-h-[640px] relative z-10">
+        <div className="w-full max-w-5xl bg-white border border-[#ECE6DC] rounded-none md:rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-screen md:min-h-[640px] relative z-10">
           
           {/* Right Side: Login Form */}
           <div className="w-full md:w-1/2 p-8 md:p-12 lg:p-16 flex flex-col justify-between space-y-8 bg-white">
@@ -1387,8 +1381,8 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                   <ShaddadLogo />
                 </div>
                 <div className="text-right">
-                  <h2 className="text-xl md:text-2xl font-black text-[#1A1A1A] m-0">رحلة صيف ٢٠٢٦</h2>
-                  <p className="text-sm md:text-base text-[#2D6A4F] font-bold m-0">صُنع بحب للأصحاب</p>
+                  <h2 className="text-xl md:text-2xl font-black text-[#14172A] m-0">رحلة صيف ٢٠٢٦</h2>
+                  <p className="text-sm md:text-base text-[#1B2D64] font-bold m-0">صُنع بحب للأصحاب</p>
                 </div>
               </div>
             </div>
@@ -1409,7 +1403,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                       placeholder="********"
                       value={newPasswordInput}
                       onChange={(e) => setNewPasswordInput(e.target.value)}
-                      className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl px-4 py-4 text-base md:text-lg text-center focus:outline-none focus:border-[#2D6A4F] focus:bg-white tracking-widest text-[#1A1A1A]"
+                      className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-4 py-4 text-base md:text-lg text-center focus:outline-none focus:border-[#1B2D64] focus:bg-white tracking-widest text-[#14172A]"
                       required
                     />
                   </div>
@@ -1421,7 +1415,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                       placeholder="********"
                       value={confirmPasswordInput}
                       onChange={(e) => setConfirmPasswordInput(e.target.value)}
-                      className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl px-4 py-4 text-base md:text-lg text-center focus:outline-none focus:border-[#2D6A4F] focus:bg-white tracking-widest text-[#1A1A1A]"
+                      className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-4 py-4 text-base md:text-lg text-center focus:outline-none focus:border-[#1B2D64] focus:bg-white tracking-widest text-[#14172A]"
                       required
                     />
                   </div>
@@ -1435,7 +1429,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                   <div className="flex gap-3 pt-2">
                     <button
                       type="submit"
-                      className="flex-1 bg-[#2D6A4F] hover:bg-[#1b4332] text-white font-black py-4 rounded-xl text-base md:text-lg transition duration-300 cursor-pointer shadow-sm text-center"
+                      className="flex-1 bg-[#1B2D64] hover:bg-[#1b4332] text-white font-black py-4 rounded-xl text-base md:text-lg transition duration-300 cursor-pointer shadow-sm text-center"
                     >
                       تحديث وحفظ كلمة المرور
                     </button>
@@ -1457,7 +1451,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                       placeholder="05XXXXXXXX"
                       value={loginPhoneInput}
                       onChange={(e) => setLoginPhoneInput(e.target.value)}
-                      className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl px-4 py-4 text-base md:text-lg text-center font-mono focus:outline-none focus:border-[#2D6A4F] focus:bg-white tracking-widest text-[#1A1A1A]"
+                      className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-4 py-4 text-base md:text-lg text-center font-mono focus:outline-none focus:border-[#1B2D64] focus:bg-white tracking-widest text-[#14172A]"
                       required
                     />
                   </div>
@@ -1469,7 +1463,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                       placeholder="********"
                       value={loginPasswordInput}
                       onChange={(e) => setLoginPasswordInput(e.target.value)}
-                      className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl px-4 py-4 text-base md:text-lg text-center focus:outline-none focus:border-[#2D6A4F] focus:bg-white tracking-widest text-[#1A1A1A]"
+                      className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-4 py-4 text-base md:text-lg text-center focus:outline-none focus:border-[#1B2D64] focus:bg-white tracking-widest text-[#14172A]"
                       required
                     />
                   </div>
@@ -1482,7 +1476,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
 
                   <button
                     type="submit"
-                    className="w-full bg-[#2D6A4F] hover:bg-[#1b4332] text-white font-black py-4 rounded-xl text-base md:text-lg transition duration-300 cursor-pointer shadow-md text-center"
+                    className="w-full bg-[#1B2D64] hover:bg-[#1b4332] text-white font-black py-4 rounded-xl text-base md:text-lg transition duration-300 cursor-pointer shadow-md text-center"
                   >
                     تأكيد ودخول للرحلة
                   </button>
@@ -1499,10 +1493,10 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
           </div>
 
           {/* Left Side: St. Basil's Green Cathedral Card (Artistic Banner Side) */}
-          <div className="hidden md:flex w-1/2 bg-[#1B4332] p-12 relative flex-col justify-between overflow-hidden">
+          <div className="hidden md:flex w-1/2 bg-[#0F1E48] p-12 relative flex-col justify-between overflow-hidden">
             {/* Background design accents */}
             <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#FFF_1px,transparent_1px)] [background-size:16px_16px]"></div>
-            <div className="absolute -top-20 -left-20 w-80 h-80 bg-gradient-to-tr from-[#74C69D]/15 to-transparent rounded-full blur-3xl"></div>
+            <div className="absolute -top-20 -left-20 w-80 h-80 bg-gradient-to-tr from-[#4A6BB5]/15 to-transparent rounded-full blur-3xl"></div>
             <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-gradient-to-bl from-[#D4AF37]/10 to-transparent rounded-full blur-3xl"></div>
             
             {/* Content card resembling the first design */}
@@ -1514,7 +1508,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                     alt="روسيا" 
                     className="w-full h-full object-cover object-center scale-105"
                   />
-                  <span className="absolute top-3 right-3 bg-white/95 text-[#1B4332] px-2.5 py-1 rounded-full text-[9px] font-black shadow-sm">
+                  <span className="absolute top-3 right-3 bg-white/95 text-[#0F1E48] px-2.5 py-1 rounded-full text-[9px] font-black shadow-sm">
                     وجهتنا: روسيا
                   </span>
                 </div>
@@ -1535,14 +1529,14 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
   }
 
   return (
-    <div className="min-h-screen bg-[#F9F7F4] text-[#1A1A1A] flex flex-col md:flex-row font-sans relative pb-20 md:pb-0" dir="rtl">
+    <div className="min-h-screen bg-[#FAF7F2] text-[#14172A] flex flex-col md:flex-row font-sans relative pb-20 md:pb-0" dir="rtl">
       
       {/* Mobile Top Header */}
-      <header className="md:hidden bg-white border-b border-[#E8E0D5] px-5 py-4 flex items-center justify-between sticky top-0 z-30 w-full shrink-0">
+      <header className="md:hidden bg-white border-b border-[#ECE6DC] px-5 py-4 flex items-center justify-between sticky top-0 z-30 w-full shrink-0">
         <div className="flex items-center gap-3">
           <button 
             onClick={() => setIsMobileMenuOpen(true)}
-            className="p-1.5 hover:bg-[#E8E0D5]/40 rounded-lg text-[#1A1A1A] cursor-pointer"
+            className="p-1.5 hover:bg-[#ECE6DC]/40 rounded-lg text-[#14172A] cursor-pointer"
             aria-label="القائمة"
           >
             <Menu size={20} />
@@ -1551,15 +1545,15 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
             <div className="w-8 h-8 shrink-0">
               <ShaddadLogo />
             </div>
-            <span className="font-extrabold text-sm text-[#1A1A1A] font-sans">رحلة صيف ٢٠٢٦</span>
+            <span className="font-extrabold text-sm text-[#14172A] font-sans">رحلة صيف ٢٠٢٦</span>
           </div>
         </div>
         
-        <div className="flex items-center gap-2 bg-[#F9F7F4] border border-[#E8E0D5] px-2.5 py-1 rounded-lg">
+        <div className="flex items-center gap-2 bg-[#FAF7F2] border border-[#ECE6DC] px-2.5 py-1 rounded-lg">
           <div className={`w-5 h-5 rounded-md bg-gradient-to-br ${currentUser.avatarColor} flex items-center justify-center font-bold text-white text-[9px]`}>
             {currentUser.name[0]}
           </div>
-          <span className="text-[10px] font-bold text-[#1A1A1A]">{currentUser.name.split(' ')[0]}</span>
+          <span className="text-[10px] font-bold text-[#14172A]">{currentUser.name.split(' ')[0]}</span>
         </div>
       </header>
 
@@ -1572,13 +1566,13 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
       )}
 
       {/* 1. RIGHT SIDEBAR */}
-      <aside className={`fixed md:sticky top-0 right-0 h-screen w-72 bg-white border-l border-[#E8E0D5] p-6 flex flex-col shrink-0 gap-6 z-50 overflow-y-auto transition-transform duration-300 md:translate-x-0 ${
+      <aside className={`fixed md:sticky top-0 right-0 h-screen w-72 bg-white border-l border-[#ECE6DC] p-6 flex flex-col shrink-0 gap-6 z-50 overflow-y-auto transition-transform duration-300 md:translate-x-0 ${
          isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full md:translate-x-0'
       }`}>
         {/* Mobile Close Button */}
         <button
           onClick={() => setIsMobileMenuOpen(false)}
-          className="md:hidden absolute top-4 left-4 p-1.5 hover:bg-[#E8E0D5]/50 rounded-lg text-gray-500 cursor-pointer"
+          className="md:hidden absolute top-4 left-4 p-1.5 hover:bg-[#ECE6DC]/50 rounded-lg text-gray-500 cursor-pointer"
           aria-label="إغلاق القائمة"
         >
           <X size={18} />
@@ -1586,36 +1580,36 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
 
         <div className="space-y-6">
           {/* Logo & Info */}
-          <div className="flex items-center gap-3 border-b border-[#E8E0D5] pb-4">
+          <div className="flex items-center gap-3 border-b border-[#ECE6DC] pb-4">
             <div className="w-10 h-10 shrink-0">
               <ShaddadLogo />
             </div>
             <div>
-              <h1 className="text-lg font-extrabold tracking-tight text-[#1A1A1A] font-sans m-0">رحلة صيف ٢٠٢٦</h1>
-              <p className="text-[10px] text-[#2D6A4F] font-bold m-0">المخطط الجماعي للأصدقاء</p>
+              <h1 className="text-lg font-extrabold tracking-tight text-[#14172A] font-sans m-0">رحلة صيف ٢٠٢٦</h1>
+              <p className="text-[10px] text-[#1B2D64] font-bold m-0">المخطط الجماعي للأصدقاء</p>
             </div>
           </div>
 
           {/* Current Traveler Profile Card */}
-          <div className="bg-[#F9F7F4] border border-[#E8E0D5] p-4 rounded-xl space-y-2">
+          <div className="bg-[#FAF7F2] border border-[#ECE6DC] p-4 rounded-xl space-y-2">
             <div className="flex items-center gap-2.5">
               <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${currentUser.avatarColor} flex items-center justify-center font-bold text-white text-xs`}>
                 {currentUser.name[0]}
               </div>
               <div className="text-right">
                 <div className="flex items-center gap-1">
-                  <h4 className="font-bold text-[#1A1A1A] text-xs">{currentUser.name}</h4>
+                  <h4 className="font-bold text-[#14172A] text-xs">{currentUser.name}</h4>
                   {/* Private Group Planner */}
                 </div>
                 <p className="text-[10px] text-gray-500 m-0">{currentUser.role}</p>
               </div>
             </div>
             
-            <div className="border-t border-[#E8E0D5]/60 pt-2 flex items-center justify-between text-[10px] text-gray-500">
+            <div className="border-t border-[#ECE6DC]/60 pt-2 flex items-center justify-between text-[10px] text-gray-500">
               <span>الجوال: <strong className="font-mono">{currentUser.phone}</strong></span>
               <button 
                 onClick={handleLogout}
-                className="text-[#2D6A4F] hover:text-red-700 flex items-center gap-0.5 font-bold cursor-pointer"
+                className="text-[#1B2D64] hover:text-red-700 flex items-center gap-0.5 font-bold cursor-pointer"
                 title="تسجيل الخروج"
               >
                 <LogOut size={11} />
@@ -1649,8 +1643,8 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                   }}
                   className={`flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 text-right cursor-pointer ${
                     isActive 
-                      ? 'bg-[#2D6A4F] text-white font-bold' 
-                      : 'text-gray-600 hover:text-[#1A1A1A] hover:bg-[#E8E0D5]/40'
+                      ? 'bg-[#1B2D64] text-white font-bold' 
+                      : 'text-gray-600 hover:text-[#14172A] hover:bg-[#ECE6DC]/40'
                   }`}
                 >
                   <Icon size={14} />
@@ -1663,15 +1657,15 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
         </div>
 
         {/* Footer in Sidebar — credit moved here from login screen */}
-        <div className="text-center space-y-1.5 border-t border-[#E8E0D5] pt-4 font-sans">
-          <p className="text-xs text-[#2D6A4F] font-bold m-0 leading-relaxed">
+        <div className="text-center space-y-1.5 border-t border-[#ECE6DC] pt-4 font-sans">
+          <p className="text-xs text-[#1B2D64] font-bold m-0 leading-relaxed">
             صُنع بحب للأصحاب
           </p>
           <p className="text-[11px] text-gray-500 m-0">
             نظام تفاعلي لتنسيق رحلتنا إلى روسيا 2026
           </p>
           <p className="text-[10px] text-gray-500 font-medium m-0">
-            بإشراف وتنظيم: <span className="text-[#1A1A1A] font-bold">عبدالله الزهراني</span>
+            بإشراف وتنظيم: <span className="text-[#14172A] font-bold">عبدالله الزهراني</span>
           </p>
           <p className="text-[9px] text-gray-400 font-mono m-0 pt-1">
             Summer Trip Planner © 2026
@@ -1682,7 +1676,17 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
       {/* 2. LEFT MAIN CONTENT */}
       <main className="flex-1 p-6 md:p-10 overflow-y-auto">
 
-
+        {/* INNER-PAGE BACK NAVIGATION — appears on every tab except home/dashboard */}
+        {activeTab !== 'dashboard' && (
+          <button
+            onClick={() => setActiveTab('dashboard')}
+            className="md:hidden flex items-center gap-1.5 text-[#1B2D64] font-bold text-sm mb-4 px-3 py-2 -mr-3 rounded-lg hover:bg-[#E8ECF5] transition cursor-pointer"
+            aria-label="العودة للرئيسية"
+          >
+            <ChevronLeft size={18} />
+            <span>الرئيسية</span>
+          </button>
+        )}
 
         {/* SUPABASE CONNECTION/SETUP WARNING */}
         {dataLoadError && (
@@ -1727,326 +1731,263 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
             <ul className="text-[11px] text-rose-800 list-disc list-inside space-y-1 pr-4">
               {criticalOverdueTasksList.map((t) => (
                 <li key={t.id} className="font-medium">
-                  {t.title} - <span className="font-extrabold text-[#2D6A4F]">{t.assignee}</span>
+                  {t.title} - <span className="font-extrabold text-[#1B2D64]">{t.assignee}</span>
                 </li>
               ))}
             </ul>
           </div>
         )}
 
-        {/* TAB 1: DASHBOARD */}
+        {/* TAB 1: DASHBOARD — Tile-based home redesign (Russian palette) */}
         {activeTab === 'dashboard' && (
-          <div className="space-y-8 animate-fadeIn">
-            
-            {/* Lighter/Premium Hero Section */}
-            <div className="hero-container relative h-48 md:h-72 rounded-2xl border border-[#E8E0D5] shadow-sm flex items-end">
-              <img 
-                src={russiaHero} 
-                alt="Russia Custom illustration" 
-                className="hero-image absolute inset-0 w-full h-full object-cover object-center animate-fadeIn"
-              />
-              <div className="relative p-6 md:p-8 text-right space-y-1 z-10">
-                <span className="bg-[#2D6A4F] text-white px-2.5 py-0.5 rounded text-[10px] font-bold">صيف 2026</span>
-                <h2 className="text-2xl md:text-4xl font-extrabold text-[#1A1A1A] m-0">رحلتنا الصيفية إلى روسيا</h2>
-                <p className="text-gray-600 text-xs md:text-sm max-w-xl font-light">
-                  المخطط الجماعي لرحلة روسيا | من {getDateForDay(tripStartDate, 1)} إلى {getDateForDay(tripStartDate, 12)}
-                </p>
+          <div className="space-y-6 md:space-y-7 animate-fadeIn">
+
+            {/* ─── 1. HERO: greeting + compact countdown ─── */}
+            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1B2D64] via-[#243A7A] to-[#0F1E48] text-white p-6 md:p-8 shadow-lg">
+              {/* Russian flag accent stripe — subtle, top edge */}
+              <div className="absolute top-0 left-0 right-0 h-1.5 flex">
+                <div className="flex-1 bg-white"></div>
+                <div className="flex-1 bg-[#1B2D64] opacity-80"></div>
+                <div className="flex-1 bg-[#D52B1E]"></div>
               </div>
-            </div>
-
-            {/* Travel Quote Banner */}
-            <div className="bg-gradient-to-r from-[#2D6A4F]/10 via-[#74C69D]/5 to-transparent border-r-4 border-[#2D6A4F] p-4 rounded-xl text-right animate-fadeIn">
-              <p className="text-xs text-[#1B4332] font-black italic m-0">
-                « السفر ميزان الأخلاق، وترياق العقول، ومولد الذكريات الجميلة التي لا تنتهي. سفرة ممتعة يا أصدقاء »
-              </p>
-            </div>
-
-            {/* COUNTDOWN TIMER WIDGET */}
-            <div className="white-card p-6 rounded-2xl space-y-4">
-              <div className="flex items-center justify-between border-b border-[#E8E0D5] pb-3">
-                <div className="flex items-center gap-2">
-                  <Clock className="text-[#2D6A4F]" size={16} />
-                  <h3 className="text-xs font-black text-gray-800">مؤقت العد التنازلي التفاعلي لإنطلاق الرحلة</h3>
-                </div>
-                <span className="text-[10px] text-[#2D6A4F] font-bold">تاريخ البداية الحالي: {tripStartDate}</span>
-              </div>
-              
-              {timeLeft.isPast ? (
-                <div className="text-center py-4 bg-[#2D6A4F]/10 border border-[#2D6A4F]/20 text-[#2D6A4F] rounded-xl font-bold text-sm">
-                  الرحلة نشطة حالياً وسعيدة للشباب!
-                </div>
-              ) : (
-                <div className="grid grid-cols-4 gap-4 max-w-lg mx-auto text-center font-mono">
-                  {[
-                    { label: 'أيام', val: timeLeft.days },
-                    { label: 'ساعات', val: timeLeft.hours },
-                    { label: 'دقائق', val: timeLeft.minutes },
-                    { label: 'ثواني', val: timeLeft.seconds }
-                  ].map((unit, uIdx) => (
-                    <div key={uIdx} className="bg-[#F9F7F4] border border-[#E8E0D5] p-3 rounded-xl">
-                      <div className="text-xl md:text-2xl font-black text-[#2D6A4F]">{String(unit.val).padStart(2, '0')}</div>
-                      <div className="text-[9px] font-bold text-gray-400 mt-1">{unit.label}</div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Two-Column Grid Layout for Widgets and Progress */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-              {/* Left/Main Column: Simulated active day, leader checklists, and Abdullah's admin alert controls */}
-              <div className="lg:col-span-8 space-y-6">
-                
-                {/* Simulated Day & Leader Widget */}
-                {simulatedActiveDay > 0 && (
-                  <div className="space-y-4">
-                    <div className="bg-emerald-50 border border-emerald-200 p-5 rounded-2xl flex items-center justify-between gap-4 text-right shadow-xs">
-                      <div className="flex items-center gap-3">
-                        <Crown className="text-emerald-700 animate-bounce" size={24} />
-                        <div>
-                          <h4 className="font-extrabold text-xs text-emerald-800">اليوم النشط للرحلة حالياً: اليوم {simulatedActiveDay}</h4>
-                          <p className="text-[11px] text-emerald-700 font-medium">قائد اليوم المسؤول عن التوجيه والتنظيم: <strong className="font-bold underline">{activeLeaderName || 'عبدالله الزهراني'}</strong></p>
-                        </div>
-                      </div>
-                      <span className="text-[9px] bg-emerald-600 text-white px-3 py-1 rounded-full font-bold animate-pulse">اليوم نشط</span>
-                    </div>
-
-                    {/* Daily Leader Checklist Card */}
-                    {(() => {
-                      const leaderInfo = getLeaderRoleAndChecklist(activeLeaderName || 'عبدالله الزهراني');
-                      return (
-                        <div className={`p-6 rounded-2xl border ${leaderInfo.themeClass} space-y-4 text-right animate-fadeIn shadow-xs`}>
-                          <div className="flex items-center justify-between border-b border-current/10 pb-3">
-                            <div className="flex items-center gap-2">
-                              <Crown size={16} />
-                              <h4 className="text-xs font-black">مهام القيادة التنفيذية لليوم</h4>
-                            </div>
-                            <span className={`text-[9px] font-black border px-2.5 py-0.5 rounded-full ${leaderInfo.badgeClass}`}>
-                              {leaderInfo.role}
-                            </span>
-                          </div>
-
-                          <p className="text-[11px] opacity-80 leading-relaxed font-light">
-                            تتطلب قيادة اليوم متابعة المهام التشغيلية التالية وضمان إنجازها لتسهيل ترحال المجموعة:
-                          </p>
-
-                          <div className="space-y-2.5">
-                            {leaderInfo.tasks.map((taskText, taskIdx) => {
-                              const stateKey = `${simulatedActiveDay}-${taskIdx}`;
-                              const isChecked = !!leaderChecklistState[stateKey];
-                              return (
-                                <label 
-                                  key={taskIdx} 
-                                  className={`flex items-start gap-3 p-3 bg-white/70 border border-black/5 hover:border-black/10 rounded-xl cursor-pointer transition select-none ${
-                                    isChecked ? 'opacity-70 line-through text-gray-500' : ''
-                                  }`}
-                                >
-                                  <input 
-                                    type="checkbox"
-                                    checked={isChecked}
-                                    onChange={(e) => {
-                                      setLeaderChecklistState(prev => ({
-                                        ...prev,
-                                        [stateKey]: e.target.checked
-                                      }));
-                                    }}
-                                    className="w-4 h-4 rounded text-[#2D6A4F] focus:ring-[#2D6A4F] mt-0.5 cursor-pointer shrink-0"
-                                  />
-                                  <span className="text-xs font-medium leading-relaxed">{taskText}</span>
-                                </label>
-                              );
-                            })}
-                          </div>
-
-                          {/* Checklist completion progress bar */}
-                          {(() => {
-                            const total = leaderInfo.tasks.length;
-                            const completed = leaderInfo.tasks.filter((_, idx) => !!leaderChecklistState[`${simulatedActiveDay}-${idx}`]).length;
-                            const pct = Math.round((completed / total) * 100);
-                            return (
-                              <div className="pt-2">
-                                <div className="flex justify-between items-center text-[10px] font-bold text-gray-600 mb-1.5">
-                                  <span>نسبة إنجاز مهام القائد اليومي</span>
-                                  <span>{completed} من {total} ({pct}%)</span>
-                                </div>
-                                <div className="w-full bg-black/5 rounded-full h-1.5 overflow-hidden">
-                                  <div 
-                                    className="bg-[#2D6A4F] h-1.5 rounded-full transition-all duration-300"
-                                    style={{ width: `${pct}%` }}
-                                  />
-                                </div>
-                              </div>
-                            );
-                          })()}
-                        </div>
-                      );
-                    })()}
-                  </div>
-                )}
-
-                {/* Group Announcements from Admin */}
-                {marketingBanners.filter(b => b.isActive).length > 0 && (
-                  <div className="white-card p-6 rounded-2xl space-y-4 text-right shadow-xs animate-fadeIn">
-                    <div className="flex items-center gap-2 border-b border-[#E8E0D5] pb-3 justify-start">
-                      <Megaphone className="text-[#2D6A4F]" size={16} />
-                      <h3 className="text-xs font-black text-gray-800">إعلانات وتنبيهات الإدارة</h3>
-                    </div>
-                    <div className="grid grid-cols-1 gap-4">
-                      {marketingBanners
-                        .filter(b => b.isActive)
-                        .map((banner) => (
-                          <div 
-                            key={banner.id}
-                            className={`border p-4.5 rounded-2xl flex items-start justify-between gap-3 text-right shadow-2xs relative ${
-                              banner.theme === 'gold' 
-                                ? 'bg-amber-50/70 border-amber-300 text-amber-900' 
-                                : banner.theme === 'green'
-                                  ? 'bg-emerald-50/70 border-emerald-300 text-emerald-900'
-                                  : 'bg-blue-50/70 border-blue-300 text-blue-900'
-                            }`}
-                          >
-                            <div className="flex gap-2.5">
-                              <Megaphone className="shrink-0 mt-0.5 text-current opacity-80" size={15} />
-                              <div className="space-y-0.5 flex-1">
-                                <h4 className="font-extrabold text-xs text-current m-0">{banner.title}</h4>
-                                <p className="text-[11px] font-medium leading-relaxed mt-1 mb-0 text-current/90">{banner.text}</p>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                    </div>
-                  </div>
-                )}
+              {/* Soft decorative dome silhouette */}
+              <div className="absolute -bottom-6 -left-6 w-40 h-40 opacity-10 pointer-events-none">
+                <ShaddadLogo />
               </div>
 
-              {/* Right Column: Travelers Preparation progress */}
-              <div className="lg:col-span-4 space-y-6">
-                <div className="white-card p-6 rounded-2xl space-y-4 text-right shadow-xs">
-                  <div className="flex items-center gap-2 border-b border-gray-100 pb-3 justify-start">
-                    <Briefcase className="text-[#2D6A4F] shrink-0" size={16} />
-                    <h3 className="text-xs font-black text-gray-800">مؤشر جاهزية الأصدقاء للرحلة</h3>
-                  </div>
-                  <p className="text-[10px] text-gray-400 leading-relaxed font-light">
-                    يقيس هذا المؤشر نسبة جاهزية كل مسافر بناءً على إنجاز قائمة مستلزمات حقيبته ورفع وثائق السفر الرسمية بنجاح.
+              <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+                <div className="space-y-2 text-right">
+                  <p className="text-xs md:text-sm font-medium text-white/70">رحلة صيف ٢٠٢٦ · موسكو وسانت بطرسبرغ</p>
+                  <h2 className="text-2xl md:text-3xl font-black leading-tight">
+                    حياك يا {currentUser.name.split(' ')[0]}
+                  </h2>
+                  <p className="text-sm md:text-base text-white/80">
+                    {timeLeft.isPast
+                      ? 'الرحلة نشطة الآن — استمتعوا!'
+                      : `باقي ${timeLeft.days} يوم على انطلاق الرحلة`}
                   </p>
-
-                  <div className="space-y-4">
-                    {travelers.map((t) => {
-                      const packing = personalPacking[t.id] || [];
-                      const docs = personalDocs[t.id] || [];
-                      const totalPacking = packing.length;
-                      const completedPacking = packing.filter(item => item.checked).length;
-                      const totalDocs = docs.length;
-                      const completedDocs = docs.filter(doc => doc.fileData || doc.status === 'معتمد').length;
-                      
-                      const total = totalPacking + totalDocs;
-                      const pct = total === 0 ? 0 : Math.round(((completedPacking + completedDocs) / total) * 100);
-
-                      return (
-                        <div key={t.id} className="space-y-1.5">
-                          <div className="flex items-center justify-between text-xs">
-                            <div className="flex items-center gap-2">
-                              <div className={`w-6.5 h-6.5 rounded-md bg-gradient-to-br ${t.avatarColor} flex items-center justify-center font-black text-white text-[9px]`}>
-                                {t.name[0]}
-                              </div>
-                              <span className="font-extrabold text-gray-700">{t.name.split(' ')[0]}</span>
-                            </div>
-                            <span className="font-mono font-bold text-[#2D6A4F]">{pct}%</span>
-                          </div>
-                          <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
-                            <div 
-                              className="bg-gradient-to-l from-[#2D6A4F] to-[#74C69D] h-full rounded-full transition-all duration-500" 
-                              style={{ width: `${pct}%` }}
-                            ></div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
                 </div>
+
+                {!timeLeft.isPast && (
+                  <div className="flex gap-2 md:gap-3 self-end md:self-auto" dir="ltr">
+                    {[
+                      { v: timeLeft.days,    l: 'يوم' },
+                      { v: timeLeft.hours,   l: 'ساعة' },
+                      { v: timeLeft.minutes, l: 'دقيقة' },
+                    ].map((u, i) => (
+                      <div key={i} className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl px-3 py-2 text-center min-w-[58px]">
+                        <div className="text-xl md:text-2xl font-black tabular-nums">{String(u.v).padStart(2, '0')}</div>
+                        <div className="text-[10px] md:text-xs text-white/75 mt-0.5">{u.l}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
-
-
-            {/* Quick Stats Grid */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+            {/* ─── 2. MAIN TILE GRID: 4 primary destinations ─── */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
               {[
-                { label: 'الوجهة والمدة', value: '3 وجهات | 12 يوماً', desc: 'موسكو، ريف موسكو، سان بطرسبرغ', icon: Calendar, color: 'text-[#2D6A4F]' },
-                { label: 'رصيد الصندوق المتبقي', value: `${financeStats.remainingFund.toLocaleString()} ر.س`, desc: `المجمع: ${financeStats.totalFundCollected.toLocaleString()} ر.س`, icon: Coins, color: 'text-amber-700' },
-                { label: 'إنجاز المهام المشتركة', value: `${financeStats.taskPercent}%`, desc: `${financeStats.completedTasks} من أصل ${financeStats.totalTasks} مهام`, icon: CheckSquare, color: 'text-blue-700' },
-                { label: 'حقيبتك الشخصية', value: `${financeStats.packingPercent}%`, desc: `${financeStats.packedCount} من أصل ${financeStats.totalPacking} مجهزة`, icon: Briefcase, color: 'text-rose-700' },
-              ].map((card, i) => {
-                const Icon = card.icon;
+                {
+                  id: 'itinerary',
+                  title: 'جدول الأيام',
+                  subtitle: 'مسار الرحلة الكامل',
+                  stat: `${itinerary.length} يوم`,
+                  icon: Calendar,
+                  iconBg: 'bg-[#1B2D64]',
+                  iconColor: 'text-white',
+                },
+                {
+                  id: 'bookings',
+                  title: 'الحجوزات',
+                  subtitle: 'الطيران والفنادق والقطارات',
+                  stat: `${financeStats.confirmedBookings}/${financeStats.totalBookings} مؤكد`,
+                  icon: Plane,
+                  iconBg: 'bg-[#D52B1E]',
+                  iconColor: 'text-white',
+                },
+                {
+                  id: 'expenses',
+                  title: 'المالية والقطة',
+                  subtitle: 'الصندوق والمصروفات',
+                  stat: `${financeStats.remainingFund.toLocaleString()} ر.س`,
+                  icon: Coins,
+                  iconBg: 'bg-[#1B2D64]',
+                  iconColor: 'text-white',
+                },
+                {
+                  id: 'personal',
+                  title: 'حقيبتي وأوراقي',
+                  subtitle: 'جاهزيتك الشخصية',
+                  stat: `${financeStats.packingPercent}% جاهز`,
+                  icon: Briefcase,
+                  iconBg: 'bg-[#D52B1E]',
+                  iconColor: 'text-white',
+                },
+              ].map((tile) => {
+                const Icon = tile.icon;
                 return (
-                  <div key={i} className="white-card p-5 rounded-2xl flex items-center justify-between gap-4">
-                    <div className="space-y-0.5">
-                      <p className="text-[10px] text-gray-500 font-bold">{card.label}</p>
-                      <h3 className="text-base md:text-lg font-black text-[#1A1A1A]">{card.value}</h3>
-                      <p className="text-[9px] text-gray-400 font-medium">{card.desc}</p>
+                  <button
+                    key={tile.id}
+                    onClick={() => setActiveTab(tile.id)}
+                    className="home-tile"
+                  >
+                    <div className={`home-tile-icon ${tile.iconBg} ${tile.iconColor}`}>
+                      <Icon size={22} />
                     </div>
-                    <div className={`w-10 h-10 rounded-lg bg-[#F9F7F4] border border-[#E8E0D5] flex items-center justify-center ${card.color}`}>
-                      <Icon size={18} />
+                    <div className="space-y-1">
+                      <h3 className="font-black text-sm md:text-base text-[#14172A]">{tile.title}</h3>
+                      <p className="text-[11px] md:text-xs text-gray-500 leading-snug">{tile.subtitle}</p>
                     </div>
-                  </div>
+                    <div className="text-xs md:text-sm font-bold text-[#1B2D64] tabular-nums">
+                      {tile.stat}
+                    </div>
+                  </button>
                 );
               })}
             </div>
 
-            {/* Travelers list */}
-            <div className="white-card p-6 rounded-2xl space-y-4">
-              <div className="flex items-center justify-between border-b border-[#E8E0D5] pb-3">
-                <div className="flex items-center gap-2">
-                  <Users className="text-[#2D6A4F]" size={18} />
-                  <h3 className="text-sm font-bold text-[#1A1A1A]">أعضاء الرحلة وجاهزيتهم</h3>
-                </div>
-                <span className="text-[10px] text-gray-400 font-bold">4 أعضاء</span>
+            {/* ─── 3. SECONDARY TILES: Tasks + Proposals ─── */}
+            <div className="grid grid-cols-2 gap-3 md:gap-4">
+              {[
+                {
+                  id: 'tasks',
+                  title: 'المهام المشتركة',
+                  stat: `${financeStats.completedTasks}/${financeStats.totalTasks} منجزة`,
+                  icon: CheckSquare,
+                },
+                {
+                  id: 'proposals',
+                  title: 'المقترحات والتصويت',
+                  stat: 'اقترح أو صوّت',
+                  icon: Vote,
+                },
+              ].map((tile) => {
+                const Icon = tile.icon;
+                return (
+                  <button
+                    key={tile.id}
+                    onClick={() => setActiveTab(tile.id)}
+                    className="bg-white border border-[#ECE6DC] rounded-2xl p-4 flex items-center gap-3 text-right cursor-pointer transition hover:border-[#1B2D64] hover:shadow-md active:scale-[0.98]"
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-[#E8ECF5] text-[#1B2D64] flex items-center justify-center shrink-0">
+                      <Icon size={18} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-bold text-xs md:text-sm text-[#14172A]">{tile.title}</h4>
+                      <p className="text-[11px] text-gray-500 truncate">{tile.stat}</p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* ─── 4. TEAM READINESS: 4 simple progress bars ─── */}
+            <div className="bg-white border border-[#ECE6DC] rounded-3xl p-5 md:p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-black text-sm md:text-base text-[#14172A]">جاهزية الفريق</h3>
+                <Users className="text-[#1B2D64]" size={18} />
               </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {travelers.map((traveler) => {
-                  const isSelf = traveler.id === currentUser.id;
-                  
-                  const userList = personalPacking[traveler.id] || [];
-                  const packed = userList.filter(item => item.checked).length;
-                  const total = userList.length;
-                  const packingPercent = total ? Math.round((packed / total) * 100) : 0;
-                  
+              <div className="space-y-3">
+                {travelers.map((t) => {
+                  const packing = personalPacking[t.id] || [];
+                  const docs = personalDocs[t.id] || [];
+                  const totalP = packing.length;
+                  const donePacking = packing.filter(i => i.checked).length;
+                  const totalD = docs.length;
+                  const doneDocs = docs.filter(d => d.fileData || d.status === 'معتمد').length;
+                  const total = totalP + totalD;
+                  const done = donePacking + doneDocs;
+                  const pct = total === 0 ? 0 : Math.round((done / total) * 100);
+                  const isYou = t.id === currentUser.id;
                   return (
-                    <div 
-                      key={traveler.id} 
-                      className={`p-4 rounded-xl border flex flex-col justify-between gap-3 transition-all ${
-                        isSelf ? 'border-[#2D6A4F] bg-[#2D6A4F]/5' : 'border-[#E8E0D5]/70 bg-white'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${traveler.avatarColor} flex items-center justify-center font-bold text-white text-[10px]`}>
-                          {traveler.name[0]}
+                    <div key={t.id} className="space-y-1.5">
+                      <div className="flex items-center justify-between text-xs md:text-sm">
+                        <div className="flex items-center gap-2">
+                          <div className={`w-7 h-7 rounded-lg bg-gradient-to-br ${t.avatarColor} text-white font-black text-xs flex items-center justify-center`}>
+                            {t.name[0]}
+                          </div>
+                          <span className="font-bold text-[#14172A]">{t.name.split(' ')[0]}</span>
+                          {isYou && <span className="text-[9px] bg-[#1B2D64]/10 text-[#1B2D64] font-bold px-1.5 py-0.5 rounded">أنت</span>}
                         </div>
-                        <div className="text-right">
-                          <h4 className="font-bold text-[#1A1A1A] text-xs flex items-center gap-1">
-                            {traveler.name}
-                            {isSelf && <span className="bg-[#2D6A4F]/10 text-[#2D6A4F] border border-[#2D6A4F]/20 px-1 py-0.5 rounded text-[8px]">أنت</span>}
-                          </h4>
-                          <p className="text-[9px] text-gray-500 m-0">{traveler.role}</p>
-                        </div>
+                        <span className="font-mono font-bold text-[#1B2D64] tabular-nums">{pct}%</span>
                       </div>
-
-                      <div className="bg-[#F9F7F4] border border-[#E8E0D5] p-2 rounded-lg flex items-center justify-between text-[10px]">
-                        <span className="text-gray-400 font-bold">حقيبة السفر:</span>
-                        {isSelf ? (
-                          <span className="text-[#2D6A4F] font-black">{packingPercent}% ({packed}/{total})</span>
-                        ) : (
-                          <span className="text-gray-400 font-bold flex items-center gap-0.5">
-                            <EyeOff size={10} className="text-gray-400" />
-                            <span>{packingPercent}% (خاص)</span>
-                          </span>
-                        )}
+                      <div className="w-full bg-[#F2EEE7] h-2 rounded-full overflow-hidden">
+                        <div
+                          className="h-full rounded-full transition-all duration-500"
+                          style={{
+                            width: `${pct}%`,
+                            background: pct === 100 ? '#1B2D64' : 'linear-gradient(to left, #1B2D64, #4A6BB5)'
+                          }}
+                        ></div>
                       </div>
                     </div>
                   );
                 })}
               </div>
+            </div>
+
+            {/* ─── 5. ADMIN-ONLY: Active day + leader checklist ─── */}
+            {simulatedActiveDay > 0 && (() => {
+              const leaderInfo = getLeaderRoleAndChecklist(activeLeaderName || 'عبدالله الزهراني');
+              return (
+                <div className="bg-white border border-[#ECE6DC] rounded-3xl p-5 md:p-6 space-y-4">
+                  <div className="flex items-center justify-between border-b border-[#ECE6DC] pb-3">
+                    <div className="flex items-center gap-2">
+                      <Crown className="text-[#D52B1E]" size={18} />
+                      <h3 className="font-black text-sm md:text-base text-[#14172A]">
+                        قائد اليوم {simulatedActiveDay}: {activeLeaderName}
+                      </h3>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-500">{leaderInfo.role}</p>
+                  <div className="space-y-2">
+                    {leaderInfo.tasks.map((taskText, idx) => {
+                      const stateKey = `${simulatedActiveDay}-${idx}`;
+                      const isChecked = !!leaderChecklistState[stateKey];
+                      return (
+                        <label
+                          key={idx}
+                          className={`flex items-start gap-3 p-3 bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl cursor-pointer select-none ${isChecked ? 'opacity-60 line-through' : ''}`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={(e) => setLeaderChecklistState(prev => ({ ...prev, [stateKey]: e.target.checked }))}
+                            className="w-4 h-4 mt-0.5 cursor-pointer shrink-0 accent-[#1B2D64]"
+                          />
+                          <span className="text-xs md:text-sm">{taskText}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* ─── 6. ADMIN ANNOUNCEMENTS (if any) ─── */}
+            {marketingBanners.filter(b => b.isActive).length > 0 && (
+              <div className="space-y-3">
+                {marketingBanners.filter(b => b.isActive).map((banner) => (
+                  <div
+                    key={banner.id}
+                    className="bg-[#FCE9E8] border border-[#D52B1E]/30 rounded-2xl p-4 flex items-start gap-3 text-right"
+                  >
+                    <Megaphone className="text-[#D52B1E] shrink-0 mt-0.5" size={18} />
+                    <div className="flex-1">
+                      <h4 className="font-black text-sm text-[#14172A]">{banner.title}</h4>
+                      <p className="text-xs text-[#14172A]/80 mt-1 leading-relaxed">{banner.text}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* ─── 7. SINGLE QUOTE — focused, calm ─── */}
+            <div className="text-center py-4 px-2">
+              <p className="text-sm md:text-base text-gray-500 italic font-medium leading-relaxed max-w-md mx-auto">
+                « الذكريات التي نصنعها مع الأصدقاء أثمن ما نحمله في حقائبنا »
+              </p>
             </div>
           </div>
         )}
@@ -2055,42 +1996,42 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
         {activeTab === 'personal' && (
           <div className="space-y-8 animate-fadeIn">
             {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#E8E0D5] pb-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#ECE6DC] pb-6">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#2D6A4F]/10 border border-[#2D6A4F]/20 flex items-center justify-center text-[#2D6A4F]">
+                <div className="w-10 h-10 rounded-xl bg-[#1B2D64]/10 border border-[#1B2D64]/20 flex items-center justify-center text-[#1B2D64]">
                   <Lock size={18} />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-[#1A1A1A]">
+                  <h2 className="text-xl font-bold text-[#14172A]">
                     المساحة الشخصية والوثائق لـ {currentUser.name}
                   </h2>
                   <p className="text-xs text-gray-500 mt-1">تجهيز حقيبتك ومستندات سفرك. هذه البيانات خاصة بك وتظهر فقط للمستخدم النشط.</p>
                 </div>
               </div>
               
-              <div className="flex items-center gap-2 bg-[#E8E0D5]/50 border border-[#E8E0D5] px-4 py-2 rounded-xl text-xs">
+              <div className="flex items-center gap-2 bg-[#ECE6DC]/50 border border-[#ECE6DC] px-4 py-2 rounded-xl text-xs">
                 <span className="text-gray-500">جوال الدخول:</span>
-                <span className="font-bold font-mono text-[#2D6A4F]">{currentUser.phone}</span>
+                <span className="font-bold font-mono text-[#1B2D64]">{currentUser.phone}</span>
               </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Document Tracker List (FileUpload integration) */}
               <div className="white-card p-6 rounded-2xl space-y-6">
-                <div className="flex items-center gap-2 border-b border-[#E8E0D5] pb-3">
-                  <FileText className="text-[#2D6A4F]" size={18} />
-                  <h3 className="text-sm font-bold text-[#1A1A1A]">أوراق ومستندات السفر الرسمية</h3>
+                <div className="flex items-center gap-2 border-b border-[#ECE6DC] pb-3">
+                  <FileText className="text-[#1B2D64]" size={18} />
+                  <h3 className="text-sm font-bold text-[#14172A]">أوراق ومستندات السفر الرسمية</h3>
                 </div>
 
                 <div className="space-y-4">
                   {(personalDocs[currentUser.id] || []).map((doc) => {
                     const isExpiring = doc.id === 'doc1' && doc.expiryDate && isDocExpiringSoon(doc.expiryDate);
                     return (
-                      <div key={doc.id} className={`bg-[#F9F7F4] p-4 rounded-xl border space-y-2 text-right transition-colors ${
-                        isExpiring ? 'border-red-300 bg-red-50/20' : 'border-[#E8E0D5]/70'
+                      <div key={doc.id} className={`bg-[#FAF7F2] p-4 rounded-xl border space-y-2 text-right transition-colors ${
+                        isExpiring ? 'border-red-300 bg-red-50/20' : 'border-[#ECE6DC]/70'
                       }`}>
                         <div>
-                          <h4 className="font-bold text-[#1A1A1A] text-xs flex items-center justify-between gap-1">
+                          <h4 className="font-bold text-[#14172A] text-xs flex items-center justify-between gap-1">
                             <span>{doc.title}</span>
                             {doc.id === 'doc1' && doc.expiryDate && (
                               <span className={`text-[8px] font-bold border px-1.5 py-0.5 rounded-full ${
@@ -2105,12 +2046,12 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                           <span className="text-[9px] text-gray-400 block mt-0.5">مطلوب لـ: {doc.requiredFor}</span>
                         </div>
 
-                        <div className="flex items-center justify-between border-t border-[#E8E0D5]/60 pt-2 text-xs">
+                        <div className="flex items-center justify-between border-t border-[#ECE6DC]/60 pt-2 text-xs">
                           <span className="text-[10px] text-gray-500">الحالة:</span>
                           <select
                             value={doc.status}
                             onChange={(e) => changeDocumentStatus(doc.id, e.target.value)}
-                            className="bg-white border border-[#E8E0D5] rounded-lg px-2 py-1 text-[10px] text-[#1A1A1A] focus:outline-none focus:border-[#2D6A4F] text-right cursor-pointer"
+                            className="bg-white border border-[#ECE6DC] rounded-lg px-2 py-1 text-[10px] text-[#14172A] focus:outline-none focus:border-[#1B2D64] text-right cursor-pointer"
                           >
                             <option value="لم يكتمل">لم يكتمل</option>
                             <option value="قيد المعالجة">قيد المعالجة</option>
@@ -2135,7 +2076,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                                   return { ...prev, [currentUser.id]: userDocs };
                                 });
                               }}
-                              className="bg-white border border-[#E8E0D5] rounded-lg px-2 py-1 text-[10px] focus:outline-none focus:border-[#2D6A4F] font-mono text-left"
+                              className="bg-white border border-[#ECE6DC] rounded-lg px-2 py-1 text-[10px] focus:outline-none focus:border-[#1B2D64] font-mono text-left"
                             />
                           </div>
                         )}
@@ -2150,11 +2091,11 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
 
                         {/* File Upload / Image Preview */}
                         {doc.fileData ? (
-                          <div className="pt-2 flex items-center justify-between bg-white border border-[#E8E0D5] px-3 py-2 rounded-xl text-xs gap-2">
+                          <div className="pt-2 flex items-center justify-between bg-white border border-[#ECE6DC] px-3 py-2 rounded-xl text-xs gap-2">
                             <button
                               type="button"
                               onClick={() => setSelectedDocForView({ name: doc.title, data: doc.fileData })}
-                              className="text-[#2D6A4F] hover:underline flex items-center gap-1 text-[10px] font-bold cursor-pointer"
+                              className="text-[#1B2D64] hover:underline flex items-center gap-1 text-[10px] font-bold cursor-pointer"
                             >
                               <Eye size={12} />
                               <span>معاينة المستند</span>
@@ -2180,7 +2121,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                             />
                             <label 
                               htmlFor={`file-${doc.id}`}
-                              className="w-full bg-white hover:bg-gray-50 border border-dashed border-[#E8E0D5] hover:border-[#2D6A4F] py-2 px-3 rounded-xl text-[10px] text-gray-500 font-bold flex items-center justify-center gap-1.5 cursor-pointer transition"
+                              className="w-full bg-white hover:bg-gray-50 border border-dashed border-[#ECE6DC] hover:border-[#1B2D64] py-2 px-3 rounded-xl text-[10px] text-gray-500 font-bold flex items-center justify-center gap-1.5 cursor-pointer transition"
                             >
                               <Upload size={12} />
                               <span>رفع صورة المستند (مجاناً)</span>
@@ -2195,32 +2136,32 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
 
               {/* Personal Packing Checklist */}
               <div className="lg:col-span-2 white-card p-6 rounded-2xl space-y-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E8E0D5] pb-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#ECE6DC] pb-3">
                   <div className="flex items-center gap-2">
-                    <Briefcase className="text-[#2D6A4F]" size={18} />
-                    <h3 className="text-sm font-bold text-[#1A1A1A]">حقيبتي الشخصية (مستلزمات السفر)</h3>
+                    <Briefcase className="text-[#1B2D64]" size={18} />
+                    <h3 className="text-sm font-bold text-[#14172A]">حقيبتي الشخصية (مستلزمات السفر)</h3>
                   </div>
                   <div className="flex items-center gap-2 text-xs">
                     <span className="text-gray-500 font-bold">الأغراض المجهزة:</span>
-                    <span className="bg-[#2D6A4F]/10 text-[#2D6A4F] px-2.5 py-0.5 rounded-full font-bold border border-[#2D6A4F]/20">
+                    <span className="bg-[#1B2D64]/10 text-[#1B2D64] px-2.5 py-0.5 rounded-full font-bold border border-[#1B2D64]/20">
                       {financeStats.packedCount} من {financeStats.totalPacking} ({financeStats.packingPercent}%)
                     </span>
                   </div>
                 </div>
 
                 {/* Form to add personal item */}
-                <form onSubmit={addPersonalPackingItem} className="flex gap-2 bg-[#F9F7F4] p-2 rounded-xl border border-[#E8E0D5]">
+                <form onSubmit={addPersonalPackingItem} className="flex gap-2 bg-[#FAF7F2] p-2 rounded-xl border border-[#ECE6DC]">
                   <input 
                     type="text" 
                     placeholder="أضف غرض شخصي آخر..."
                     value={newPersonalItem.title}
                     onChange={(e) => setNewPersonalItem(prev => ({ ...prev, title: e.target.value }))}
-                    className="flex-1 bg-transparent border-none px-2 text-xs text-[#1A1A1A] focus:outline-none placeholder-gray-500 text-right"
+                    className="flex-1 bg-transparent border-none px-2 text-xs text-[#14172A] focus:outline-none placeholder-gray-500 text-right"
                   />
                   <select
                     value={newPersonalItem.category}
                     onChange={(e) => setNewPersonalItem(prev => ({ ...prev, category: e.target.value }))}
-                    className="bg-white border border-[#E8E0D5] rounded-lg px-2 text-[10px] text-gray-600 focus:outline-none cursor-pointer"
+                    className="bg-white border border-[#ECE6DC] rounded-lg px-2 text-[10px] text-gray-600 focus:outline-none cursor-pointer"
                   >
                     <option value="إلكترونيات">إلكترونيات</option>
                     <option value="عناية شخصية">عناية شخصية</option>
@@ -2229,7 +2170,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                   </select>
                   <button 
                     type="submit"
-                    className="bg-[#2D6A4F] hover:bg-[#1b4332] text-white px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer"
+                    className="bg-[#1B2D64] hover:bg-[#1b4332] text-white px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer"
                   >
                     إضافة
                   </button>
@@ -2240,8 +2181,8 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                   {['إلكترونيات', 'عناية شخصية', 'ملابس ومستلزمات', 'وثائق وأموال'].map((cat) => {
                     const catItems = (personalPacking[currentUser.id] || []).filter(item => item.category === cat);
                     return (
-                      <div key={cat} className="space-y-3 bg-[#F9F7F4]/40 border border-[#E8E0D5]/50 p-4 rounded-xl">
-                        <h4 className="font-extrabold text-[#2D6A4F] text-xs border-b border-[#E8E0D5] pb-1.5 text-right">{cat}</h4>
+                      <div key={cat} className="space-y-3 bg-[#FAF7F2]/40 border border-[#ECE6DC]/50 p-4 rounded-xl">
+                        <h4 className="font-extrabold text-[#1B2D64] text-xs border-b border-[#ECE6DC] pb-1.5 text-right">{cat}</h4>
                         
                         {catItems.length === 0 ? (
                           <p className="text-[10px] text-gray-400 py-2 text-right">لا توجد أغراض مضافة بعد.</p>
@@ -2254,7 +2195,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                                     type="checkbox" 
                                     checked={item.checked}
                                     onChange={() => togglePackingItem(item.id)}
-                                    className="w-4 h-4 rounded border-gray-300 text-[#2D6A4F] focus:ring-0 cursor-pointer"
+                                    className="w-4 h-4 rounded border-gray-300 text-[#1B2D64] focus:ring-0 cursor-pointer"
                                   />
                                   <span className={item.checked ? 'text-gray-400 line-through' : 'text-gray-700'}>
                                     {item.title}
@@ -2284,22 +2225,22 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
         {activeTab === 'itinerary' && (
           <div className="space-y-8 animate-fadeIn">
             {/* Header and filters */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#E8E0D5] pb-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#ECE6DC] pb-6">
               <div>
-                <h2 className="text-xl font-bold text-[#1A1A1A]">مسار الرحلة والنشاطات اليومية</h2>
+                <h2 className="text-xl font-bold text-[#14172A]">مسار الرحلة والنشاطات اليومية</h2>
                 <p className="text-xs text-gray-500 mt-1">تتبع خط سير الرحلة وقادة اليوم المسؤولين عن التنسيق والمجموعات</p>
               </div>
 
               {/* City selector buttons */}
-              <div className="flex gap-1.5 bg-[#E8E0D5]/50 p-1 rounded-xl border border-[#E8E0D5]">
+              <div className="flex gap-1.5 bg-[#ECE6DC]/50 p-1 rounded-xl border border-[#ECE6DC]">
                 {['الكل', 'موسكو', 'سان بطرسبرغ', 'سوتشي'].map((c) => (
                   <button
                     key={c}
                     onClick={() => setItineraryCityFilter(c)}
                     className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                       itineraryCityFilter === c 
-                        ? 'bg-[#2D6A4F] text-white shadow-xs' 
-                        : 'text-gray-600 hover:text-[#1A1A1A]'
+                        ? 'bg-[#1B2D64] text-white shadow-xs' 
+                        : 'text-gray-600 hover:text-[#14172A]'
                     }`}
                   >
                     {c}
@@ -2325,16 +2266,16 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                     const isActive = item.day === simulatedActiveDay;
                     const calculatedDate = getDateForDay(tripStartDate, item.day);
                     return (
-                      <div key={item.id} className="relative pl-0 pr-6 border-r border-[#E8E0D5] last:border-0 pb-1">
+                      <div key={item.id} className="relative pl-0 pr-6 border-r border-[#ECE6DC] last:border-0 pb-1">
                         {/* Timeline dot */}
                         <span className={`absolute top-1 right-[-4.5px] w-2.5 h-2.5 rounded-full border border-white ${
-                          isActive ? 'bg-emerald-500 ring-4 ring-emerald-500/20' : 'bg-[#2D6A4F]'
+                          isActive ? 'bg-emerald-500 ring-4 ring-emerald-500/20' : 'bg-[#1B2D64]'
                         }`} />
                         
                         <div className={`white-card p-5 rounded-xl transition-all space-y-2 ${
                           isActive 
                             ? 'border-emerald-500 bg-emerald-500/5 shadow-[0_0_15px_rgba(16,185,129,0.15)] ring-1 ring-emerald-500/30' 
-                            : 'hover:border-[#2D6A4F]/40'
+                            : 'hover:border-[#1B2D64]/40'
                         }`}>
                           {editingActivityId === item.id ? (
                             <div className="space-y-3 text-right">
@@ -2345,7 +2286,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                                     type="number"
                                     value={editActivityData.day}
                                     onChange={(e) => setEditActivityData(prev => ({ ...prev, day: e.target.value }))}
-                                    className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-lg p-2 text-xs text-left font-mono"
+                                    className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-lg p-2 text-xs text-left font-mono"
                                   />
                                 </div>
                                 <div>
@@ -2353,7 +2294,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                                   <select
                                     value={editActivityData.city}
                                     onChange={(e) => setEditActivityData(prev => ({ ...prev, city: e.target.value }))}
-                                    className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-lg p-2 text-xs text-right cursor-pointer"
+                                    className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-lg p-2 text-xs text-right cursor-pointer"
                                   >
                                     <option value="موسكو">موسكو</option>
                                     <option value="ريف موسكو">ريف موسكو</option>
@@ -2366,7 +2307,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                                 <select
                                   value={editActivityData.leader}
                                   onChange={(e) => setEditActivityData(prev => ({ ...prev, leader: e.target.value }))}
-                                  className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-lg p-2 text-xs text-right cursor-pointer"
+                                  className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-lg p-2 text-xs text-right cursor-pointer"
                                 >
                                   {travelers.map(t => (
                                     <option key={t.id} value={t.name}>{t.name}</option>
@@ -2379,7 +2320,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                                   type="text"
                                   value={editActivityData.title}
                                   onChange={(e) => setEditActivityData(prev => ({ ...prev, title: e.target.value }))}
-                                  className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-lg p-2 text-xs"
+                                  className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-lg p-2 text-xs"
                                 />
                               </div>
                               <div>
@@ -2388,7 +2329,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                                   rows="3"
                                   value={editActivityData.activities}
                                   onChange={(e) => setEditActivityData(prev => ({ ...prev, activities: e.target.value }))}
-                                  className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-lg p-2 text-xs leading-relaxed"
+                                  className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-lg p-2 text-xs leading-relaxed"
                                 />
                               </div>
                               <div>
@@ -2397,13 +2338,13 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                                   type="text"
                                   value={editActivityData.notes}
                                   onChange={(e) => setEditActivityData(prev => ({ ...prev, notes: e.target.value }))}
-                                  className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-lg p-2 text-xs"
+                                  className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-lg p-2 text-xs"
                                 />
                               </div>
                               <div className="flex gap-2">
                                 <button
                                   onClick={() => handleSaveActivityEdit(item.id)}
-                                  className="bg-[#2D6A4F] hover:bg-[#1B4332] text-white px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer"
+                                  className="bg-[#1B2D64] hover:bg-[#0F1E48] text-white px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer"
                                 >
                                   حفظ
                                 </button>
@@ -2417,9 +2358,9 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                             </div>
                           ) : (
                             <>
-                              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#E8E0D5]/60 pb-2">
+                              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#ECE6DC]/60 pb-2">
                                 <div className="flex items-center gap-2 flex-wrap">
-                                  <span className="bg-[#2D6A4F]/10 border border-[#2D6A4F]/20 text-[#2D6A4F] font-bold px-2 py-0.5 rounded text-[10px] font-mono">اليوم {item.day}</span>
+                                  <span className="bg-[#1B2D64]/10 border border-[#1B2D64]/20 text-[#1B2D64] font-bold px-2 py-0.5 rounded text-[10px] font-mono">اليوم {item.day}</span>
                                   <span className="text-gray-400 text-[10px] font-mono">{calculatedDate}</span>
                                   
                                   {/* Leader Badge */}
@@ -2436,7 +2377,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                                   )}
                                 </div>
                                 <div className="flex items-center gap-3">
-                                  <span className="flex items-center gap-1 text-[10px] text-[#2D6A4F] font-bold">
+                                  <span className="flex items-center gap-1 text-[10px] text-[#1B2D64] font-bold">
                                     <MapPin size={11} />
                                     {item.city}
                                   </span>
@@ -2444,7 +2385,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                                     <div className="flex items-center gap-1.5">
                                       <button 
                                         onClick={() => startEditingActivity(item)}
-                                        className="text-gray-400 hover:text-[#2D6A4F] p-0.5 rounded transition cursor-pointer"
+                                        className="text-gray-400 hover:text-[#1B2D64] p-0.5 rounded transition cursor-pointer"
                                         title="تعديل اليوم"
                                       >
                                         <Edit3 size={13} />
@@ -2461,10 +2402,10 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                                 </div>
                               </div>
                               
-                              <h4 className="font-extrabold text-[#1A1A1A] text-sm">{item.title}</h4>
+                              <h4 className="font-extrabold text-[#14172A] text-sm">{item.title}</h4>
                               <p className="text-xs text-gray-600 font-light leading-relaxed m-0">{item.activities}</p>
                               {item.notes && (
-                                <div className="bg-[#2D6A4F]/5 border-r-2 border-[#2D6A4F] p-2.5 rounded-l-lg text-[11px] text-[#1B4332] font-semibold mt-1">
+                                <div className="bg-[#1B2D64]/5 border-r-2 border-[#1B2D64] p-2.5 rounded-l-lg text-[11px] text-[#0F1E48] font-semibold mt-1">
                                   · {item.notes}
                                 </div>
                               )}
@@ -2478,9 +2419,9 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
 
               {/* Add Activity Sidebar */}
               <div className="white-card p-6 rounded-2xl h-fit space-y-4">
-                <div className="flex items-center gap-2 border-b border-[#E8E0D5] pb-3 justify-start">
-                  <Plus className="text-[#2D6A4F]" size={18} />
-                  <h3 className="text-sm font-bold text-[#1A1A1A]">إضافة يوم جديد للمسار</h3>
+                <div className="flex items-center gap-2 border-b border-[#ECE6DC] pb-3 justify-start">
+                  <Plus className="text-[#1B2D64]" size={18} />
+                  <h3 className="text-sm font-bold text-[#14172A]">إضافة يوم جديد للمسار</h3>
                 </div>
 
                 {canEdit ? (
@@ -2492,7 +2433,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                         min="1"
                         value={newActivity.day}
                         onChange={(e) => setNewActivity(prev => ({ ...prev, day: e.target.value }))}
-                        className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl px-3 py-2 text-xs text-[#1A1A1A] focus:outline-none focus:border-[#2D6A4F] text-left font-mono"
+                        className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-3 py-2 text-xs text-[#14172A] focus:outline-none focus:border-[#1B2D64] text-left font-mono"
                       />
                     </div>
 
@@ -2501,7 +2442,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                       <select
                         value={newActivity.city}
                         onChange={(e) => setNewActivity(prev => ({ ...prev, city: e.target.value }))}
-                        className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl px-3 py-2 text-xs text-[#1A1A1A] focus:outline-none focus:border-[#2D6A4F] text-right cursor-pointer font-bold"
+                        className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-3 py-2 text-xs text-[#14172A] focus:outline-none focus:border-[#1B2D64] text-right cursor-pointer font-bold"
                       >
                         <option value="موسكو">موسكو</option>
                         <option value="ريف موسكو">ريف موسكو</option>
@@ -2516,7 +2457,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                       <select
                         value={newActivity.leader}
                         onChange={(e) => setNewActivity(prev => ({ ...prev, leader: e.target.value }))}
-                        className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl px-3 py-2 text-xs text-[#1A1A1A] focus:outline-none focus:border-[#2D6A4F] text-right cursor-pointer font-bold"
+                        className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-3 py-2 text-xs text-[#14172A] focus:outline-none focus:border-[#1B2D64] text-right cursor-pointer font-bold"
                       >
                         {travelers.map(t => (
                           <option key={t.id} value={t.name}>{t.name}</option>
@@ -2531,7 +2472,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                         placeholder="مثال: جولة كروز بحرية"
                         value={newActivity.title}
                         onChange={(e) => setNewActivity(prev => ({ ...prev, title: e.target.value }))}
-                        className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl px-3 py-2 text-xs text-[#1A1A1A] focus:outline-none focus:border-[#2D6A4F]"
+                        className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-3 py-2 text-xs text-[#14172A] focus:outline-none focus:border-[#1B2D64]"
                       />
                     </div>
 
@@ -2542,7 +2483,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                         placeholder="صف نشاطات هذا اليوم بالتفصيل..."
                         value={newActivity.activities}
                         onChange={(e) => setNewActivity(prev => ({ ...prev, activities: e.target.value }))}
-                        className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl px-3 py-2 text-xs text-[#1A1A1A] focus:outline-none focus:border-[#2D6A4F] leading-relaxed"
+                        className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-3 py-2 text-xs text-[#14172A] focus:outline-none focus:border-[#1B2D64] leading-relaxed"
                       />
                     </div>
 
@@ -2553,13 +2494,13 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                         placeholder="مثال: تجربة كافيه Grand Kafe..."
                         value={newActivity.notes || ''}
                         onChange={(e) => setNewActivity(prev => ({ ...prev, notes: e.target.value }))}
-                        className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl px-3 py-2 text-xs text-[#1A1A1A] focus:outline-none focus:border-[#2D6A4F]"
+                        className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-3 py-2 text-xs text-[#14172A] focus:outline-none focus:border-[#1B2D64]"
                       />
                     </div>
 
                     <button 
                       type="submit"
-                      className="w-full bg-[#2D6A4F] hover:bg-[#1b4332] text-white py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                      className="w-full bg-[#1B2D64] hover:bg-[#1b4332] text-white py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       <Plus size={14} />
                       <span>إضافة إلى الجدول</span>
@@ -2579,8 +2520,8 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
         {/* TAB 4: BOOKINGS */}
         {activeTab === 'bookings' && (
           <div className="space-y-8 animate-fadeIn">
-            <div className="border-b border-[#E8E0D5] pb-6">
-              <h2 className="text-xl font-bold text-[#1A1A1A]">الحجوزات والتذاكر المؤكدة</h2>
+            <div className="border-b border-[#ECE6DC] pb-6">
+              <h2 className="text-xl font-bold text-[#14172A]">الحجوزات والتذاكر المؤكدة</h2>
               <p className="text-xs text-gray-500 mt-1">تأكيد ومتابعة حجوزات الطيران الدولي والداخلي والسكن المشترك والقطارات</p>
             </div>
 
@@ -2596,7 +2537,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
               {/* Bookings List */}
               <div className="lg:col-span-2 space-y-4">
                 {bookings.map((booking) => (
-                  <div key={booking.id} className="white-card p-5 rounded-xl flex flex-col justify-between gap-4 hover:border-[#E8E0D5] transition-all duration-200">
+                  <div key={booking.id} className="white-card p-5 rounded-xl flex flex-col justify-between gap-4 hover:border-[#ECE6DC] transition-all duration-200">
                     {editingBookingId === booking.id ? (
                       <div className="w-full space-y-3 text-right">
                         <div className="grid grid-cols-2 gap-2">
@@ -2605,7 +2546,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                             <select
                               value={editBookingData.type}
                               onChange={(e) => setEditBookingData(prev => ({ ...prev, type: e.target.value }))}
-                              className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-lg p-2 text-xs text-right cursor-pointer"
+                              className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-lg p-2 text-xs text-right cursor-pointer"
                             >
                               <option value="طيران">طيران</option>
                               <option value="سكن">سكن</option>
@@ -2618,7 +2559,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                             <select
                               value={editBookingData.status}
                               onChange={(e) => setEditBookingData(prev => ({ ...prev, status: e.target.value }))}
-                              className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-lg p-2 text-xs text-right cursor-pointer"
+                              className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-lg p-2 text-xs text-right cursor-pointer"
                             >
                               <option value="مستهدف">مستهدف</option>
                               <option value="مؤكد">مؤكد</option>
@@ -2631,7 +2572,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                             type="text"
                             value={editBookingData.title}
                             onChange={(e) => setEditBookingData(prev => ({ ...prev, title: e.target.value }))}
-                            className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-lg p-2 text-xs"
+                            className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-lg p-2 text-xs"
                           />
                         </div>
                         <div>
@@ -2640,13 +2581,13 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                             rows="2"
                             value={editBookingData.details}
                             onChange={(e) => setEditBookingData(prev => ({ ...prev, details: e.target.value }))}
-                            className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-lg p-2 text-xs leading-relaxed"
+                            className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-lg p-2 text-xs leading-relaxed"
                           />
                         </div>
                         <div className="flex gap-2">
                           <button
                             onClick={() => handleSaveBookingEdit(booking.id)}
-                            className="bg-[#2D6A4F] hover:bg-[#1B4332] text-white px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer"
+                            className="bg-[#1B2D64] hover:bg-[#0F1E48] text-white px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer"
                           >
                             حفظ
                           </button>
@@ -2661,22 +2602,22 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                     ) : (
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 w-full">
                         <div className="flex items-start gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-[#F9F7F4] border border-[#E8E0D5] flex items-center justify-center shrink-0 text-[#2D6A4F]">
+                          <div className="w-10 h-10 rounded-lg bg-[#FAF7F2] border border-[#ECE6DC] flex items-center justify-center shrink-0 text-[#1B2D64]">
                             {booking.type === 'طيران' ? <Plane size={20} /> : booking.type === 'سكن' ? <Hotel size={20} /> : <FileText size={20} />}
                           </div>
                           <div className="text-right space-y-0.5">
                             <div className="flex items-center gap-2">
-                              <span className="text-[9px] text-[#2D6A4F] bg-[#2D6A4F]/10 px-1.5 py-0.5 rounded font-bold">{booking.type}</span>
-                              <h4 className="font-extrabold text-[#1A1A1A] text-sm">{booking.title}</h4>
+                              <span className="text-[9px] text-[#1B2D64] bg-[#1B2D64]/10 px-1.5 py-0.5 rounded font-bold">{booking.type}</span>
+                              <h4 className="font-extrabold text-[#14172A] text-sm">{booking.title}</h4>
                             </div>
                             <p className="text-xs text-gray-600 font-light leading-relaxed m-0">{booking.details}</p>
                           </div>
                         </div>
                         
-                        <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 border-[#E8E0D5] pt-3 sm:pt-0">
+                        <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 border-[#ECE6DC] pt-3 sm:pt-0">
                           <span className={`px-2.5 py-1 rounded-lg text-xs font-bold border flex items-center gap-1 ${
                             booking.status === 'مؤكد' 
-                              ? 'bg-[#2D6A4F]/10 text-[#2D6A4F] border-[#2D6A4F]/25' 
+                              ? 'bg-[#1B2D64]/10 text-[#1B2D64] border-[#1B2D64]/25' 
                               : 'bg-amber-50 text-amber-700 border-amber-200'
                           }`}>
                             {booking.status === 'مؤكد' ? <CheckCircle2 size={12} /> : <Clock size={12} />}
@@ -2687,7 +2628,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                             <div className="flex items-center gap-1">
                               <button 
                                 onClick={() => startEditingBooking(booking)}
-                                className="text-gray-400 hover:text-[#2D6A4F] p-1 rounded-lg hover:bg-gray-100 transition cursor-pointer"
+                                className="text-gray-400 hover:text-[#1B2D64] p-1 rounded-lg hover:bg-gray-100 transition cursor-pointer"
                                 title="تعديل الحجز"
                               >
                                 <Edit3 size={15} />
@@ -2710,9 +2651,9 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
 
               {/* Add Booking Sidebar */}
               <div className="white-card p-6 rounded-2xl h-fit space-y-4">
-                <div className="flex items-center gap-2 border-b border-[#E8E0D5] pb-3 justify-start">
-                  <Plus className="text-[#2D6A4F]" size={18} />
-                  <h3 className="text-sm font-bold text-[#1A1A1A]">إضافة حجز جديد للرحلة</h3>
+                <div className="flex items-center gap-2 border-b border-[#ECE6DC] pb-3 justify-start">
+                  <Plus className="text-[#1B2D64]" size={18} />
+                  <h3 className="text-sm font-bold text-[#14172A]">إضافة حجز جديد للرحلة</h3>
                 </div>
 
                 {canEdit ? (
@@ -2722,7 +2663,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                       <select
                         value={newBooking.type}
                         onChange={(e) => setNewBooking(prev => ({ ...prev, type: e.target.value }))}
-                        className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl px-3 py-2 text-xs text-[#1A1A1A] focus:outline-none focus:border-[#2D6A4F] text-right cursor-pointer font-bold"
+                        className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-3 py-2 text-xs text-[#14172A] focus:outline-none focus:border-[#1B2D64] text-right cursor-pointer font-bold"
                       >
                         <option value="طيران">طيران دولي أو داخلي</option>
                         <option value="سكن">فندق أو شقة</option>
@@ -2738,7 +2679,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                         placeholder="مثال: قطار سابسان"
                         value={newBooking.title}
                         onChange={(e) => setNewBooking(prev => ({ ...prev, title: e.target.value }))}
-                        className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl px-3 py-2 text-xs text-[#1A1A1A] focus:outline-none focus:border-[#2D6A4F]"
+                        className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-3 py-2 text-xs text-[#14172A] focus:outline-none focus:border-[#1B2D64]"
                       />
                     </div>
 
@@ -2747,7 +2688,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                       <select
                         value={newBooking.status}
                         onChange={(e) => setNewBooking(prev => ({ ...prev, status: e.target.value }))}
-                        className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl px-3 py-2 text-xs text-[#1A1A1A] focus:outline-none focus:border-[#2D6A4F] text-right cursor-pointer font-bold"
+                        className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-3 py-2 text-xs text-[#14172A] focus:outline-none focus:border-[#1B2D64] text-right cursor-pointer font-bold"
                       >
                         <option value="مستهدف">مستهدف / غير محجوز</option>
                         <option value="مؤكد">مؤكد ومحجوز</option>
@@ -2761,13 +2702,13 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                         placeholder="رقم الرحلة، العنوان، السعر..."
                         value={newBooking.details}
                         onChange={(e) => setNewBooking(prev => ({ ...prev, details: e.target.value }))}
-                        className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl px-3 py-2 text-xs text-[#1A1A1A] focus:outline-none focus:border-[#2D6A4F] leading-relaxed"
+                        className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-3 py-2 text-xs text-[#14172A] focus:outline-none focus:border-[#1B2D64] leading-relaxed"
                       />
                     </div>
 
                     <button 
                       type="submit"
-                      className="w-full bg-[#2D6A4F] hover:bg-[#1b4332] text-white py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                      className="w-full bg-[#1B2D64] hover:bg-[#1b4332] text-white py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       <Plus size={14} />
                       <span>إضافة الحجز جديد</span>
@@ -2787,14 +2728,14 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
         {/* TAB 5: TASKS */}
         {activeTab === 'tasks' && (
           <div className="space-y-8 animate-fadeIn text-right">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#E8E0D5] pb-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#ECE6DC] pb-6">
               <div>
-                <h2 className="text-xl font-bold text-[#1A1A1A]">قائمة المهام المشتركة</h2>
+                <h2 className="text-xl font-bold text-[#14172A]">قائمة المهام المشتركة</h2>
                 <p className="text-xs text-gray-500 mt-1">توزيع التجهيزات والمهام التنظيمية العامة قبل الرحلة ومتابعة جاهزيتها</p>
               </div>
               <div className="flex items-center gap-2 text-xs font-bold text-gray-600 justify-end">
                 <span>المهام المنجزة:</span>
-                <span className="bg-[#2D6A4F]/10 text-[#2D6A4F] px-2.5 py-0.5 rounded-full border border-[#2D6A4F]/20">
+                <span className="bg-[#1B2D64]/10 text-[#1B2D64] px-2.5 py-0.5 rounded-full border border-[#1B2D64]/20">
                   {financeStats.completedTasks} من {financeStats.totalTasks} ({financeStats.taskPercent}%)
                 </span>
               </div>
@@ -2815,7 +2756,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                   <div 
                     key={task.id} 
                     className={`white-card p-4 rounded-xl flex items-center justify-between gap-4 transition-all border-r-4 ${
-                      task.completed ? 'border-r-[#2D6A4F] bg-[#2D6A4F]/5' : 'border-r-[#E8E0D5]'
+                      task.completed ? 'border-r-[#1B2D64] bg-[#1B2D64]/5' : 'border-r-[#ECE6DC]'
                     }`}
                   >
                     {editingTaskId === task.id ? (
@@ -2826,7 +2767,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                             type="text"
                             value={editTaskData.title}
                             onChange={(e) => setEditTaskData(prev => ({ ...prev, title: e.target.value }))}
-                            className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-lg p-2 text-xs"
+                            className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-lg p-2 text-xs"
                           />
                         </div>
                         <div className="grid grid-cols-2 gap-2">
@@ -2835,7 +2776,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                             <select
                               value={editTaskData.assignee}
                               onChange={(e) => setEditTaskData(prev => ({ ...prev, assignee: e.target.value }))}
-                              className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-lg p-2 text-xs text-right cursor-pointer font-bold"
+                              className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-lg p-2 text-xs text-right cursor-pointer font-bold"
                             >
                               <option value="الجميع">الجميع</option>
                               {travelers.map(t => (
@@ -2848,7 +2789,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                             <select
                               value={editTaskData.category}
                               onChange={(e) => setEditTaskData(prev => ({ ...prev, category: e.target.value }))}
-                              className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-lg p-2 text-xs text-right cursor-pointer"
+                              className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-lg p-2 text-xs text-right cursor-pointer"
                             >
                               <option value="تجهيزات">تجهيزات واستعدادات</option>
                               <option value="لوجستيات">حجوزات ولوجستيات</option>
@@ -2857,20 +2798,20 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                             </select>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2 p-2 bg-[#F9F7F4] rounded-lg border border-[#E8E0D5]">
+                        <div className="flex items-center gap-2 p-2 bg-[#FAF7F2] rounded-lg border border-[#ECE6DC]">
                           <input 
                             type="checkbox" 
                             id={`edit-critical-${task.id}`}
                             checked={editTaskData.isCritical}
                             onChange={(e) => setEditTaskData(prev => ({ ...prev, isCritical: e.target.checked }))}
-                            className="w-4 h-4 rounded border-gray-300 text-[#2D6A4F] focus:ring-0 cursor-pointer"
+                            className="w-4 h-4 rounded border-gray-300 text-[#1B2D64] focus:ring-0 cursor-pointer"
                           />
                           <label htmlFor={`edit-critical-${task.id}`} className="text-xs font-bold text-gray-600 cursor-pointer select-none">تعليم هذه المهمة كحرجة وعاجلة</label>
                         </div>
                         <div className="flex gap-2">
                           <button
                             onClick={() => handleSaveTaskEdit(task.id)}
-                            className="bg-[#2D6A4F] hover:bg-[#1B4332] text-white px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer"
+                            className="bg-[#1B2D64] hover:bg-[#0F1E48] text-white px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer"
                           >
                             حفظ
                           </button>
@@ -2889,23 +2830,23 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                             onClick={() => toggleTask(task.id)}
                             className={`w-5.5 h-5.5 rounded-md border flex items-center justify-center transition-all cursor-pointer ${
                               task.completed 
-                                ? 'bg-[#2D6A4F] border-[#2D6A4F] text-white' 
-                                : 'border-gray-300 hover:border-[#2D6A4F] text-transparent'
+                                ? 'bg-[#1B2D64] border-[#1B2D64] text-white' 
+                                : 'border-gray-300 hover:border-[#1B2D64] text-transparent'
                             }`}
                           >
                             <Check size={12} className="stroke-[3]" />
                           </button>
                           
                           <div className="text-right">
-                            <span className={`text-xs ${task.completed ? 'text-gray-400 line-through' : 'text-[#1A1A1A] font-semibold'} flex items-center gap-1.5`}>
+                            <span className={`text-xs ${task.completed ? 'text-gray-400 line-through' : 'text-[#14172A] font-semibold'} flex items-center gap-1.5`}>
                               {task.title}
                               {task.isCritical && !task.completed && (
                                 <span className="bg-rose-100 text-rose-800 border border-rose-200 px-2 py-0.5 rounded text-[8px] font-black">هام وعاجل</span>
                               )}
                             </span>
                             <div className="flex items-center gap-2 mt-0.5 text-[9px] text-gray-500">
-                              <span className="bg-[#E8E0D5]/50 px-1.5 py-0.2 rounded font-semibold">{task.category}</span>
-                              <span>المسؤول: <strong className="text-[#2D6A4F] font-bold">{task.assignee}</strong></span>
+                              <span className="bg-[#ECE6DC]/50 px-1.5 py-0.2 rounded font-semibold">{task.category}</span>
+                              <span>المسؤول: <strong className="text-[#1B2D64] font-bold">{task.assignee}</strong></span>
                             </div>
                           </div>
                         </div>
@@ -2914,7 +2855,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                           <div className="flex items-center gap-1.5">
                             <button 
                               onClick={() => startEditingTask(task)}
-                              className="text-gray-400 hover:text-[#2D6A4F] p-1 rounded hover:bg-gray-100 transition cursor-pointer"
+                              className="text-gray-400 hover:text-[#1B2D64] p-1 rounded hover:bg-gray-100 transition cursor-pointer"
                               title="تعديل المهمة"
                             >
                               <Edit3 size={14} />
@@ -2936,9 +2877,9 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
 
               {/* Add Task Form */}
               <div className="white-card p-6 rounded-2xl h-fit space-y-4">
-                <div className="flex items-center gap-2 border-b border-[#E8E0D5] pb-3 justify-start">
-                  <Plus className="text-[#2D6A4F]" size={18} />
-                  <h3 className="text-sm font-bold text-[#1A1A1A] font-sans">إنشاء مهمة جديدة</h3>
+                <div className="flex items-center gap-2 border-b border-[#ECE6DC] pb-3 justify-start">
+                  <Plus className="text-[#1B2D64]" size={18} />
+                  <h3 className="text-sm font-bold text-[#14172A] font-sans">إنشاء مهمة جديدة</h3>
                 </div>
 
                 {canEdit ? (
@@ -2950,7 +2891,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                         placeholder="مثال: حجز طيران سوتشي الداخلي"
                         value={newTask.title}
                         onChange={(e) => setNewTask(prev => ({ ...prev, title: e.target.value }))}
-                        className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl px-3 py-2 text-xs text-[#1A1A1A] focus:outline-none focus:border-[#2D6A4F]"
+                        className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-3 py-2 text-xs text-[#14172A] focus:outline-none focus:border-[#1B2D64]"
                       />
                     </div>
 
@@ -2959,7 +2900,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                       <select
                         value={newTask.assignee}
                         onChange={(e) => setNewTask(prev => ({ ...prev, assignee: e.target.value }))}
-                        className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl px-3 py-2 text-xs text-[#1A1A1A] focus:outline-none focus:border-[#2D6A4F] text-right cursor-pointer font-bold"
+                        className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-3 py-2 text-xs text-[#14172A] focus:outline-none focus:border-[#1B2D64] text-right cursor-pointer font-bold"
                       >
                         <option value="الجميع">الجميع</option>
                         {travelers.map(t => (
@@ -2973,7 +2914,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                       <select
                         value={newTask.category}
                         onChange={(e) => setNewTask(prev => ({ ...prev, category: e.target.value }))}
-                        className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl px-3 py-2 text-xs text-[#1A1A1A] focus:outline-none focus:border-[#2D6A4F] text-right cursor-pointer font-bold"
+                        className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-3 py-2 text-xs text-[#14172A] focus:outline-none focus:border-[#1B2D64] text-right cursor-pointer font-bold"
                       >
                         <option value="تجهيزات">تجهيزات واستعدادات</option>
                         <option value="لوجستيات">حجوزات ولوجستيات</option>
@@ -2982,20 +2923,20 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                       </select>
                     </div>
 
-                    <div className="flex items-center gap-2 p-2 bg-[#F9F7F4] rounded-xl border border-[#E8E0D5]">
+                    <div className="flex items-center gap-2 p-2 bg-[#FAF7F2] rounded-xl border border-[#ECE6DC]">
                       <input 
                         type="checkbox" 
                         id="critical-task-checkbox"
                         checked={newTask.isCritical}
                         onChange={(e) => setNewTask(prev => ({ ...prev, isCritical: e.target.checked }))}
-                        className="w-4 h-4 rounded border-gray-300 text-[#2D6A4F] focus:ring-0 cursor-pointer"
+                        className="w-4 h-4 rounded border-gray-300 text-[#1B2D64] focus:ring-0 cursor-pointer"
                       />
                       <label htmlFor="critical-task-checkbox" className="text-xs font-bold text-gray-600 cursor-pointer select-none">تعليم هذه المهمة كحرجة وعاجلة</label>
                     </div>
 
                     <button 
                       type="submit"
-                      className="w-full bg-[#2D6A4F] hover:bg-[#1b4332] text-white py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                      className="w-full bg-[#1B2D64] hover:bg-[#1b4332] text-white py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       <Plus size={14} />
                       <span>إضافة المهمة</span>
@@ -3015,9 +2956,9 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
         {/* TAB 6: FINANCIALS & FUND ("المالية والقطة" - Unified expenses, reserve and members Qatta) */}
         {activeTab === 'expenses' && (
           <div className="space-y-8 animate-fadeIn text-right">
-            <div className="border-b border-[#E8E0D5] pb-6 flex items-center justify-between flex-wrap gap-4">
+            <div className="border-b border-[#ECE6DC] pb-6 flex items-center justify-between flex-wrap gap-4">
               <div>
-                <h2 className="text-xl font-bold text-[#1A1A1A]">صندوق الرحلة والميزانية العامة (المالية والقطة)</h2>
+                <h2 className="text-xl font-bold text-[#14172A]">صندوق الرحلة والميزانية العامة (المالية والقطة)</h2>
                 <p className="text-xs text-gray-500 mt-1">تتبع الصندوق والقطة المشتركة، مبالغ الاحتياطي، وتسجيل نفقات الصندوق أو المشتريات الشخصية بالتفصيل</p>
               </div>
               {pricingPlan === 'free' && (
@@ -3033,20 +2974,20 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
 
             {/* Fund State Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-[#2D6A4F]/5 border-2 border-[#2D6A4F] p-5 rounded-2xl flex flex-col justify-between shadow-sm relative overflow-hidden">
+              <div className="bg-[#1B2D64]/5 border-2 border-[#1B2D64] p-5 rounded-2xl flex flex-col justify-between shadow-sm relative overflow-hidden">
                 <div className="z-10">
                   <span className="text-[10px] text-gray-500 font-bold block">الرصيد المتبقي بالصندوق المشترك</span>
-                  <span className="text-2xl font-black text-[#2D6A4F] block mt-1">
+                  <span className="text-2xl font-black text-[#1B2D64] block mt-1">
                     {financeStats.remainingFund.toLocaleString()} ر.س
                   </span>
                   <div className="w-full bg-gray-200 h-1.5 rounded-full overflow-hidden mt-3">
                     <div 
-                      className="bg-[#2D6A4F] h-full" 
+                      className="bg-[#1B2D64] h-full" 
                       style={{ width: `${Math.min(100, Math.round((financeStats.remainingFund / (financeStats.totalFundCollected || 1)) * 100))}%` }}
                     ></div>
                   </div>
                 </div>
-                <Coins className="absolute left-2 bottom-2 text-[#2D6A4F]/10 w-24 h-24" />
+                <Coins className="absolute left-2 bottom-2 text-[#1B2D64]/10 w-24 h-24" />
               </div>
 
               <div className="white-card p-5 rounded-2xl flex flex-col justify-between">
@@ -3081,17 +3022,17 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                 
                 {/* 1. Member Contributions */}
                 <div className="white-card p-6 rounded-2xl space-y-4">
-                  <div className="flex items-center justify-between border-b border-[#E8E0D5] pb-3">
+                  <div className="flex items-center justify-between border-b border-[#ECE6DC] pb-3">
                     <h3 className="text-xs font-black text-gray-800">حالة دفع قطة السفر المشتركة (المستهدف: 5,000 ر.س لكل شخص)</h3>
                     {isFinanceSupervisor && (
-                      <span className="text-[8px] bg-[#2D6A4F]/10 border border-[#2D6A4F]/30 text-[#2D6A4F] px-2 py-0.5 rounded font-black">
+                      <span className="text-[8px] bg-[#1B2D64]/10 border border-[#1B2D64]/30 text-[#1B2D64] px-2 py-0.5 rounded font-black">
                         أنت مخول بالتعديل
                       </span>
                     )}
                   </div>
 
                   <div className="overflow-x-auto">
-                    <table className="w-full text-xs text-right divide-y divide-[#E8E0D5]">
+                    <table className="w-full text-xs text-right divide-y divide-[#ECE6DC]">
                       <thead>
                         <tr className="text-gray-500 font-bold">
                           <th className="pb-2">اسم العضو</th>
@@ -3101,7 +3042,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                           <th className="pb-2 text-left">الحالة</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-[#E8E0D5]/50 text-gray-700 font-medium">
+                      <tbody className="divide-y divide-[#ECE6DC]/50 text-gray-700 font-medium">
                         {fundContributions.map(contrib => {
                           const isFullyPaid = contrib.paid >= contrib.target;
                           const isPartial = contrib.paid > 0 && contrib.paid < contrib.target;
@@ -3114,7 +3055,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                                     type="number"
                                     value={contrib.target}
                                     onChange={(e) => handleUpdateContTarget(contrib.id, e.target.value)}
-                                    className="bg-[#F9F7F4] border border-[#E8E0D5] rounded px-1.5 py-1 text-[10px] text-center w-20 font-mono"
+                                    className="bg-[#FAF7F2] border border-[#ECE6DC] rounded px-1.5 py-1 text-[10px] text-center w-20 font-mono"
                                   />
                                 ) : (
                                   contrib.target.toLocaleString()
@@ -3126,7 +3067,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                                     type="number"
                                     value={contrib.paid}
                                     onChange={(e) => handleUpdateContribution(contrib.id, e.target.value)}
-                                    className="bg-[#F9F7F4] border border-[#E8E0D5] rounded px-1.5 py-1 text-[10px] text-center w-20 font-mono"
+                                    className="bg-[#FAF7F2] border border-[#ECE6DC] rounded px-1.5 py-1 text-[10px] text-center w-20 font-mono"
                                   />
                                 ) : (
                                   contrib.paid.toLocaleString()
@@ -3154,7 +3095,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                   </div>
 
                   {/* Reserve Fund Editing Box */}
-                  <div className="pt-4 border-t border-[#E8E0D5] flex items-center justify-between flex-wrap gap-4 bg-[#F9F7F4] p-3 rounded-xl">
+                  <div className="pt-4 border-t border-[#ECE6DC] flex items-center justify-between flex-wrap gap-4 bg-[#FAF7F2] p-3 rounded-xl">
                     <div className="text-right">
                       <h4 className="text-xs font-bold text-gray-700">مبالغ الصندوق الاحتياطية والطوارئ</h4>
                       <p className="text-[9px] text-gray-400">مبلغ إضافي كاش في الصندوق لحالات الطوارئ المباغتة</p>
@@ -3166,7 +3107,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                             type="number"
                             value={reserveFund}
                             onChange={(e) => setReserveFund(parseFloat(e.target.value) || 0)}
-                            className="bg-white border border-[#E8E0D5] rounded-lg px-2 py-1 text-xs text-center w-24 font-mono font-bold focus:outline-none focus:border-[#2D6A4F]"
+                            className="bg-white border border-[#ECE6DC] rounded-lg px-2 py-1 text-xs text-center w-24 font-mono font-bold focus:outline-none focus:border-[#1B2D64]"
                           />
                           <span className="text-xs text-gray-500 font-bold">ر.س</span>
                         </div>
@@ -3205,11 +3146,11 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                 <div className="white-card p-6 rounded-2xl space-y-4 relative overflow-hidden">
                   <div className="flex items-center justify-between border-b border-gray-100 pb-3">
                     <h3 className="text-xs font-black text-gray-800">حاسبة محول العملات الذكي للرحلة (SAR - RUB - USD)</h3>
-                    <span className="text-[9px] text-[#2D6A4F] font-bold">معدل الصرف: 1 ر.س = {currencyRates.rub} روبل</span>
+                    <span className="text-[9px] text-[#1B2D64] font-bold">معدل الصرف: 1 ر.س = {currencyRates.rub} روبل</span>
                   </div>
 
                   {pricingPlan === 'free' ? (
-                    <div className="py-6 flex flex-col items-center justify-center text-center space-y-3 bg-[#F9F7F4]/80 rounded-2xl border border-dashed border-[#E8E0D5] p-6">
+                    <div className="py-6 flex flex-col items-center justify-center text-center space-y-3 bg-[#FAF7F2]/80 rounded-2xl border border-dashed border-[#ECE6DC] p-6">
                       <Lock className="text-amber-600 animate-pulse" size={24} />
                       <div>
                         <h4 className="text-xs font-extrabold text-gray-800">ميزة محول العملات المتكامل مغلقة</h4>
@@ -3227,7 +3168,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {/* Convert SAR to RUB / USD */}
-                      <div className="bg-[#F9F7F4] border border-[#E8E0D5] p-4 rounded-xl space-y-3">
+                      <div className="bg-[#FAF7F2] border border-[#ECE6DC] p-4 rounded-xl space-y-3">
                         <h4 className="text-xs font-bold text-gray-700">تحويل من ريال سعودي (SAR)</h4>
                         <div className="space-y-2">
                           <div>
@@ -3235,14 +3176,14 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                               type="number"
                               value={calcAmountSar}
                               onChange={(e) => setCalcAmountSar(e.target.value)}
-                              className="w-full bg-white border border-[#E8E0D5] rounded-lg p-2 text-xs font-mono text-left focus:outline-none focus:border-[#2D6A4F]"
+                              className="w-full bg-white border border-[#ECE6DC] rounded-lg p-2 text-xs font-mono text-left focus:outline-none focus:border-[#1B2D64]"
                               placeholder="أدخل المبلغ بالريال..."
                             />
                           </div>
                           <div className="grid grid-cols-2 gap-2 text-xs pt-1 border-t border-gray-200/50">
                             <div>
                               <span className="text-[9px] text-gray-400 block">الروبل الروسي:</span>
-                              <span className="font-mono font-bold text-[#2D6A4F]">{((parseFloat(calcAmountSar) || 0) * currencyRates.rub).toLocaleString(undefined, { maximumFractionDigits: 2 })} RUB</span>
+                              <span className="font-mono font-bold text-[#1B2D64]">{((parseFloat(calcAmountSar) || 0) * currencyRates.rub).toLocaleString(undefined, { maximumFractionDigits: 2 })} RUB</span>
                             </div>
                             <div>
                               <span className="text-[9px] text-gray-400 block">الدولار الأمريكي:</span>
@@ -3253,7 +3194,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                       </div>
 
                       {/* Convert RUB to SAR */}
-                      <div className="bg-[#F9F7F4] border border-[#E8E0D5] p-4 rounded-xl space-y-3">
+                      <div className="bg-[#FAF7F2] border border-[#ECE6DC] p-4 rounded-xl space-y-3">
                         <h4 className="text-xs font-bold text-gray-700">تحويل من روبل روسي (RUB)</h4>
                         <div className="space-y-2">
                           <div>
@@ -3261,13 +3202,13 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                               type="number"
                               value={calcAmountRub}
                               onChange={(e) => setCalcAmountRub(e.target.value)}
-                              className="w-full bg-white border border-[#E8E0D5] rounded-lg p-2 text-xs font-mono text-left focus:outline-none focus:border-[#2D6A4F]"
+                              className="w-full bg-white border border-[#ECE6DC] rounded-lg p-2 text-xs font-mono text-left focus:outline-none focus:border-[#1B2D64]"
                               placeholder="أدخل المبلغ بالروبل..."
                             />
                           </div>
                           <div className="text-xs pt-1 border-t border-gray-200/50">
                             <span className="text-[9px] text-gray-400 block">الريال السعودي الموازي:</span>
-                            <span className="font-mono font-bold text-[#2D6A4F]">{((parseFloat(calcAmountRub) || 0) / currencyRates.rub).toLocaleString(undefined, { maximumFractionDigits: 2 })} SAR</span>
+                            <span className="font-mono font-bold text-[#1B2D64]">{((parseFloat(calcAmountRub) || 0) / currencyRates.rub).toLocaleString(undefined, { maximumFractionDigits: 2 })} SAR</span>
                           </div>
                         </div>
                       </div>
@@ -3278,7 +3219,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                 {/* 4. Advanced Settlement ledger */}
                 <div className="white-card p-6 rounded-2xl space-y-4">
                   <div className="flex items-start gap-2.5 justify-start">
-                    <Info className="text-[#2D6A4F] shrink-0 mt-0.5" size={16} />
+                    <Info className="text-[#1B2D64] shrink-0 mt-0.5" size={16} />
                     <div className="text-right">
                       <h4 className="font-black text-xs text-gray-800">مخلص التسوية المالية الخاصة (للشباب)</h4>
                       <p className="text-[10px] text-gray-500 leading-relaxed mt-0.5">
@@ -3287,12 +3228,12 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                     </div>
                   </div>
 
-                  <div className="bg-[#F9F7F4] border border-[#E8E0D5] p-4 rounded-xl space-y-3">
+                  <div className="bg-[#FAF7F2] border border-[#ECE6DC] p-4 rounded-xl space-y-3">
                     <div className="flex justify-between items-center text-xs font-bold text-gray-600">
                       <span>إجمالي المدفوع شخصياً:</span>
-                      <span className="font-mono text-[#1A1A1A]">{financeStats.totalPersonalSpent.toLocaleString()} ر.س</span>
+                      <span className="font-mono text-[#14172A]">{financeStats.totalPersonalSpent.toLocaleString()} ر.س</span>
                     </div>
-                    <div className="flex justify-between items-center text-xs font-bold text-[#2D6A4F] border-b border-[#E8E0D5] pb-2">
+                    <div className="flex justify-between items-center text-xs font-bold text-[#1B2D64] border-b border-[#ECE6DC] pb-2">
                       <span>نصيب الشخص الواحد للرحلة:</span>
                       <span className="font-mono">{financeStats.splitSharePerPerson.toLocaleString()} ر.س</span>
                     </div>
@@ -3326,7 +3267,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                     <h4 className="text-xs font-black text-gray-800">خارطة التحويلات والتسويات المباشرة لإنهاء العوالق</h4>
                     
                     {pricingPlan === 'free' ? (
-                      <div className="py-6 flex flex-col items-center justify-center text-center space-y-2 bg-[#F9F7F4]/60 rounded-xl border border-dashed border-[#E8E0D5] p-4">
+                      <div className="py-6 flex flex-col items-center justify-center text-center space-y-2 bg-[#FAF7F2]/60 rounded-xl border border-dashed border-[#ECE6DC] p-4">
                         <Lock className="text-amber-600" size={18} />
                         <div>
                           <h5 className="text-[11px] font-bold text-gray-800">ميزة خارطة التحويلات التلقائية مغلقة</h5>
@@ -3375,7 +3316,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                 <div className="white-card p-6 rounded-2xl space-y-4">
                   <h3 className="text-xs font-black text-gray-800 border-b border-gray-100 pb-3">سجل المصروفات ومشتريات الصندوق</h3>
                   
-                  <div className="divide-y divide-[#E8E0D5]/50">
+                  <div className="divide-y divide-[#ECE6DC]/50">
                     {expenses.map((expense) => {
                       const isFund = expense.paidBy === 'الصندوق';
                       return (
@@ -3384,7 +3325,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                             <div className="flex items-center gap-2">
                               <span className={`text-[8px] font-black px-2 py-0.5 rounded-full ${
                                 isFund 
-                                  ? 'bg-[#2D6A4F]/10 text-[#2D6A4F] border border-[#2D6A4F]/20'
+                                  ? 'bg-[#1B2D64]/10 text-[#1B2D64] border border-[#1B2D64]/20'
                                   : 'bg-blue-50 text-blue-800 border border-blue-200'
                               }`}>
                                 {isFund ? 'خصم من الصندوق' : 'مدفوع شخصي'}
@@ -3400,7 +3341,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                               <span className="font-bold text-gray-700 block text-left">{expense.paidBy}</span>
                             </div>
                             <div className="flex items-center gap-1">
-                              <span className="font-extrabold text-[#2D6A4F] font-mono">{expense.amountSar.toLocaleString()} ر.س</span>
+                              <span className="font-extrabold text-[#1B2D64] font-mono">{expense.amountSar.toLocaleString()} ر.س</span>
                               {canEdit && (
                                 <button
                                   onClick={() => handleDeleteExpense(expense.id)}
@@ -3421,9 +3362,9 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
 
               {/* Add Expense Sidebar Form */}
               <div className="white-card p-6 rounded-2xl h-fit space-y-4">
-                <div className="flex items-center gap-2 border-b border-[#E8E0D5] pb-3 justify-start">
-                  <Plus className="text-[#2D6A4F]" size={18} />
-                  <h3 className="text-sm font-bold text-[#1A1A1A]">تسجيل مصروف جديد</h3>
+                <div className="flex items-center gap-2 border-b border-[#ECE6DC] pb-3 justify-start">
+                  <Plus className="text-[#1B2D64]" size={18} />
+                  <h3 className="text-sm font-bold text-[#14172A]">تسجيل مصروف جديد</h3>
                 </div>
 
                 {canEdit ? (
@@ -3435,7 +3376,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                         placeholder="مثال: قطار سابسان السريع"
                         value={newExpense.description}
                         onChange={(e) => setNewExpense(prev => ({ ...prev, description: e.target.value }))}
-                        className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl px-3 py-2 text-xs text-[#1A1A1A] focus:outline-none focus:border-[#2D6A4F]"
+                        className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-3 py-2 text-xs text-[#14172A] focus:outline-none focus:border-[#1B2D64]"
                         required
                       />
                     </div>
@@ -3447,7 +3388,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                         placeholder="0"
                         value={newExpense.amountSar}
                         onChange={(e) => setNewExpense(prev => ({ ...prev, amountSar: e.target.value }))}
-                        className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl px-3 py-2 text-xs text-[#1A1A1A] focus:outline-none focus:border-[#2D6A4F] font-mono text-left"
+                        className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-3 py-2 text-xs text-[#14172A] focus:outline-none focus:border-[#1B2D64] font-mono text-left"
                         required
                       />
                     </div>
@@ -3457,7 +3398,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                       <select
                         value={newExpense.paidBy}
                         onChange={(e) => setNewExpense(prev => ({ ...prev, paidBy: e.target.value }))}
-                        className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl px-3 py-2 text-xs text-[#1A1A1A] focus:outline-none focus:border-[#2D6A4F] text-right cursor-pointer font-bold"
+                        className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-3 py-2 text-xs text-[#14172A] focus:outline-none focus:border-[#1B2D64] text-right cursor-pointer font-bold"
                       >
                         <option value="الصندوق">الصندوق المشترك (خصم من رصيد القطة)</option>
                         {travelers.map(t => (
@@ -3468,7 +3409,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
 
                     <button 
                       type="submit"
-                      className="w-full bg-[#2D6A4F] hover:bg-[#1b4332] text-white py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                      className="w-full bg-[#1B2D64] hover:bg-[#1b4332] text-white py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       <Plus size={14} />
                       <span>تسجيل المصروف</span>
@@ -3488,8 +3429,8 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
         {/* TAB 8: PROPOSALS & VOTING BOARD */}
         {activeTab === 'proposals' && (
           <div className="space-y-8 animate-fadeIn text-right">
-            <div className="border-b border-[#E8E0D5] pb-6">
-              <h2 className="text-xl font-bold text-[#1A1A1A]">مجلس المقترحات والقرارات المشتركة</h2>
+            <div className="border-b border-[#ECE6DC] pb-6">
+              <h2 className="text-xl font-bold text-[#14172A]">مجلس المقترحات والقرارات المشتركة</h2>
               <p className="text-xs text-gray-500 mt-1">اطرح استطلاعات رأي أو مقترحات ثنائية لتصويت الشباب لحسم الخيارات والأنشطة وإدماجها تلقائياً بالجدول</p>
             </div>
 
@@ -3516,16 +3457,16 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
 
                     return (
                       <div key={poll.id} className={`white-card p-5 rounded-2xl border transition-all ${
-                        poll.isActive ? 'border-[#2D6A4F]/30 bg-[#2D6A4F]/2' : 'border-gray-200 bg-gray-50/40'
+                        poll.isActive ? 'border-[#1B2D64]/30 bg-[#1B2D64]/2' : 'border-gray-200 bg-gray-50/40'
                       } space-y-4`}>
                         <div className="flex items-center justify-between border-b border-gray-100 pb-2">
                           <span className="text-[10px] text-gray-400 font-bold block">الهدف: اليوم {poll.targetDay} في {poll.targetCity}</span>
-                          <span className="text-[10px] text-gray-500 font-extrabold">طرح بواسطة: <strong className="text-[#2D6A4F]">{poll.creator}</strong></span>
+                          <span className="text-[10px] text-gray-500 font-extrabold">طرح بواسطة: <strong className="text-[#1B2D64]">{poll.creator}</strong></span>
                         </div>
 
                         <div className="space-y-1">
-                          <h4 className="font-extrabold text-[#1A1A1A] text-sm flex items-center gap-1.5">
-                            <Vote size={16} className="text-[#2D6A4F]" />
+                          <h4 className="font-extrabold text-[#14172A] text-sm flex items-center gap-1.5">
+                            <Vote size={16} className="text-[#1B2D64]" />
                             <span>{poll.question}</span>
                             {!poll.isActive && (
                               <span className="bg-gray-200 text-gray-700 text-[8px] font-black px-2 py-0.5 rounded-full">مغلق ومحسوم</span>
@@ -3550,16 +3491,16 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                                     isWinningOption 
                                       ? 'bg-emerald-100 border-emerald-400 text-emerald-950 shadow-xs'
                                       : hasVoted
-                                        ? 'bg-[#2D6A4F]/10 border-[#2D6A4F] text-[#2D6A4F]'
+                                        ? 'bg-[#1B2D64]/10 border-[#1B2D64] text-[#1B2D64]'
                                         : 'bg-white hover:bg-gray-50 border-gray-200 text-gray-700'
                                   } ${poll.isActive ? 'cursor-pointer' : ''}`}
                                 >
                                   <div className="flex items-center gap-2">
                                     {poll.isActive && (
                                       <div className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${
-                                        hasVoted ? 'border-[#2D6A4F]' : 'border-gray-300'
+                                        hasVoted ? 'border-[#1B2D64]' : 'border-gray-300'
                                       }`}>
-                                        {hasVoted && <div className="w-2 h-2 rounded-full bg-[#2D6A4F]"></div>}
+                                        {hasVoted && <div className="w-2 h-2 rounded-full bg-[#1B2D64]"></div>}
                                       </div>
                                     )}
                                     {isWinningOption && <Crown size={12} className="text-amber-600 animate-bounce" />}
@@ -3572,7 +3513,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                                 <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
                                   <div 
                                     className={`h-full transition-all duration-300 ${
-                                      isWinningOption ? 'bg-amber-500' : hasVoted ? 'bg-[#2D6A4F]' : 'bg-gray-300'
+                                      isWinningOption ? 'bg-amber-500' : hasVoted ? 'bg-[#1B2D64]' : 'bg-gray-300'
                                     }`} 
                                     style={{ width: `${optPercent}%` }}
                                   ></div>
@@ -3621,29 +3562,29 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                       const userDownvoted = prop.votesDown.includes(currentUser.id);
 
                       return (
-                        <div key={prop.id} className="white-card p-5 rounded-2xl border border-[#E8E0D5]/70 space-y-4 transition hover:border-[#2D6A4F]/20">
+                        <div key={prop.id} className="white-card p-5 rounded-2xl border border-[#ECE6DC]/70 space-y-4 transition hover:border-[#1B2D64]/20">
                           <div className="flex items-center justify-between border-b border-gray-100 pb-2">
                             <div className="flex items-center gap-2">
                               <span className="text-[10px] text-gray-400 font-bold block">تاريخ النشر: {prop.date}</span>
                             </div>
                             <div>
-                              <span className="text-[10px] text-gray-500 font-extrabold">المقترح بواسطة: <strong className="text-[#2D6A4F]">{prop.proposer}</strong></span>
+                              <span className="text-[10px] text-gray-500 font-extrabold">المقترح بواسطة: <strong className="text-[#1B2D64]">{prop.proposer}</strong></span>
                             </div>
                           </div>
 
                           <div className="space-y-1">
-                            <h4 className="font-extrabold text-[#1A1A1A] text-sm">{prop.title}</h4>
+                            <h4 className="font-extrabold text-[#14172A] text-sm">{prop.title}</h4>
                             <p className="text-xs text-gray-600 font-light leading-relaxed m-0">{prop.description}</p>
                           </div>
 
                           {/* Votes breakdown */}
-                          <div className="space-y-2 bg-[#F9F7F4] p-3 rounded-xl border border-[#E8E0D5]/60">
+                          <div className="space-y-2 bg-[#FAF7F2] p-3 rounded-xl border border-[#ECE6DC]/60">
                             <div className="flex justify-between items-center text-[10px] text-gray-500 font-bold">
                               <span>نسبة التأييد: {percentUp}%</span>
                               <span>إجمالي الأصوات: {totalVotes} صوت</span>
                             </div>
                             <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden flex">
-                              <div className="bg-[#2D6A4F] h-full" style={{ width: `${percentUp}%` }}></div>
+                              <div className="bg-[#1B2D64] h-full" style={{ width: `${percentUp}%` }}></div>
                               <div className="bg-red-500 h-full" style={{ width: `${100 - percentUp}%` }}></div>
                             </div>
                           </div>
@@ -3655,7 +3596,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                               className={`flex-1 py-2 rounded-xl text-xs font-black transition flex items-center justify-center gap-2 cursor-pointer border ${
                                 userUpvoted 
                                   ? 'bg-emerald-500 border-emerald-500 text-white shadow-xs' 
-                                  : 'bg-white border-[#E8E0D5] text-gray-600 hover:bg-emerald-50/50'
+                                  : 'bg-white border-[#ECE6DC] text-gray-600 hover:bg-emerald-50/50'
                               }`}
                             >
                               <span>مؤيد</span>
@@ -3667,7 +3608,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                               className={`flex-1 py-2 rounded-xl text-xs font-black transition flex items-center justify-center gap-2 cursor-pointer border ${
                                 userDownvoted 
                                   ? 'bg-red-500 border-red-500 text-white shadow-xs' 
-                                  : 'bg-white border-[#E8E0D5] text-gray-600 hover:bg-rose-50/50'
+                                  : 'bg-white border-[#ECE6DC] text-gray-600 hover:bg-rose-50/50'
                               }`}
                             >
                               <span>معارض</span>
@@ -3685,9 +3626,9 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
               <div className="space-y-6">
                 {/* A. Create Multi-Option Poll */}
                 <div className="white-card p-6 rounded-2xl space-y-4">
-                  <div className="flex items-center gap-2 border-b border-[#E8E0D5] pb-3 justify-start">
-                    <Plus className="text-[#2D6A4F]" size={18} />
-                    <h3 className="text-sm font-bold text-[#1A1A1A] font-sans">طرح استطلاع خيارات متعددة</h3>
+                  <div className="flex items-center gap-2 border-b border-[#ECE6DC] pb-3 justify-start">
+                    <Plus className="text-[#1B2D64]" size={18} />
+                    <h3 className="text-sm font-bold text-[#14172A] font-sans">طرح استطلاع خيارات متعددة</h3>
                   </div>
 
                   <form 
@@ -3715,7 +3656,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                         name="pollQuestion"
                         type="text" 
                         placeholder="مثال: أين نذهب مساء اليوم الثامن؟"
-                        className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl px-3 py-2 text-xs text-[#1A1A1A] focus:outline-none focus:border-[#2D6A4F]"
+                        className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-3 py-2 text-xs text-[#14172A] focus:outline-none focus:border-[#1B2D64]"
                         required
                       />
                     </div>
@@ -3726,21 +3667,21 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                         name="pollOpt1"
                         type="text" 
                         placeholder="الخيار الأول (إلزامي)"
-                        className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl px-3 py-1.5 text-xs text-[#1A1A1A] focus:outline-none focus:border-[#2D6A4F]"
+                        className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-3 py-1.5 text-xs text-[#14172A] focus:outline-none focus:border-[#1B2D64]"
                         required
                       />
                       <input 
                         name="pollOpt2"
                         type="text" 
                         placeholder="الخيار الثاني (إلزامي)"
-                        className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl px-3 py-1.5 text-xs text-[#1A1A1A] focus:outline-none focus:border-[#2D6A4F]"
+                        className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-3 py-1.5 text-xs text-[#14172A] focus:outline-none focus:border-[#1B2D64]"
                         required
                       />
                       <input 
                         name="pollOpt3"
                         type="text" 
                         placeholder="الخيار الثالث (اختياري)"
-                        className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl px-3 py-1.5 text-xs text-[#1A1A1A] focus:outline-none focus:border-[#2D6A4F]"
+                        className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-3 py-1.5 text-xs text-[#14172A] focus:outline-none focus:border-[#1B2D64]"
                       />
                     </div>
 
@@ -3749,7 +3690,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                         <label className="text-[10px] font-bold text-gray-500">يوم الرحلة</label>
                         <select 
                           name="pollDay"
-                          className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl px-2 py-2 text-xs focus:outline-none cursor-pointer"
+                          className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-2 py-2 text-xs focus:outline-none cursor-pointer"
                         >
                           {itinerary.map(item => (
                             <option key={item.id} value={item.day}>اليوم {item.day}</option>
@@ -3760,7 +3701,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                         <label className="text-[10px] font-bold text-gray-500">المدينة</label>
                         <select 
                           name="pollCity"
-                          className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl px-2 py-2 text-xs focus:outline-none cursor-pointer"
+                          className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-2 py-2 text-xs focus:outline-none cursor-pointer"
                         >
                           <option value="موسكو">موسكو</option>
                           <option value="ريف موسكو">ريف موسكو</option>
@@ -3771,7 +3712,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
 
                     <button 
                       type="submit"
-                      className="w-full bg-[#2D6A4F] hover:bg-[#1b4332] text-white py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                      className="w-full bg-[#1B2D64] hover:bg-[#1b4332] text-white py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       <Plus size={13} />
                       <span>نشر استبيان الخيارات</span>
@@ -3781,9 +3722,9 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
 
                 {/* B. Create Standard Up/Down Proposal */}
                 <div className="white-card p-6 rounded-2xl space-y-4">
-                  <div className="flex items-center gap-2 border-b border-[#E8E0D5] pb-3 justify-start">
-                    <Plus className="text-[#2D6A4F]" size={18} />
-                    <h3 className="text-sm font-bold text-[#1A1A1A] font-sans">طرح مقترح ثنائي</h3>
+                  <div className="flex items-center gap-2 border-b border-[#ECE6DC] pb-3 justify-start">
+                    <Plus className="text-[#1B2D64]" size={18} />
+                    <h3 className="text-sm font-bold text-[#14172A] font-sans">طرح مقترح ثنائي</h3>
                   </div>
 
                   <form onSubmit={handleAddProposal} className="space-y-4">
@@ -3794,7 +3735,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                         placeholder="مثال: زيادة يوم في موسكو"
                         value={newProposal.title}
                         onChange={(e) => setNewProposal(prev => ({ ...prev, title: e.target.value }))}
-                        className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl px-3 py-2 text-xs text-[#1A1A1A] focus:outline-none focus:border-[#2D6A4F]"
+                        className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-3 py-2 text-xs text-[#14172A] focus:outline-none focus:border-[#1B2D64]"
                         required
                       />
                     </div>
@@ -3806,25 +3747,25 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                         placeholder="اشرح تبريرك وتفاصيل اقتراحك للمجموعة..."
                         value={newProposal.description}
                         onChange={(e) => setNewProposal(prev => ({ ...prev, description: e.target.value }))}
-                        className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl px-3 py-2 text-xs text-[#1A1A1A] focus:outline-none focus:border-[#2D6A4F] leading-relaxed"
+                        className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-3 py-2 text-xs text-[#14172A] focus:outline-none focus:border-[#1B2D64] leading-relaxed"
                         required
                       />
                     </div>
 
-                    <div className="flex items-center gap-2 p-2 bg-[#F9F7F4] rounded-xl border border-[#E8E0D5]">
+                    <div className="flex items-center gap-2 p-2 bg-[#FAF7F2] rounded-xl border border-[#ECE6DC]">
                       <input 
                         type="checkbox" 
                         id="proposal-alert-checkbox"
                         checked={newProposal.sendAlert}
                         onChange={(e) => setNewProposal(prev => ({ ...prev, sendAlert: e.target.checked }))}
-                        className="w-4 h-4 rounded border-gray-300 text-[#2D6A4F] focus:ring-0 cursor-pointer"
+                        className="w-4 h-4 rounded border-gray-300 text-[#1B2D64] focus:ring-0 cursor-pointer"
                       />
                       <label htmlFor="proposal-alert-checkbox" className="text-xs font-bold text-gray-600 cursor-pointer select-none">بث إشعار عاجل للشباب بالتطبيق</label>
                     </div>
 
                     <button 
                       type="submit"
-                      className="w-full bg-[#2D6A4F] hover:bg-[#1b4332] text-white py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                      className="w-full bg-[#1B2D64] hover:bg-[#1b4332] text-white py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       <Send size={13} />
                       <span>طرح المقترح</span>
@@ -3839,9 +3780,9 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
         {/* TAB 10: SUPER ADMIN PANEL */}
         {activeTab === 'superadmin' && isSuperAdmin && (
           <div className="space-y-8 animate-fadeIn text-right font-sans">
-            <div className="border-b border-[#E8E0D5] pb-6">
-              <h2 className="text-xl font-bold text-[#1A1A1A] flex items-center gap-2 justify-start">
-                <Shield size={22} className="text-[#2D6A4F]" />
+            <div className="border-b border-[#ECE6DC] pb-6">
+              <h2 className="text-xl font-bold text-[#14172A] flex items-center gap-2 justify-start">
+                <Shield size={22} className="text-[#1B2D64]" />
                 <span>لوحة تحكم مدير الرحلة (عبدالله الزهراني)</span>
               </h2>
               <p className="text-xs text-gray-500 mt-1">أدوات إشرافية متكاملة للتحكم في تواريخ الرحلة، بث التنبيهات العاجلة، وقفل التعديل والمحاكاة.</p>
@@ -3850,7 +3791,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
             {/* Metrics cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
               {[
-                { label: 'عدد أيام الرحلة', value: '12 يوماً', desc: 'تغطي الفترة المحددة', icon: Calendar, color: 'text-[#2D6A4F]' },
+                { label: 'عدد أيام الرحلة', value: '12 يوماً', desc: 'تغطي الفترة المحددة', icon: Calendar, color: 'text-[#1B2D64]' },
                 { label: 'أعضاء القروب', value: '4 أعضاء', desc: 'عبدالله، عبدالعزيز، حسن، فهد', icon: Users, color: 'text-blue-700' },
                 { label: 'الحجوزات المنجزة', value: `${financeStats.confirmedBookings} من ${financeStats.totalBookings}`, desc: 'تذاكر طيران وفنادق وقطارات', icon: Hotel, color: 'text-amber-700' },
                 { label: 'المهام المشتركة المكتملة', value: `${financeStats.completedTasks} من ${financeStats.totalTasks}`, desc: `نسبة الإنجاز الفعلي ${financeStats.taskPercent}%`, icon: CheckSquare, color: 'text-purple-700' }
@@ -3860,10 +3801,10 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                   <div key={i} className="white-card p-5 rounded-2xl flex items-center justify-between gap-4">
                     <div className="space-y-0.5">
                       <p className="text-[10px] text-gray-500 font-bold">{m.label}</p>
-                      <h3 className="text-base font-black text-[#1A1A1A]">{m.value}</h3>
+                      <h3 className="text-base font-black text-[#14172A]">{m.value}</h3>
                       <p className="text-[9px] text-gray-400 font-medium">{m.desc}</p>
                     </div>
-                    <div className={`w-10 h-10 rounded-lg bg-[#F9F7F4] border border-[#E8E0D5] flex items-center justify-center ${m.color}`}>
+                    <div className={`w-10 h-10 rounded-lg bg-[#FAF7F2] border border-[#ECE6DC] flex items-center justify-center ${m.color}`}>
                       <Icon size={18} />
                     </div>
                   </div>
@@ -3877,8 +3818,8 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                 
                 {/* Card 1: Trip Dates & Plan Lock */}
                 <div className="white-card p-6 rounded-2xl space-y-6">
-                  <div className="flex items-center gap-2 border-b border-[#E8E0D5] pb-3">
-                    <Settings className="text-[#2D6A4F]" size={18} />
+                  <div className="flex items-center gap-2 border-b border-[#ECE6DC] pb-3">
+                    <Settings className="text-[#1B2D64]" size={18} />
                     <h3 className="text-sm font-bold text-gray-800">إعدادات الرحلة وتعديل التواريخ</h3>
                   </div>
                   
@@ -3889,7 +3830,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                         type="date"
                         value={tripStartDate}
                         onChange={(e) => setTripStartDate(e.target.value)}
-                        className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl px-3 py-2.5 text-xs text-[#1A1A1A] font-mono text-left focus:outline-none focus:border-[#2D6A4F]"
+                        className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-3 py-2.5 text-xs text-[#14172A] font-mono text-left focus:outline-none focus:border-[#1B2D64]"
                       />
                     </div>
                     <div className="space-y-1">
@@ -3898,12 +3839,12 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                         type="date"
                         value={tripEndDate}
                         onChange={(e) => setTripEndDate(e.target.value)}
-                        className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl px-3 py-2.5 text-xs text-[#1A1A1A] font-mono text-left focus:outline-none focus:border-[#2D6A4F]"
+                        className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-3 py-2.5 text-xs text-[#14172A] font-mono text-left focus:outline-none focus:border-[#1B2D64]"
                       />
                     </div>
                   </div>
 
-                  <div className="p-4 bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl flex items-center justify-between gap-4">
+                  <div className="p-4 bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl flex items-center justify-between gap-4">
                     <div>
                       <h4 className="text-xs font-bold text-gray-700">قفل تعديل خطة السفر</h4>
                       <p className="text-[10px] text-gray-400 mt-0.5">عند القفل، لن يتمكن أي عضو (ما عدا عبدالله) من تعديل جدول الأيام أو الحجوزات أو المهام.</p>
@@ -3924,8 +3865,8 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
 
                 {/* Card 2: Simulated Active Day & Telegram Integration */}
                 <div className="white-card p-6 rounded-2xl space-y-6">
-                  <div className="flex items-center gap-2 border-b border-[#E8E0D5] pb-3">
-                    <Bot className="text-[#2D6A4F]" size={18} />
+                  <div className="flex items-center gap-2 border-b border-[#ECE6DC] pb-3">
+                    <Bot className="text-[#1B2D64]" size={18} />
                     <h3 className="text-sm font-bold text-gray-800">محاكاة يوم الرحلة النشط والتقارير</h3>
                   </div>
 
@@ -3935,7 +3876,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                       <select
                         value={simulatedActiveDay}
                         onChange={(e) => setSimulatedActiveDay(parseInt(e.target.value) || 0)}
-                        className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl px-3 py-2.5 text-xs text-[#1A1A1A] focus:outline-none focus:border-[#2D6A4F] text-right cursor-pointer"
+                        className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-3 py-2.5 text-xs text-[#14172A] focus:outline-none focus:border-[#1B2D64] text-right cursor-pointer"
                       >
                         <option value={0}>الرحلة لم تبدأ بعد (مغلق)</option>
                         {itinerary.map(item => (
@@ -3948,7 +3889,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                       <button
                         onClick={triggerTelegramSimulation}
                         disabled={simulatedActiveDay === 0}
-                        className="w-full bg-[#2D6A4F] hover:bg-[#1b4332] disabled:bg-gray-100 disabled:text-gray-400 text-white font-bold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-2 cursor-pointer border border-[#2D6A4F]/20"
+                        className="w-full bg-[#1B2D64] hover:bg-[#1b4332] disabled:bg-gray-100 disabled:text-gray-400 text-white font-bold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-2 cursor-pointer border border-[#1B2D64]/20"
                       >
                         <Send size={14} />
                         <span>بث إشعار اليوم النشط لقروب تيليجرام</span>
@@ -3959,8 +3900,8 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
 
                 {/* Card 3: Urgent Broadcast Alerts */}
                 <div className="white-card p-6 rounded-2xl space-y-4">
-                  <div className="flex items-center gap-2 border-b border-[#E8E0D5] pb-3">
-                    <Megaphone className="text-[#2D6A4F]" size={18} />
+                  <div className="flex items-center gap-2 border-b border-[#ECE6DC] pb-3">
+                    <Megaphone className="text-[#1B2D64]" size={18} />
                     <h3 className="text-sm font-bold text-gray-800">بث تنبيه جماعي عاجل (Megaphone Broadcast)</h3>
                   </div>
 
@@ -3981,7 +3922,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                       name="alertText"
                       rows="2"
                       placeholder="اكتب التنبيه العاجل الذي سيظهر باللون الأحمر أعلى شاشات كافة الأعضاء..."
-                      className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl px-3 py-2 text-xs text-[#1A1A1A] focus:outline-none focus:border-[#2D6A4F] leading-relaxed"
+                      className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-3 py-2 text-xs text-[#14172A] focus:outline-none focus:border-[#1B2D64] leading-relaxed"
                       required
                     />
                     <div className="flex justify-end gap-2">
@@ -4007,7 +3948,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                 {/* Card 4: Announcements Lists */}
                 <div className="white-card p-6 rounded-2xl space-y-4">
                   <div className="flex items-center gap-2 border-b border-gray-100 pb-3">
-                    <Megaphone className="text-[#2D6A4F]" size={18} />
+                    <Megaphone className="text-[#1B2D64]" size={18} />
                     <h3 className="text-sm font-bold text-gray-800">إدارة الإعلانات وتوجيهات الإدارة</h3>
                   </div>
 
@@ -4016,7 +3957,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                   ) : (
                     <div className="space-y-3">
                       {marketingBanners.map(banner => (
-                        <div key={banner.id} className="p-4 bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl flex items-center justify-between gap-4 text-xs">
+                        <div key={banner.id} className="p-4 bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl flex items-center justify-between gap-4 text-xs">
                           <div className="space-y-1 text-right">
                             <div className="flex items-center gap-2">
                               <span className={`text-[8px] font-black border px-2 py-0.5 rounded-full ${
@@ -4062,8 +4003,8 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                 
                 {/* Card 5: Add Announcement Form */}
                 <div className="white-card p-6 rounded-2xl h-fit space-y-4">
-                  <div className="flex items-center gap-2 border-b border-[#E8E0D5] pb-3 justify-start">
-                    <Plus className="text-[#2D6A4F]" size={18} />
+                  <div className="flex items-center gap-2 border-b border-[#ECE6DC] pb-3 justify-start">
+                    <Plus className="text-[#1B2D64]" size={18} />
                     <h3 className="text-sm font-bold text-gray-800">بث إعلان / توجيه جديد</h3>
                   </div>
 
@@ -4085,7 +4026,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                         name="bannerTitle"
                         type="text" 
                         placeholder="مثال: موعد تجمع عشاء موسكو"
-                        className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl px-3 py-2 text-xs text-[#1A1A1A] focus:outline-none focus:border-[#2D6A4F]"
+                        className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-3 py-2 text-xs text-[#14172A] focus:outline-none focus:border-[#1B2D64]"
                         required
                       />
                     </div>
@@ -4096,7 +4037,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                         name="bannerText"
                         rows="3"
                         placeholder="اكتب تفاصيل الإعلان أو التوجيه هنا..."
-                        className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl px-3 py-2 text-xs text-[#1A1A1A] focus:outline-none focus:border-[#2D6A4F] leading-relaxed"
+                        className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-3 py-2 text-xs text-[#14172A] focus:outline-none focus:border-[#1B2D64] leading-relaxed"
                         required
                       />
                     </div>
@@ -4105,7 +4046,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                       <label className="text-[10px] font-bold text-gray-500">النمط البصري</label>
                       <select
                         name="bannerTheme"
-                        className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl px-3 py-2 text-xs text-[#1A1A1A] focus:outline-none focus:border-[#2D6A4F] text-right cursor-pointer font-bold"
+                        className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-3 py-2 text-xs text-[#14172A] focus:outline-none focus:border-[#1B2D64] text-right cursor-pointer font-bold"
                       >
                         <option value="green">أخضر هادئ (تنبيه داخلي)</option>
                         <option value="gold">ذهبي فخم (تنبيه هام جداً)</option>
@@ -4115,7 +4056,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
 
                     <button 
                       type="submit"
-                      className="w-full bg-[#2D6A4F] hover:bg-[#1b4332] text-white py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
+                      className="w-full bg-[#1B2D64] hover:bg-[#1b4332] text-white py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
                     >
                       <Plus size={14} />
                       <span>نشر الإعلان للجميع</span>
@@ -4125,8 +4066,8 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
 
                 {/* Card 6: Quick Task Assignment Form */}
                 <div className="white-card p-6 rounded-2xl h-fit space-y-4">
-                  <div className="flex items-center gap-2 border-b border-[#E8E0D5] pb-3 justify-start">
-                    <Plus className="text-[#2D6A4F]" size={18} />
+                  <div className="flex items-center gap-2 border-b border-[#ECE6DC] pb-3 justify-start">
+                    <Plus className="text-[#1B2D64]" size={18} />
                     <h3 className="text-sm font-bold text-gray-800">تفويض مهمة لعضو بالفريق</h3>
                   </div>
 
@@ -4138,7 +4079,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                         placeholder="مثال: حجز تذاكر الإرميتاج"
                         value={newTask.title}
                         onChange={(e) => setNewTask(prev => ({ ...prev, title: e.target.value }))}
-                        className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl px-3 py-2 text-xs text-[#1A1A1A] focus:outline-none focus:border-[#2D6A4F]"
+                        className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-3 py-2 text-xs text-[#14172A] focus:outline-none focus:border-[#1B2D64]"
                         required
                       />
                     </div>
@@ -4148,7 +4089,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                       <select
                         value={newTask.assignee}
                         onChange={(e) => setNewTask(prev => ({ ...prev, assignee: e.target.value }))}
-                        className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl px-3 py-2 text-xs text-[#1A1A1A] focus:outline-none focus:border-[#2D6A4F] text-right cursor-pointer font-bold"
+                        className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-3 py-2 text-xs text-[#14172A] focus:outline-none focus:border-[#1B2D64] text-right cursor-pointer font-bold"
                       >
                         <option value="الجميع">الجميع</option>
                         {travelers.map(t => (
@@ -4162,7 +4103,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                       <select
                         value={newTask.category}
                         onChange={(e) => setNewTask(prev => ({ ...prev, category: e.target.value }))}
-                        className="w-full bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl px-3 py-2 text-xs text-[#1A1A1A] focus:outline-none focus:border-[#2D6A4F] text-right cursor-pointer font-bold"
+                        className="w-full bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl px-3 py-2 text-xs text-[#14172A] focus:outline-none focus:border-[#1B2D64] text-right cursor-pointer font-bold"
                       >
                         <option value="تجهيزات">تجهيزات واستعدادات</option>
                         <option value="لوجستيات">حجوزات ولوجستيات</option>
@@ -4171,20 +4112,20 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                       </select>
                     </div>
 
-                    <div className="flex items-center gap-2 p-2 bg-[#F9F7F4] rounded-xl border border-[#E8E0D5]">
+                    <div className="flex items-center gap-2 p-2 bg-[#FAF7F2] rounded-xl border border-[#ECE6DC]">
                       <input 
                         type="checkbox" 
                         id="admin-critical-task-checkbox"
                         checked={newTask.isCritical}
                         onChange={(e) => setNewTask(prev => ({ ...prev, isCritical: e.target.checked }))}
-                        className="w-4 h-4 rounded border-gray-300 text-[#2D6A4F] focus:ring-0 cursor-pointer"
+                        className="w-4 h-4 rounded border-gray-300 text-[#1B2D64] focus:ring-0 cursor-pointer"
                       />
                       <label htmlFor="admin-critical-task-checkbox" className="text-xs font-bold text-gray-600 cursor-pointer select-none">مهمة عاجلة وحرجة</label>
                     </div>
 
                     <button 
                       type="submit"
-                      className="w-full bg-[#2D6A4F] hover:bg-[#1b4332] text-white py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                      className="w-full bg-[#1B2D64] hover:bg-[#1b4332] text-white py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       <Plus size={14} />
                       <span>إضافة وتفويض المهمة</span>
@@ -4199,51 +4140,45 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
 
       </main>
 
-      {/* MOBILE BOTTOM NAVIGATION BAR */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#E8E0D5] flex justify-around py-2.5 md:hidden shadow-[0_-4px_12px_rgba(0,0,0,0.05)] pb-safe-bottom">
+      {/* MOBILE BOTTOM NAVIGATION — slim: Home + Schedule + MyBag + More */}
+      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#ECE6DC] flex justify-around py-2.5 md:hidden shadow-[0_-4px_12px_rgba(0,0,0,0.04)] pb-safe-bottom">
         {[
-          { id: 'dashboard', label: 'الرئيسية', icon: Award },
+          { id: 'dashboard', label: 'الرئيسية', icon: Home },
           { id: 'itinerary', label: 'الجدول', icon: Calendar },
-          { id: 'personal', label: 'حقيبتي', icon: Lock },
-          { id: 'tasks', label: 'المهام', icon: CheckSquare },
+          { id: 'personal',  label: 'حقيبتي',  icon: Briefcase },
         ].map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
           return (
             <button
               key={tab.id}
-              onClick={() => {
-                setActiveTab(tab.id);
-                setIsMobileMenuOpen(false);
-              }}
-              className={`flex flex-col items-center justify-center gap-1 px-3 py-1 rounded-xl transition-all duration-200 cursor-pointer ${
-                isActive 
-                  ? 'text-[#2D6A4F] font-bold' 
-                  : 'text-gray-400 hover:text-gray-600'
+              onClick={() => { setActiveTab(tab.id); setIsMobileMenuOpen(false); }}
+              className={`flex flex-col items-center justify-center gap-1 px-4 py-1 rounded-xl transition-all duration-200 cursor-pointer ${
+                isActive ? 'text-[#1B2D64]' : 'text-gray-400 hover:text-gray-600'
               }`}
             >
-              <Icon size={18} className={isActive ? 'stroke-[2.5]' : 'stroke-[1.8]'} />
-              <span className="text-[9px] font-semibold">{tab.label}</span>
+              <Icon size={20} className={isActive ? 'stroke-[2.5]' : 'stroke-[1.8]'} />
+              <span className={`text-[10px] ${isActive ? 'font-black' : 'font-semibold'}`}>{tab.label}</span>
             </button>
           );
         })}
-        
-        {/* 'More' Button to toggle Sidebar Drawer */}
+
+        {/* 'More' opens the full menu drawer */}
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="flex flex-col items-center justify-center gap-1 px-3 py-1 rounded-xl text-gray-400 hover:text-gray-600 cursor-pointer"
+          className="flex flex-col items-center justify-center gap-1 px-4 py-1 rounded-xl text-gray-400 hover:text-gray-600 cursor-pointer"
         >
-          <Menu size={18} className="stroke-[1.8]" />
-          <span className="text-[9px] font-semibold">المزيد</span>
+          <Menu size={20} className="stroke-[1.8]" />
+          <span className="text-[10px] font-semibold">المزيد</span>
         </button>
       </nav>
 
       {/* TELEGRAM SIMULATION MODAL DIALOG */}
       {telegramMockOpen && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-fadeIn">
-          <div className="bg-white border border-[#E8E0D5] max-w-md w-full rounded-2xl p-6 space-y-4 text-right shadow-xl">
+          <div className="bg-white border border-[#ECE6DC] max-w-md w-full rounded-2xl p-6 space-y-4 text-right shadow-xl">
             <div className="flex items-center gap-2 border-b border-gray-100 pb-3 justify-start">
-              <Bot className="text-[#2D6A4F]" size={20} />
+              <Bot className="text-[#1B2D64]" size={20} />
               <h3 className="text-sm font-bold text-gray-800">محاكاة تكامل بوت تيليجرام</h3>
             </div>
             
@@ -4262,7 +4197,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
 
             <button
               onClick={() => setTelegramMockOpen(false)}
-              className="w-full bg-[#2D6A4F] hover:bg-[#1b4332] text-white font-bold py-2.5 rounded-xl text-xs transition cursor-pointer"
+              className="w-full bg-[#1B2D64] hover:bg-[#1b4332] text-white font-bold py-2.5 rounded-xl text-xs transition cursor-pointer"
             >
               إغلاق المعاينة
             </button>
@@ -4282,10 +4217,10 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
               <X size={18} />
             </button>
             <h3 className="text-sm font-bold text-gray-800 border-b border-gray-100 pb-2 flex items-center gap-1.5 justify-start">
-              <FileText size={16} className="text-[#2D6A4F]" />
+              <FileText size={16} className="text-[#1B2D64]" />
               <span>معاينة مستند: {selectedDocForView.name}</span>
             </h3>
-            <div className="w-full max-h-[70vh] overflow-auto flex items-center justify-center bg-gray-50 rounded-xl p-2 border border-[#E8E0D5]">
+            <div className="w-full max-h-[70vh] overflow-auto flex items-center justify-center bg-gray-50 rounded-xl p-2 border border-[#ECE6DC]">
               <img 
                 src={selectedDocForView.data} 
                 alt={selectedDocForView.name} 
@@ -4319,7 +4254,7 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
           >
             <div className="min-h-full flex items-center justify-center p-4">
               <div
-                className="bg-white max-w-md w-full rounded-3xl p-6 md:p-8 space-y-5 text-center shadow-2xl relative border border-[#E8E0D5]"
+                className="bg-white max-w-md w-full rounded-3xl p-6 md:p-8 space-y-5 text-center shadow-2xl relative border border-[#ECE6DC]"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto text-white shadow-md bg-gradient-to-tr ${currentUser.avatarColor}`}>
@@ -4330,14 +4265,14 @@ ${relatedTasks.map(t => `- ${t.title} (مسؤولية: ${t.assignee})`).join('\n
                   <h3 className="text-xl md:text-2xl font-black text-gray-800 leading-tight">{welcomeLine.headline}</h3>
                   <p className="text-sm text-gray-500 font-medium">{currentUser.role}</p>
 
-                  <div className="py-4 px-4 bg-[#F9F7F4] border border-[#E8E0D5] rounded-xl text-sm md:text-base text-[#1A1A1A] leading-relaxed font-medium">
+                  <div className="py-4 px-4 bg-[#FAF7F2] border border-[#ECE6DC] rounded-xl text-sm md:text-base text-[#14172A] leading-relaxed font-medium">
                     {welcomeLine.sub}
                   </div>
                 </div>
 
                 <button
                   onClick={() => setShowWelcome(false)}
-                  className="w-full bg-[#2D6A4F] hover:bg-[#1B4332] text-white py-3 rounded-xl text-base font-black transition shadow-md cursor-pointer text-center"
+                  className="w-full bg-[#1B2D64] hover:bg-[#0F1E48] text-white py-3 rounded-xl text-base font-black transition shadow-md cursor-pointer text-center"
                 >
                   يلا نبدأ
                 </button>
