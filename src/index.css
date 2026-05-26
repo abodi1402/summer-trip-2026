@@ -1,0 +1,155 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'IBM Plex Sans Arabic', system-ui, -apple-system, sans-serif;
+  --color-primary: #2D6A4F;
+  --color-secondary: #74C69D;
+  --color-cream-bg: #F9F7F4;
+  --color-dark-txt: #1A1A1A;
+  --color-accent-card: #E8E0D5;
+}
+
+:root {
+  font-family: 'IBM Plex Sans Arabic', system-ui, -apple-system, sans-serif;
+  color-scheme: light;
+}
+
+body {
+  background-color: #F9F7F4; /* Warm Light Cream Background */
+  color: #1A1A1A; /* Dark Text */
+  min-height: 100vh;
+  margin: 0;
+  overflow-x: hidden;
+}
+
+/* Custom premium scrollbar for light theme */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F9F7F4;
+}
+::-webkit-scrollbar-thumb {
+  background: #D8D0C5;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #B8B0A5;
+}
+
+/* Bright & Soft Hero Styling */
+.hero-container {
+  position: relative;
+  overflow: hidden;
+  background-color: #E8E0D5;
+}
+
+.hero-image {
+  opacity: 0.25; /* Light and clean */
+  filter: contrast(1.05) brightness(1.1);
+  mix-blend-mode: multiply;
+}
+
+/* Custom layout utilities */
+.white-card {
+  background-color: #FFFFFF;
+  border: 1px solid #E8E0D5;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+}
+
+.accent-block {
+  background-color: #E8E0D5;
+  border: 1px solid rgba(45, 106, 79, 0.15);
+}
+
+.text-primary {
+  color: #2D6A4F;
+}
+
+.bg-primary {
+  background-color: #2D6A4F;
+}
+
+.border-primary {
+  border-color: #2D6A4F;
+}
+
+/* Safe area padding for mobile navigation */
+.pb-safe-bottom {
+  padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+}
+
+/* Smooth fade-in animation for tab transitions */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Pulsing effect for active day indicator */
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.25);
+  }
+}
+
+.active-day-pulse {
+  animation: pulseGlow 2s infinite ease-in-out;
+}
+
+/* Premium Glassmorphism Card styling */
+.glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px) saturate(120%);
+  -webkit-backdrop-filter: blur(12px) saturate(120%);
+  border: 1px solid rgba(232, 224, 213, 0.6);
+  box-shadow: 
+    0 4px 30px rgba(0, 0, 0, 0.03), 
+    inset 0 1px 1px rgba(255, 255, 255, 0.8),
+    0 1px 3px rgba(0, 0, 0, 0.01);
+}
+
+.dark-glass-card {
+  background: rgba(27, 67, 50, 0.08);
+  backdrop-filter: blur(12px) saturate(120%);
+  -webkit-backdrop-filter: blur(12px) saturate(120%);
+  border: 1px solid rgba(45, 106, 79, 0.15);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.02);
+}
+
+/* Ambient glow accents */
+.gold-glow {
+  box-shadow: 0 0 30px -5px rgba(212, 175, 55, 0.15);
+}
+
+.green-glow {
+  box-shadow: 0 0 30px -5px rgba(45, 106, 79, 0.15);
+}
+
+/* Luxury transitions and micro-interactions */
+.transition-luxury {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hover-luxury {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.hover-luxury:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.08);
+}
+
